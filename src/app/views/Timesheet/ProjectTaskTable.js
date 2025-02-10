@@ -16,7 +16,8 @@ const ProjectTaskTable = ({
   dayDates,
   totalHours,
   setStart,
-  setEnd
+  setEnd,
+  SetrefreshTasktableforfilter
 }) => {
   const [editingTask, setEditingTask] = useState({}); // Tracks which task/field is being edited
   const [fetchedTaskDetails, setFetchedTaskDetails] = useState(null);
@@ -26,7 +27,9 @@ const ProjectTaskTable = ({
   const [selectedTasks, setSelectedTasks] = useState([]); // Tracks selected task IDs for quick entry
   const [quickEntryValues, setQuickEntryValues] = useState("");
   const [projects, setProjects] = useState({});
+  const [refreshTasktable, SetrefreshTasktable] = useState(false);
 
+  // SetrefreshTasktable(SetrefreshTasktableforfilter);
   const extractTimes = (dateStr) => {
     // Split by the '|' character to separate the date and the time range
     const timeRange = dateStr?.split("|")[1];

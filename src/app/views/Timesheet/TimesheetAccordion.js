@@ -15,6 +15,7 @@ const TimesheetAccordion = ({
   date,
   topdata,
   date1,
+  setNewdate,
   newdate
 }) => {
   const [selectedProject, setSelectedProject] = useState("");
@@ -225,7 +226,9 @@ const TimesheetAccordion = ({
   };
   const handleDateChange = (newDate) => {
     console.log("handleDateChange", newDate);
+
     setDate(newDate); // Update the selected date
+    setNewdate(newDate);
     setSelectedMonth(newDate.getMonth()); // Update the month based on selected date
     setSelectedYear(newDate.getFullYear()); // Update the year based on selected date
   };

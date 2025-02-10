@@ -134,7 +134,7 @@ const MyTimesheet = ({ setActiveTab1, setNewdate }) => {
                     </Button>
                     <IconButton
                       aria-label="Edit"
-                      onClick={() => {
+                      onClick={async () => {
                         setActiveTab1("timesheetEntry");
                         setNewdate(item.period.split(" to ")[0]);
                       }} // Ensure you're using setActiveTab1 here

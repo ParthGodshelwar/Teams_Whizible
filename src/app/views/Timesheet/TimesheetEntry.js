@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import TimesheetTable from "./TimesheetTable";
 import ApprTabs from "./ApprTabs";
 import SelectProjectDetlsModal from "./SelectProjectDetlsModal";
@@ -38,6 +38,12 @@ const TimesheetEntry = ({ projects, tasks }) => {
   const [refresh1, setRefresh1] = useState(false);
   // Function to handle search term changes
   const [refresh12, setRefresh12] = useState(false);
+  const filterRef = useRef(null);
+  useEffect(() => {
+    setTimeout(() => {
+      console.log(" Filter ref assigned:", filterRef.current);
+    }, 1000); // Adding a slight delay to ensure component is mounted
+  }, []);
   console.log("GetTimesheetEntryDetailsss9999", newdate);
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -87,15 +93,36 @@ const TimesheetEntry = ({ projects, tasks }) => {
   //   }));
   // };
 
-  const removeFilter = (filterKey) => {
-    if (filterKey === "selectedProject") {
-      // Clear all filters if the selected project filter is removed
-      setAppliedFilters({});
+  const removeFilter = async (filterKey) => {
+    // if (filterKey === "selectedProject") {
+    //   // Clear all filters if the selected project filter is removed
+    //   setAppliedFilters({});
+    // } else {
+    //   // Remove the specific filter
+    //   const newFilters = { ...appliedFilters };
+    //   delete newFilters[filterKey];
+    //   setAppliedFilters(newFilters);
+    // }
+    var finalFilter;
+    await setAppliedFilters(async (prevFilters) => {
+      const updatedFilters = { ...prevFilters };
+      delete updatedFilters[filterKey];
+      finalFilter = updatedFilters;
+      console.log("Filter bagu :", updatedFilters);
+      console.log("filterRef.current:", filterRef.current);
+
+      return updatedFilters;
+    });
+
+    if (filterRef.current) {
+      console.log("Calling applyFilters...");
+      // console.log("Final Filter need to apply:", updatedFilters);
+      console.log("Filter bagu inside :", finalFilter);
+      await filterRef.current.applyFilters(finalFilter, true);
     } else {
-      // Remove the specific filter
-      const newFilters = { ...appliedFilters };
-      delete newFilters[filterKey];
-      setAppliedFilters(newFilters);
+      console.error(
+        "filterRef.current is NULL - Ensure <TimesheetFilters ref={filterRef} /> is rendered."
+      );
     }
   };
 
@@ -135,6 +162,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
                 const daiD = `daiD${day}`;
 
                 // Exclude task if duration is "00:00"
+                //Added by Parth.G
                 if (task[dayEffortsKey] === "00:00") return null; // Skip this task
 
                 // Check if task is in selectedTasks, only include it if selected
@@ -201,10 +229,13 @@ const TimesheetEntry = ({ projects, tasks }) => {
       // Extract validation data
       const validationData = result?.data;
       setRefresh1(!refresh1);
-      if (validationData.validationMessage.includes("the Daily Activity will still be saved.")) {
-        // Handle the case where the message contains the specific string
-        toast.info(validationData.validationMessage);
+      if (validationData.validationMessage != null) {
+        if (validationData.validationMessage.includes("the Daily Activity will still be saved.")) {
+          // Handle the case where the message contains the specific string
+          toast.info(validationData.validationMessage);
+        }
       }
+
       if (!validationData || validationData.validationMessage === null) {
         toast.error("Please Fill Dailyactivity");
         console.error("Missing validation message in API response:", validationData);
@@ -222,9 +253,15 @@ const TimesheetEntry = ({ projects, tasks }) => {
           const formattedMessage = validationMessage.split("\r\n").join("<br/>");
 
           // Show red toast for validation errors
-          toast.error(<div dangerouslySetInnerHTML={{ __html: formattedMessage }} />, {
-            style: { backgroundColor: "red", color: "white" }
-          });
+          if (
+            !validationData.validationMessage.includes("the Daily Activity will still be saved.")
+          ) {
+            // Handle the case where the message contains the specific string
+            // toast.info(validationData.validationMessage);
+            toast.error(<div dangerouslySetInnerHTML={{ __html: formattedMessage }} />, {
+              style: { backgroundColor: "red", color: "white" }
+            });
+          }
         }
       }
     } catch (error) {
@@ -312,6 +349,12 @@ const TimesheetEntry = ({ projects, tasks }) => {
       console.error("Error submitting timesheet:", error);
       toast.error("An error occurred while submitting the timesheet.");
     }
+
+    if (refresh1) {
+      setRefresh1(false);
+    } else {
+      setRefresh1(true);
+    }
   };
   const handleTabClick = (tabName) => {
     setActiveTab(tabName); // Set active tab based on the button clicked
@@ -372,6 +415,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
                   date1={date1}
                   showAccordion={showAccordion}
                   toggleAccordion={toggleAccordion}
+                  setNewdate={setNewdate}
                   newdate={newdate}
                 />
               </div>
@@ -503,6 +547,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
                     {showFilters && (
                       <div className="filter-container">
                         <TimesheetFilters
+                          ref={filterRef}
                           appliedFilters={appliedFilters}
                           setAppliedFilters={setAppliedFilters}
                         />
@@ -634,6 +679,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
                   setNewdate={setNewdate}
                   setRefresh1={setRefresh1}
                   refresh1={refresh1}
+                  // clearinitals={}
                 />
                 <TimesheetBottomSec timesheetData={timesheetData} />
               </div>

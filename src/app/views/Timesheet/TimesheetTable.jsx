@@ -86,13 +86,16 @@ const TimesheetTable = ({
     console.log("GetTimesheetEntryDetailsss,ssss111", newdate);
     const fetchTimesheetData = async (filterData) => {
       try {
+        var fdate = await formatDateToISO(newdate);
         // Retrieve token from sessionStorage
         console.log("GetTimesheetEntryDetailsss,", normalizedDate);
+        console.log("GetTimesheetEntryDetailsss,", fdate);
 
         const constructRequestBody = () => {
           const rawRequestBody = {
             userID: userid,
-            inputDate: newdate ? formatDateToISO(newdate) : normalizedDate,
+            // inputDate: newdate ? formatDateToISO(newdate) : normalizedDate,
+            inputDate: newdate ? fdate : normalizedDate,
             whereClause: filterData,
             strTaskName: searchTerm
           };
@@ -372,7 +375,52 @@ const TimesheetTable = ({
         }
       } else if (validationErrors) {
         // If validation fails, show the validation error message
-        toast.error(`${validationErrors}`);
+        //added by parth.g
+        if (
+          validationErrors?.startsWith("You were allocated") ||
+          validationErrors?.startsWith("Entry date for")
+        ) {
+          toast.info(
+            <div>
+              <div style={{ marginBottom: "10px" }}>{validationErrors}</div>
+              <button
+                onClick={() => {
+                  toast.dismiss();
+                  // yesClickHandler();
+                }}
+                style={{
+                  marginRight: "10px",
+                  padding: "5px 10px",
+                  border: "1px solid #ccc",
+                  backgroundColor: "#4CAF50",
+                  color: "white",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => {
+                  toast.dismiss();
+                }}
+                style={{
+                  padding: "5px 10px",
+                  border: "1px solid #ccc",
+                  backgroundColor: "#f44336",
+                  color: "white",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                No
+              </button>
+            </div>,
+            { autoClose: false }
+          );
+        } else {
+          toast.error(`${validationErrors}`);
+        }
       } else {
         // Fallback for unexpected validation response
         toast.error("Unexpected validation response. Please try again.");
