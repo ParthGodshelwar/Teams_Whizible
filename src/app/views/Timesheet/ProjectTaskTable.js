@@ -15,9 +15,11 @@ const ProjectTaskTable = ({
   dayNames,
   dayDates,
   totalHours,
+  clearinitalvaluesflag,
+  handleclearinitalvaluesflag,
+  refresh1,
   setStart,
-  setEnd,
-  SetrefreshTasktableforfilter
+  setEnd
 }) => {
   const [editingTask, setEditingTask] = useState({}); // Tracks which task/field is being edited
   const [fetchedTaskDetails, setFetchedTaskDetails] = useState(null);
@@ -27,9 +29,34 @@ const ProjectTaskTable = ({
   const [selectedTasks, setSelectedTasks] = useState([]); // Tracks selected task IDs for quick entry
   const [quickEntryValues, setQuickEntryValues] = useState("");
   const [projects, setProjects] = useState({});
-  const [refreshTasktable, SetrefreshTasktable] = useState(false);
+  // const [refreshTasktable,SetrefreshTasktable]
 
-  // SetrefreshTasktable(SetrefreshTasktableforfilter);
+  const clearinitalvalues = async () => {
+    debugger;
+    await setSelectedTasks([]);
+    setQuickEntryValues("");
+
+    document.querySelectorAll(".parentCheckbox").forEach((checkbox) => {
+      checkbox.checked = false;
+    });
+  };
+
+  //Added by Parth.G
+  useEffect(() => {
+    if (clearinitalvaluesflag) {
+      alert("1a");
+      clearinitalvalues();
+      handleclearinitalvaluesflag();
+    }
+  });
+
+  useEffect(() => {
+    alert("1");
+    clearinitalvalues();
+  }, []);
+
+  //Ended by Parth.G
+
   const extractTimes = (dateStr) => {
     // Split by the '|' character to separate the date and the time range
     const timeRange = dateStr?.split("|")[1];
@@ -492,7 +519,7 @@ const ProjectTaskTable = ({
                 {project?.listTaskDetailsEntity?.map((task, taskIndex) => {
                   const isEditing = editingTask[`${task.taskID}-${day}`]?.field;
                   const dayEfforts = task[`dayEfforts${day}`] || "N/A";
-                  console.log("dayEfforts", task);
+                  // console.log("dayEfforts", task);
                   return (
                     <div key={taskIndex} style={{ marginBottom: "45px" }}>
                       <TextField

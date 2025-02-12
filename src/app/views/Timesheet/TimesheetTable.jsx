@@ -19,7 +19,9 @@ const TimesheetTable = ({
   newdate,
   setNewdate,
   setRefresh1,
-  refresh1
+  refresh1,
+  clearinitalvaluesflag,
+  handleclearinitalvaluesflag
 }) => {
   // const [timesheetData, setTimesheetData] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -40,7 +42,7 @@ const TimesheetTable = ({
   const [daTypes, setDATypes] = useState([]);
   const token = sessionStorage.getItem("token");
   const currentDate = new Date().toISOString();
-  console.log("99999999999999999", appliedFilters);
+  // console.log("99999999999999999", appliedFilters);
   const [lastToastTime, setLastToastTime] = useState(0);
   const getCurrentDate = () => {
     const today = new Date(date);
@@ -74,7 +76,7 @@ const TimesheetTable = ({
             }
           }
         );
-        console.log("User DA Entry Filter Response:", response.data);
+        // console.log("User DA Entry Filter Response:", response.data);
 
         const filterData = response.data?.data?.listDAFilterDetails[0];
         fetchTimesheetData(filterData.whereClause);
@@ -83,13 +85,13 @@ const TimesheetTable = ({
         console.error("Error fetching DA entry filter:", error);
       }
     };
-    console.log("GetTimesheetEntryDetailsss,ssss111", newdate);
+    // console.log("GetTimesheetEntryDetailsss,ssss111", newdate);
     const fetchTimesheetData = async (filterData) => {
       try {
         var fdate = await formatDateToISO(newdate);
         // Retrieve token from sessionStorage
-        console.log("GetTimesheetEntryDetailsss,", normalizedDate);
-        console.log("GetTimesheetEntryDetailsss,", fdate);
+        // console.log("GetTimesheetEntryDetailsss,", normalizedDate);
+        // console.log("GetTimesheetEntryDetailsss,", fdate);
 
         const constructRequestBody = () => {
           const rawRequestBody = {
@@ -132,16 +134,19 @@ const TimesheetTable = ({
         if (data?.listProjectDetailsEntity && data?.listProjectDetailsEntity.length === 0) {
           const currentTime = Date.now(); // Get current time in milliseconds
 
+          //Added by Parth.G
+          toast.error("Please recheck the filters, currently no data.");
+
           // Check if 2 minutes have passed since the last toast
           if (currentTime - lastToastTime >= 60000) {
             // Show toast if listProjectDetailsEntity is empty and 2 minutes have passed
-            toast.error("Please recheck the filters, currently no data.");
+            // toast.error("Please recheck the filters, currently no data.");
 
             // Update lastToastTime to current time after showing the toast
             setLastToastTime(currentTime);
           }
         }
-        console.log("listTimesheetEntryHeader", data);
+        // console.log("listTimesheetEntryHeader", data);
         setTopdata(data.listTimesheetEntryHeader[0]);
         setDate1(data.listTimesheetEntryHeader[0].dayDate1);
         setTimesheetData(data); // Assuming setTimesheetData is a valid state setter
@@ -155,14 +160,14 @@ const TimesheetTable = ({
   }, [appliedFilters, date, normalizedDate, searchTerm, newdate, refresh1]);
 
   const handleProjectSelect = (projectId) => {
-    console.log("handleProjectSelect", projectId);
+    // console.log("handleProjectSelect", projectId);
     setSelectedProject(projectId);
     setShowModal(true);
   };
 
   const handleClose = () => setShowModal(false);
 
-  console.log("listProjectDetailsEntity12121", timesheetData);
+  // console.log("listProjectDetailsEntity12121", timesheetData);
 
   const dayNames = timesheetData?.listTimesheetEntryHeader?.[0]
     ? [
@@ -200,9 +205,9 @@ const TimesheetTable = ({
       ]
     : [];
 
-  console.log("dayNames:", dayNames);
-  console.log("dayDates:", dayDates);
-  console.log("totalHours:", totalHours);
+  // console.log("dayNames:", dayNames);
+  // console.log("dayDates:", dayDates);
+  // console.log("totalHours:", totalHours);
   const daTypeMapping = {
     N: "Normal",
     0: "Overtime",
@@ -241,11 +246,11 @@ const TimesheetTable = ({
     setCurrentDay(projectId?.day);
     setTaskid(projectId?.task);
     setShowDaTypeModal(true);
-    console.log("handleShowDaTypeModal1111", day);
-    console.log("handleShowDaTypeModal222", task);
-    console.log("handleShowDaTypeModal444", projectId);
+    // console.log("handleShowDaTypeModal1111", day);
+    // console.log("handleShowDaTypeModal222", task);
+    // console.log("handleShowDaTypeModal444", projectId);
   };
-  console.log("handleShowDaTypeModal", daType, description);
+  // console.log("handleShowDaTypeModal", daType, description);
   const handleCloseDaTypeModal = () => {
     setShowDaTypeModal(false);
     setDaType("");
@@ -255,7 +260,7 @@ const TimesheetTable = ({
     // Extract day-specific date string and time range
     const dayDateString = timesheetData.listTimesheetEntryHeader[0][`dayDate${currentDay}`];
     const [dateString, timeRangeString] = dayDateString.split("|").map((part) => part.trim()); // Split date and time range
-    console.log("dayDateString", dayDateString);
+    // console.log("dayDateString", dayDateString);
 
     // Parse the date string (e.g., "14 Jan 2025") into a Date object
     const date = new Date(dateString);
@@ -307,7 +312,7 @@ const TimesheetTable = ({
       duration: taskid[`dayEfforst${currentDay}`] // Effort duration
     };
 
-    console.log("Mapped Entry Data:", entryData);
+    // console.log("Mapped Entry Data:", entryData);
 
     try {
       // Validate the entry first using POST with JSON body
@@ -325,7 +330,7 @@ const TimesheetTable = ({
       );
 
       const validationResult = await validateResponse.json();
-      console.log("validationResult", validationResult);
+      // console.log("validationResult", validationResult);
 
       // Check for validation message success or errors
       const validationErrors = validationResult?.data
@@ -432,10 +437,10 @@ const TimesheetTable = ({
   };
   const handleSubmitDaType = () => {
     handleSave();
-    console.log("Selected DA Type:", daType); // "S"
-    console.log("Description:", description); // "2ssssssssssss"
-    console.log("Project ID:", currentProject); // 48310
-    console.log("Day:", currentDay); // 3
+    // console.log("Selected DA Type:", daType); // "S"
+    // console.log("Description:", description); // "2ssssssssssss"
+    // console.log("Project ID:", currentProject); // 48310
+    // console.log("Day:", currentDay); // 3
 
     // Update the corresponding project entry in the timesheetData state
     setTimesheetData((prevData) => {
@@ -444,11 +449,11 @@ const TimesheetTable = ({
 
       // Map through projects in listProjectDetailsEntity
       const updatedProjects = updatedData?.listProjectDetailsEntity.map((project) => {
-        console.log("currentProject:", currentProject, project.projectID); // 3
+        // console.log("currentProject:", currentProject, project.projectID); // 3
 
         // Update the tasks for the selected project
         const updatedTasks = project.listTaskDetailsEntity.map((task) => {
-          console.log(`Updating taskID: ${task.taskID}`); // Log task ID being updated
+          // console.log(`Updating taskID: ${task.taskID}`); // Log task ID being updated
 
           // Get the dynamic field names based on the `day` value
           const daTypetField = `daTypet${currentDay}`; // Example: daTypet3
@@ -456,17 +461,17 @@ const TimesheetTable = ({
 
           // Update the day-specific DA Type field (e.g., daTypet3)
           if (task.hasOwnProperty(daTypetField)) {
-            console.log(
-              `Updating ${daTypetField} for taskID: ${task.taskID} with value: ${daType}`
-            );
+            // console.log(
+            //   `Updating ${daTypetField} for taskID: ${task.taskID} with value: ${daType}`
+            // );
             task[daTypetField] = daType; // Set the DA Type field for the current day
           }
 
           // Update the day-specific Description field (e.g., descriptiont3)
           if (task.hasOwnProperty(descriptiontField)) {
-            console.log(
-              `Updating ${descriptiontField} for taskID: ${task.taskID} with value: ${description}`
-            );
+            // console.log(
+            //   `Updating ${descriptiontField} for taskID: ${task.taskID} with value: ${description}`
+            // );
             task[descriptiontField] = description; // Set the Description field for the current day
           }
 
@@ -480,7 +485,7 @@ const TimesheetTable = ({
       });
 
       // Log the updated state before setting
-      console.log("Updated Timesheet Data:", updatedData);
+      // console.log("Updated Timesheet Data:", updatedData);
 
       // Return the updated timesheet data to set it in state
       return {
@@ -493,13 +498,13 @@ const TimesheetTable = ({
   };
 
   const handleInfoIconClick = (task) => {
-    console.log("handleInfoIconClick", task);
+    // console.log("handleInfoIconClick", task);
     setIsHovered(!isHovered);
     setTaskDetails(task);
   };
 
   const handleTabIconClick = (task) => {
-    console.log("handleTabIconClick", task);
+    // console.log("handleTabIconClick", task);
     setId(task.taskID);
     setShowTabModal(true);
   };
@@ -521,11 +526,11 @@ const TimesheetTable = ({
 
       setDaType(selectedDaTypeKey);
       setDescription(selectedDescription);
-      console.log("handleShowDaTypeModal9999", currentProject, selectedDescription);
+      // console.log("handleShowDaTypeModal9999", currentProject, selectedDescription);
     }
   }, [showDaTypeModal, currentProject]);
 
-  console.log("handleShowDaTypeModal9999000000", currentProject);
+  // console.log("handleShowDaTypeModal9999000000", currentProject);
   return (
     <table className="table table-bordered borderGrey TimesheetTbl mt-2" style={{ width: "100%" }}>
       {/* Project Rows */}
@@ -542,6 +547,9 @@ const TimesheetTable = ({
         isHovered={isHovered}
         taskDetails={taskDetails}
         handleShowDaTypeModal={handleShowDaTypeModal}
+        clearinitalvaluesflag={clearinitalvaluesflag}
+        handleclearinitalvaluesflag={handleclearinitalvaluesflag}
+        refresh1={refresh1}
       />
 
       {/* Modal */}

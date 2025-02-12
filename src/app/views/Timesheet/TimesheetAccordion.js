@@ -16,7 +16,8 @@ const TimesheetAccordion = ({
   topdata,
   date1,
   setNewdate,
-  newdate
+  newdate,
+  refreshGrid
 }) => {
   const [selectedProject, setSelectedProject] = useState("");
   // Set default selected hour and minute from timesheet data
@@ -169,6 +170,7 @@ const TimesheetAccordion = ({
     fetchDATypes();
   }, []);
   const fetchTasks = async (pId) => {
+    debugger;
     try {
       const response = await fetch(
         `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyTimesheetEntry/GetTimesheetDADetailsDropDown?UserID=${userid}&ProjectID=${pId}&FieldName=Task`,
@@ -297,7 +299,7 @@ const TimesheetAccordion = ({
       daType: selecteddaTypes,
       duration: efforts,
       description: description,
-      TotalDuration: topdata.weekActualHours
+      TotalDuration: `00:00`
     };
     try {
       // Validate the entry first using POST with JSON body
@@ -347,6 +349,8 @@ const TimesheetAccordion = ({
           // Check for the response validation message after posting the entry
           if (postResult?.data?.[0]?.validationMessage === "Success") {
             toast.success("Timesheet Entry saved successfully");
+            alert("w12");
+            refreshGrid();
           } else {
             const postValidationErrors = postResult?.data
               ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage
@@ -424,6 +428,8 @@ const TimesheetAccordion = ({
 
           if (postResult?.data?.[0]?.validationMessage === "Success") {
             toast.success("Timesheet Entry saved successfully");
+            alert("w2");
+            refreshGrid();
           } else {
             const postValidationErrors = postResult?.data
               ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage

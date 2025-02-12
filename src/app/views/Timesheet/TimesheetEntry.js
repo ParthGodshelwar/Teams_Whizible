@@ -36,6 +36,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
   const userdata = JSON.parse(sessionStorage.getItem("user"));
   const UserID = userdata?.data?.employeeId;
   const [refresh1, setRefresh1] = useState(false);
+  const [clearinitalvaluesflag, setclearinitalvaluesflag] = useState(false);
   // Function to handle search term changes
   const [refresh12, setRefresh12] = useState(false);
   const filterRef = useRef(null);
@@ -45,8 +46,8 @@ const TimesheetEntry = ({ projects, tasks }) => {
     }, 1000); // Adding a slight delay to ensure component is mounted
   }, []);
   console.log("GetTimesheetEntryDetailsss9999", newdate);
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
+  const handleSearchChange = async (event) => {
+    await setSearchTerm(event.target.value);
   };
   // useEffect(() => {
   //   // Fetch the timesheet data from an API
@@ -127,7 +128,8 @@ const TimesheetEntry = ({ projects, tasks }) => {
   };
 
   const handleSubmitTimesheet = async () => {
-    console.log("timesheetData.listProjectDetailsEntity", timesheetData);
+    debugger;
+    // console.log("timesheetData.listProjectDetailsEntity", timesheetData);
 
     // Retrieve selected tasks from sessionStorage
     const selectedTasksFromSession = JSON.parse(sessionStorage.getItem("selectedTasks")) || [];
@@ -237,7 +239,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
       }
 
       if (!validationData || validationData.validationMessage === null) {
-        toast.error("Please Fill Dailyactivity");
+        toast.error("Please Fill Daily Activity");
         console.error("Missing validation message in API response:", validationData);
       } else {
         let { validationMessage } = validationData;
@@ -245,9 +247,11 @@ const TimesheetEntry = ({ projects, tasks }) => {
         // Format the validation message properly
         if (validationMessage.toLowerCase().includes("success")) {
           // Show green toast for success
-          toast.success("Daily Activity Saved Successfully!", {
-            style: { backgroundColor: "green", color: "white" }
-          });
+          // toast.success("Daily Activity Saved Successfully!", {
+          //   style: { backgroundColor: "green", color: "white" }
+          // });
+          //Added by Parth.G
+          toast.success("Daily Activity Saved Successfully!");
         } else {
           // Replace '\r\n' with a new line `<br/>` for proper formatting
           const formattedMessage = validationMessage.split("\r\n").join("<br/>");
@@ -264,10 +268,28 @@ const TimesheetEntry = ({ projects, tasks }) => {
           }
         }
       }
+      // added by Parth.G
+      alert("2");
+      setclearinitalvaluesflag(true);
+
+      if (refresh1) {
+        setRefresh1(false);
+      } else {
+        setRefresh1(true);
+      }
     } catch (error) {
       console.error("Error submitting timesheet:", error);
       toast.error("An error occurred while submitting the timesheet.");
     }
+  };
+
+  //added by parth.G
+  const handleclearinitalvaluesflag = () => {
+    setclearinitalvaluesflag(false);
+  };
+
+  const refreshGrid = () => {
+    setRefresh1((prev) => !prev);
   };
 
   console.log("timesheetData.listProjectDetailsEntity", timesheetData);
@@ -417,6 +439,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
                   toggleAccordion={toggleAccordion}
                   setNewdate={setNewdate}
                   newdate={newdate}
+                  refreshGrid={refreshGrid}
                 />
               </div>
             </div>
@@ -558,7 +581,8 @@ const TimesheetEntry = ({ projects, tasks }) => {
                       <h6>Applied Filters:</h6>
                       <div className="d-flex flex-wrap">
                         {Object.entries(appliedFilters).map(([filterKey, filterValue]) => {
-                          console.log("appliedFilters111", filterKey, filterValue);
+                          // console.log("alok");
+                          // console.log("appliedFilters111", filterKey, filterValue);
 
                           if (filterKey === "billable") {
                             const billableValue = filterValue;
@@ -679,6 +703,8 @@ const TimesheetEntry = ({ projects, tasks }) => {
                   setNewdate={setNewdate}
                   setRefresh1={setRefresh1}
                   refresh1={refresh1}
+                  clearinitalvaluesflag={clearinitalvaluesflag}
+                  handleclearinitalvaluesflag={handleclearinitalvaluesflag}
                   // clearinitals={}
                 />
                 <TimesheetBottomSec timesheetData={timesheetData} />

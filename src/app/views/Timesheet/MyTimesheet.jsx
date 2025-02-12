@@ -134,7 +134,7 @@ const MyTimesheet = ({ setActiveTab1, setNewdate }) => {
                     </Button>
                     <IconButton
                       aria-label="Edit"
-                      onClick={async () => {
+                      onClick={() => {
                         setActiveTab1("timesheetEntry");
                         setNewdate(item.period.split(" to ")[0]);
                       }} // Ensure you're using setActiveTab1 here
@@ -154,6 +154,7 @@ const MyTimesheet = ({ setActiveTab1, setNewdate }) => {
                       onClick={() => {
                         setSelectedItem(item);
                         setShowDetail(true);
+                        document.getElementById("drawer-title")?.focus();
                       }}
                       sx={{
                         border: "none",
@@ -216,6 +217,7 @@ const MyTimesheet = ({ setActiveTab1, setNewdate }) => {
   };
 
   const handleTabClick = (tabName) => {
+    debugger;
     setActiveTab(tabName); // Set the active tab when clicked
     setCurrentPage(1); // Reset to the first page when the tab changes
   };

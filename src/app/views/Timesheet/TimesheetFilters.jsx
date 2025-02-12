@@ -25,7 +25,7 @@ const TimesheetFilters = forwardRef(
       subProject: "",
       milestone: "",
       subTaskType: "",
-      tasksStatus: "",
+      // tasksStatus: "",
       taskType: "",
       priority: "",
       deliverable: "",
@@ -55,8 +55,8 @@ const TimesheetFilters = forwardRef(
       phase: [],
       deliverable: [],
       taskType: [],
-      taskCategories: [],
-      status: []
+      taskCategories: []
+      // status: []
     });
 
     // Set up a flag to track if data should be loaded
@@ -109,7 +109,8 @@ const TimesheetFilters = forwardRef(
             setDeliverable(filterData.deliverable);
             setTaskType(filterData.taskType);
             setTaskCategories(filterData.tasksCategories);
-            setStatus(filterData.tasksStatus);
+            // commented by parth.G
+            // setStatus(filterData.tasksStatus);
             fetchFiltersData();
             setSelectedProject(Number(filterData.projectName));
             setProject(Number(filterData.projectName));
@@ -124,7 +125,8 @@ const TimesheetFilters = forwardRef(
               deliverable: filterData.deliverable,
               taskType: filterData.taskType,
               taskCategories: filterData.tasksCategories,
-              status: filterData.priority,
+              // commented by parth.g
+              // status: filterData.priority,
               billable: filterData.billable == "Yes" ? 1 : filterData.billable == "No" ? 0 : ""
             };
 
@@ -306,8 +308,8 @@ const TimesheetFilters = forwardRef(
           "Phase",
           "Deliverable",
           "TaskType",
-          "TasksCategories",
-          "Status"
+          "TasksCategories"
+          // "Status"
         ];
 
         const filterData = {};

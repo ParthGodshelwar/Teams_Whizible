@@ -30,23 +30,47 @@ const TimesheetDetailDrawer = ({ showDetail, setShowDetail, selectedItem }) => {
         const myTimesheetDetails = data.data.myTimesheetDetailsEntity;
         setData(data.data.myTimesheetDetailsEntity);
         console.log("myTimesheetDetails", myTimesheetDetails);
+        // if (myTimesheetDetails.length > 0) {
+        //   setTasks(
+        //     myTimesheetDetails[0].listProjectDetails.map((project) => ({
+        //       projectName: project.projectName,
+        //       monday: project.listTasksDetails[0]?.mon || "00:00",
+        //       tuesday: project.listTasksDetails[0]?.tue || "00:00",
+        //       wednesday: project.listTasksDetails[0]?.wed || "00:00",
+        //       thursday: project.listTasksDetails[0]?.thu || "00:00",
+        //       friday: project.listTasksDetails[0]?.fri || "00:00",
+        //       saturday: project.listTasksDetails[0]?.sat || "00:00",
+        //       sunday: project.listTasksDetails[0]?.sun || "00:00",
+        //       plannedEffort: project.listTasksDetails[0]?.plannedHour || "--",
+        //       actualEffort: project.listTasksDetails[0]?.actualHour || "--",
+        //       startDate: project.listTasksDetails[0]?.startDate,
+        //       endDate: project.listTasksDetails[0]?.endDate,
+        //       taskName: project.listTasksDetails[0]?.taskName || "Unnamed Task" // Assuming taskName is available
+        //     }))
+        //   );
+        // }
+
         if (myTimesheetDetails.length > 0) {
           setTasks(
-            myTimesheetDetails[0].listProjectDetails.map((project) => ({
-              projectName: project.projectName,
-              monday: project.listTasksDetails[0]?.mon || "00:00",
-              tuesday: project.listTasksDetails[0]?.tue || "00:00",
-              wednesday: project.listTasksDetails[0]?.wed || "00:00",
-              thursday: project.listTasksDetails[0]?.thu || "00:00",
-              friday: project.listTasksDetails[0]?.fri || "00:00",
-              saturday: project.listTasksDetails[0]?.sat || "00:00",
-              sunday: project.listTasksDetails[0]?.sun || "00:00",
-              plannedEffort: project.listTasksDetails[0]?.plannedHour || "--",
-              actualEffort: project.listTasksDetails[0]?.actualHour || "--",
-              startDate: project.listTasksDetails[0]?.startDate,
-              endDate: project.listTasksDetails[0]?.endDate,
-              taskName: project.listTasksDetails[0]?.taskName || "Unnamed Task" // Assuming taskName is available
-            }))
+            myTimesheetDetails.flatMap((timesheet) =>
+              timesheet.listProjectDetails.flatMap((project) =>
+                project.listTasksDetails.map((task) => ({
+                  projectName: project.projectName,
+                  taskName: task.taskName || "Unnamed Task",
+                  monday: task.mon || "00:00",
+                  tuesday: task.tue || "00:00",
+                  wednesday: task.wed || "00:00",
+                  thursday: task.thu || "00:00",
+                  friday: task.fri || "00:00",
+                  saturday: task.sat || "00:00",
+                  sunday: task.sun || "00:00",
+                  plannedEffort: task.plannedHour || "--",
+                  actualEffort: task.actualHour || "--",
+                  startDate: task.taskStartDate,
+                  endDate: task.taskEndDate
+                }))
+              )
+            )
           );
         }
       } catch (err) {
@@ -115,6 +139,7 @@ const TimesheetDetailDrawer = ({ showDetail, setShowDetail, selectedItem }) => {
     }
     return date.toLocaleDateString("en-GB"); // Returns dd/mm/yyyy
   };
+
   return (
     <Drawer
       anchor="right"
@@ -127,6 +152,10 @@ const TimesheetDetailDrawer = ({ showDetail, setShowDetail, selectedItem }) => {
       }}
       open={showDetail}
       onClose={() => setShowDetail(false)}
+      ModalProps={{
+        keepMounted: true,
+        disableEnforceFocus: true // Prevents MUI from forcing focus behavior
+      }}
     >
       <div className="offcanvas-body">
         <div id="ProjInfo_Sec" className="ProjInfoDetails">
