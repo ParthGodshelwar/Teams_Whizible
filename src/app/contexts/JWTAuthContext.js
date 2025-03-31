@@ -18,7 +18,7 @@ initializeIcons();
 const initialState = {
   user: null,
   isInitialized: false,
-  isAuthenticated: false
+  isAuthenticated: false,
 };
 
 const reducer = (state, action) => {
@@ -28,7 +28,11 @@ const reducer = (state, action) => {
       return { ...state, isAuthenticated, isInitialized: true, user };
     }
     case "LOGIN":
-      console.log("New state:", { ...state, isAuthenticated: true, user: action.payload.user });
+      console.log("New state:", {
+        ...state,
+        isAuthenticated: true,
+        user: action.payload.user,
+      });
       return { ...state, isAuthenticated: true, user: action.payload.user };
     case "LOGOUT":
       return { ...state, isAuthenticated: false, user: null };
@@ -44,7 +48,7 @@ const AuthContext = createContext({
   login: () => {},
   logout: () => {},
   register: () => {},
-  handleMicrosoftSignIn: () => {}
+  handleMicrosoftSignIn: () => {},
 });
 
 export const AuthProvider = ({ children }) => {
@@ -64,6 +68,24 @@ export const AuthProvider = ({ children }) => {
   //     navigate("/UnauthorizedPage"); // Redirect to the unauthorized route
   //   }
   // }, [navigate, isUnregistered]);
+
+  useEffect(() => {
+    const user = sessionStorage.getItem("user");
+    const token = sessionStorage.getItem("token");
+
+    if (user && token) {
+      dispatch({
+        type: "INIT",
+        payload: { isAuthenticated: true, user: JSON.parse(user) },
+      });
+    } else {
+      dispatch({
+        type: "INIT",
+        payload: { isAuthenticated: false, user: null },
+      });
+    }
+  }, []);
+
   const handleMicrosoftSignIn = async () => {
     try {
       dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
@@ -91,19 +113,24 @@ export const AuthProvider = ({ children }) => {
                 method: "GET",
                 headers: {
                   Authorization: `Bearer ${result}`,
-                  "Content-Type": "application/json"
-                }
+                  "Content-Type": "application/json",
+                },
               }
             );
 
             if (!userProfileResponse.ok) {
-              throw new Error(`Error fetching user profile: ${userProfileResponse.statusText}`);
+              throw new Error(
+                `Error fetching user profile: ${userProfileResponse.statusText}`
+              );
             }
 
             const userProfileData = await userProfileResponse.json();
             setUserProfile(userProfileData);
             sessionStorage.setItem("user", JSON.stringify(userProfileData));
-            sessionStorage.setItem("UserProfilePic", userProfileData?.data?.profilePicURL);
+            sessionStorage.setItem(
+              "UserProfilePic",
+              userProfileData?.data?.profilePicURL
+            );
             // Extract empID from userProfileData
             const empID = userProfileData.data.employeeId;
             if (!empID) setIsUnregistered(true);
@@ -115,20 +142,32 @@ export const AuthProvider = ({ children }) => {
                 method: "GET",
                 headers: {
                   Authorization: `Bearer ${result}`,
-                  "Content-Type": "application/json"
-                }
+                  "Content-Type": "application/json",
+                },
               }
             );
 
             if (!moduleAccessResponse.ok) {
-              throw new Error(`Error fetching module access: ${moduleAccessResponse.statusText}`);
+              throw new Error(
+                `Error fetching module access: ${moduleAccessResponse.statusText}`
+              );
             }
 
             const moduleAccessData = await moduleAccessResponse.json();
             setModuleAccess(moduleAccessData);
             sessionStorage.setItem("tAccess", JSON.stringify(moduleAccessData));
-            const empId = moduleAccessData.data.length > 0 ? moduleAccessData.data[0].empId : null;
-            if (emailId) navigate("/landingpage");
+            const empId =
+              moduleAccessData.data.length > 0
+                ? moduleAccessData.data[0].empId
+                : null;
+            const appAccess =
+              moduleAccessData.data.length > 0
+                ? moduleAccessData.data[0].appAccess
+                : null;
+            if (appAccess == 0) {
+              navigate("/UnauthorizedPage");
+            }
+            if (empId && appAccess == 1) navigate("/landingpage");
           } catch (apiError) {
             setError("Error calling API: " + apiError.message);
             // Clear cache if userProfileData is null
@@ -141,7 +180,7 @@ export const AuthProvider = ({ children }) => {
         },
         failureCallback: (error) => {
           setError("Error getting token: " + error);
-        }
+        },
       });
     } catch (err) {
       setError("Initialization error: " + err.message);
@@ -169,7 +208,7 @@ export const AuthProvider = ({ children }) => {
         ...state,
         method: "JWT",
         logout,
-        handleMicrosoftSignIn
+        handleMicrosoftSignIn,
       }}
     >
       <ToastContainer position="top-right" autoClose={5000} />

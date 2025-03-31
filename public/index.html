@@ -148,5 +148,16 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          const scripts = document.querySelectorAll("script");
+          scripts.forEach(script => {
+              if (script.src.includes("directfwd")) { // More generic
+                  script.remove();
+              }
+          });
+      });
+  </script>
+
   </body>
 </html>

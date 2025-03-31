@@ -14,6 +14,7 @@ const WhizVerticalNav = () => {
   const [activeNav, setActiveNav] = useState("/landingpage"); // Track the active navigation
 
   const handleNavigation = (path) => {
+    
     setActiveNav(path); // Update the active navigation path
     navigate(path);
   };
@@ -50,7 +51,7 @@ const WhizVerticalNav = () => {
 
     fetchModuleAccess();
   }, [UserID]); // Add UserID as a dependency to ensure it's available
-
+  
   return (
     <ul className="sidebar-nav">
       <li className={activeNav === "/landingpage" ? "active" : ""}>

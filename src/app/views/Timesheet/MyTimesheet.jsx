@@ -92,13 +92,13 @@ const MyTimesheet = ({ setActiveTab1, setNewdate }) => {
               <th style={{ textAlign: "center", width: "10%" }}>Status</th>
               <th style={{ textAlign: "center", width: "10%" }}>History</th>
               <th style={{ textAlign: "center", width: "10%" }}>By</th>
-              {!["Submitted"].includes(activeTab) && (
+              {/* {!["Submitted"].includes(activeTab) && (
                 <>
                   <th style={{ textAlign: "center", width: "10%" }}>Date</th>
 
-                  {/* Smaller width */}
+                  
                 </>
-              )}
+              )} */}
               <th style={{ textAlign: "center", width: "10%" }}>Approve/Reject Remark</th>{" "}
             </tr>
           </thead>
@@ -169,11 +169,11 @@ const MyTimesheet = ({ setActiveTab1, setNewdate }) => {
                     </Button>
                   </td>
                   <td style={{ textAlign: "center" }}>{item.by}</td>
-                  {!["Submitted"].includes(activeTab) && (
+                  {/* {!["Submitted"].includes(activeTab) && (
                     <>
                       <td style={{ textAlign: "center" }}>{item.fromDate}</td>
                     </>
-                  )}
+                  )} */}
                   <td style={{ textAlign: "center" }}>{item.comment}</td>
                 </tr>
               ))
@@ -217,7 +217,7 @@ const MyTimesheet = ({ setActiveTab1, setNewdate }) => {
   };
 
   const handleTabClick = (tabName) => {
-    debugger;
+    
     setActiveTab(tabName); // Set the active tab when clicked
     setCurrentPage(1); // Reset to the first page when the tab changes
   };

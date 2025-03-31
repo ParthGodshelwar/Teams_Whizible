@@ -26,7 +26,7 @@ const TimesheetTable = ({
   setPreviousEfforts,
   previousEfforts1,
   isFetchedPrevvalue,
-  setisFetchedPrevvalue
+  // setisFetchedPrevvalue
   // setPreviousData
 }) => {
   // const [timesheetData, setTimesheetData] = useState([]);
@@ -71,7 +71,6 @@ const TimesheetTable = ({
   };
 
   useEffect(() => {
-    // debugger;
     var data;
     const fetchUserDAEntryFilter = async () => {
       try {
@@ -79,8 +78,8 @@ const TimesheetTable = ({
           `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyTimesheetEntry/GetUserDAEntryFilter?UserID=${userid}`,
           {
             headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("token")}`
-            }
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            },
           }
         );
         // console.log("User DA Entry Filter Response:", response.data);
@@ -94,7 +93,6 @@ const TimesheetTable = ({
     };
     // console.log("GetTimesheetEntryDetailsss,ssss111", newdate);
     const fetchTimesheetData = async (filterData) => {
-      // debugger;
       try {
         var fdate = await formatDateToISO(newdate);
         // Retrieve token from sessionStorage
@@ -107,7 +105,7 @@ const TimesheetTable = ({
             // inputDate: newdate ? formatDateToISO(newdate) : normalizedDate,
             inputDate: newdate ? fdate : normalizedDate,
             whereClause: filterData,
-            strTaskName: searchTerm
+            strTaskName: searchTerm,
           };
 
           // Remove fields with undefined, null, empty string, or empty array
@@ -133,13 +131,16 @@ const TimesheetTable = ({
             headers: {
               Accept: "*/*",
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}` // Add token to Authorization header
-            }
+              Authorization: `Bearer ${token}`, // Add token to Authorization header
+            },
           }
         );
 
         const data = response.data.data;
-        if (data?.listProjectDetailsEntity && data?.listProjectDetailsEntity.length === 0) {
+        if (
+          data?.listProjectDetailsEntity &&
+          data?.listProjectDetailsEntity.length === 0
+        ) {
           const currentTime = Date.now(); // Get current time in milliseconds
 
           //Added by Parth.G
@@ -195,7 +196,7 @@ const TimesheetTable = ({
         timesheetData.listTimesheetEntryHeader[0].day4,
         timesheetData.listTimesheetEntryHeader[0].day5,
         timesheetData.listTimesheetEntryHeader[0].day6,
-        timesheetData.listTimesheetEntryHeader[0].day7
+        timesheetData.listTimesheetEntryHeader[0].day7,
       ]
     : [];
 
@@ -207,7 +208,7 @@ const TimesheetTable = ({
         timesheetData.listTimesheetEntryHeader[0].dayDate4,
         timesheetData.listTimesheetEntryHeader[0].dayDate5,
         timesheetData.listTimesheetEntryHeader[0].dayDate6,
-        timesheetData.listTimesheetEntryHeader[0].dayDate7
+        timesheetData.listTimesheetEntryHeader[0].dayDate7,
       ]
     : [];
 
@@ -219,7 +220,7 @@ const TimesheetTable = ({
         timesheetData.listTimesheetEntryHeader[0].daySumTotal4,
         timesheetData.listTimesheetEntryHeader[0].daySumTotal5,
         timesheetData.listTimesheetEntryHeader[0].daySumTotal6,
-        timesheetData.listTimesheetEntryHeader[0].daySumTotal7
+        timesheetData.listTimesheetEntryHeader[0].daySumTotal7,
       ]
     : [];
 
@@ -230,12 +231,15 @@ const TimesheetTable = ({
     N: "Normal",
     0: "Overtime",
     C: "OnCall",
-    C1: "CallBack"
+    C1: "CallBack",
   };
+
   useEffect(() => {
+    
     if (showDaTypeModal && currentProject && currentDay) {
       const selectedDaTypeKey = currentDay[`daTypet${currentProject}`];
-      const selectedDaType = daTypeMapping[selectedDaTypeKey] || selectedDaTypeKey; // Default to key if no mapping
+      const selectedDaType =
+        daTypeMapping[selectedDaTypeKey] || selectedDaTypeKey; // Default to key if no mapping
       const selectedDescription = currentDay[`descriptiont${currentProject}`];
 
       setDaType(selectedDaType);
@@ -260,6 +264,7 @@ const TimesheetTable = ({
   }, []);
   // Function to handle the opening of the DA Type modal
   const handleShowDaTypeModal = (projectId, day, task) => {
+    
     setCurrentProject(projectId?.projectId);
     setCurrentDay(projectId?.day);
     setTaskid(projectId?.task);
@@ -276,8 +281,11 @@ const TimesheetTable = ({
   };
   const handleSave = async () => {
     // Extract day-specific date string and time range
-    const dayDateString = timesheetData.listTimesheetEntryHeader[0][`dayDate${currentDay}`];
-    const [dateString, timeRangeString] = dayDateString.split("|").map((part) => part.trim()); // Split date and time range
+    const dayDateString =
+      timesheetData.listTimesheetEntryHeader[0][`dayDate${currentDay}`];
+    const [dateString, timeRangeString] = dayDateString
+      .split("|")
+      .map((part) => part.trim()); // Split date and time range
     // console.log("dayDateString", dayDateString);
 
     // Parse the date string (e.g., "14 Jan 2025") into a Date object
@@ -298,7 +306,9 @@ const TimesheetTable = ({
       if (modifier === "PM" && hours < 12) hours += 12; // Convert PM to 24-hour format
       if (modifier === "AM" && hours === 12) hours = 0; // Handle midnight (12 AM)
 
-      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`; // Format as "HH:mm"
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`; // Format as "HH:mm"
     };
 
     // Extract and convert `fromTime` and `toTime`
@@ -308,7 +318,9 @@ const TimesheetTable = ({
       return `${hours % 12 || 12}:${minutes.toString().padStart(2, "0")}`; // Ensure two-digit minutes
     };
 
-    const [fromTimeString, toTimeString] = timeRangeString.split("-").map((time) => time.trim());
+    const [fromTimeString, toTimeString] = timeRangeString
+      .split("-")
+      .map((time) => time.trim());
     const fromTime = convertTo12HourTime(fromTimeString);
     const toTime = convertTo12HourTime(toTimeString);
 
@@ -327,7 +339,7 @@ const TimesheetTable = ({
       taskID: Number(taskid?.taskID), // Task ID
       description: description, // Description for the day
       daType: daType, // DA type for the day
-      duration: taskid[`dayEfforst${currentDay}`] // Effort duration
+      duration: taskid[`dayEfforst${currentDay}`], // Effort duration
     };
 
     // console.log("Mapped Entry Data:", entryData);
@@ -341,9 +353,9 @@ const TimesheetTable = ({
           headers: {
             Accept: "*/*",
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(entryData) // Send the entryData in JSON body
+          body: JSON.stringify(entryData), // Send the entryData in JSON body
         }
       );
 
@@ -368,9 +380,9 @@ const TimesheetTable = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
               },
-              body: JSON.stringify(entryData) // Send the entryData to post
+              body: JSON.stringify(entryData), // Send the entryData to post
             }
           );
 
@@ -381,11 +393,19 @@ const TimesheetTable = ({
             toast.success("Timesheet Entry saved successfully");
           } else {
             const postValidationErrors = postResult?.data
-              ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage
+              ?.filter(
+                (item) =>
+                  !item.validationMessage ||
+                  item.validationMessage.trim() === ""
+              ) // Check for null or empty validationMessage
               .map((item) => "Please fill Daily Activity")
               .concat(
                 postResult?.data
-                  ?.filter((item) => item.validationMessage && item.validationMessage.trim() !== "") // Include non-empty validation messages
+                  ?.filter(
+                    (item) =>
+                      item.validationMessage &&
+                      item.validationMessage.trim() !== ""
+                  ) // Include non-empty validation messages
                   .map((item) => item.validationMessage)
               )
               .join(", ");
@@ -418,7 +438,7 @@ const TimesheetTable = ({
                   backgroundColor: "#4CAF50",
                   color: "white",
                   borderRadius: "4px",
-                  cursor: "pointer"
+                  cursor: "pointer",
                 }}
               >
                 Yes
@@ -433,7 +453,7 @@ const TimesheetTable = ({
                   backgroundColor: "#f44336",
                   color: "white",
                   borderRadius: "4px",
-                  cursor: "pointer"
+                  cursor: "pointer",
                 }}
               >
                 No
@@ -454,11 +474,7 @@ const TimesheetTable = ({
     }
   };
   const handleSubmitDaType = () => {
-    handleSave();
-    // console.log("Selected DA Type:", daType); // "S"
-    // console.log("Description:", description); // "2ssssssssssss"
-    // console.log("Project ID:", currentProject); // 48310
-    // console.log("Day:", currentDay); // 3
+    handleSave();    
 
     // Update the corresponding project entry in the timesheetData state
     setTimesheetData((prevData) => {
@@ -466,41 +482,43 @@ const TimesheetTable = ({
       const updatedData = JSON.parse(JSON.stringify(prevData)); // Deep copy to avoid mutating state
 
       // Map through projects in listProjectDetailsEntity
-      const updatedProjects = updatedData?.listProjectDetailsEntity.map((project) => {
-        // console.log("currentProject:", currentProject, project.projectID); // 3
+      const updatedProjects = updatedData?.listProjectDetailsEntity.map(
+        (project) => {
+          // console.log("currentProject:", currentProject, project.projectID); // 3
 
-        // Update the tasks for the selected project
-        const updatedTasks = project.listTaskDetailsEntity.map((task) => {
-          // console.log(`Updating taskID: ${task.taskID}`); // Log task ID being updated
+          // Update the tasks for the selected project
+          const updatedTasks = project.listTaskDetailsEntity.map((task) => {
+            // console.log(`Updating taskID: ${task.taskID}`); // Log task ID being updated
 
-          // Get the dynamic field names based on the `day` value
-          const daTypetField = `daTypet${currentDay}`; // Example: daTypet3
-          const descriptiontField = `descriptiont${currentDay}`; // Example: descriptiont3
+            // Get the dynamic field names based on the `day` value
+            const daTypetField = `daTypet${currentDay}`; // Example: daTypet3
+            const descriptiontField = `descriptiont${currentDay}`; // Example: descriptiont3
 
-          // Update the day-specific DA Type field (e.g., daTypet3)
-          if (task.hasOwnProperty(daTypetField)) {
-            // console.log(
-            //   `Updating ${daTypetField} for taskID: ${task.taskID} with value: ${daType}`
-            // );
-            task[daTypetField] = daType; // Set the DA Type field for the current day
-          }
+            // Update the day-specific DA Type field (e.g., daTypet3)
+            if (task.hasOwnProperty(daTypetField)) {
+              // console.log(
+              //   `Updating ${daTypetField} for taskID: ${task.taskID} with value: ${daType}`
+              // );
+              task[daTypetField] = daType; // Set the DA Type field for the current day
+            }
 
-          // Update the day-specific Description field (e.g., descriptiont3)
-          if (task.hasOwnProperty(descriptiontField)) {
-            // console.log(
-            //   `Updating ${descriptiontField} for taskID: ${task.taskID} with value: ${description}`
-            // );
-            task[descriptiontField] = description; // Set the Description field for the current day
-          }
+            // Update the day-specific Description field (e.g., descriptiont3)
+            if (task.hasOwnProperty(descriptiontField)) {
+              // console.log(
+              //   `Updating ${descriptiontField} for taskID: ${task.taskID} with value: ${description}`
+              // );
+              task[descriptiontField] = description; // Set the Description field for the current day
+            }
 
-          return task; // Return the updated task
-        });
+            return task; // Return the updated task
+          });
 
-        // Return the updated project with modified tasks
-        return { ...project, listTaskDetailsEntity: updatedTasks };
+          // Return the updated project with modified tasks
+          return { ...project, listTaskDetailsEntity: updatedTasks };
 
-        return project; // Return unchanged project if not the selected one
-      });
+          return project; // Return unchanged project if not the selected one
+        }
+      );
 
       // Log the updated state before setting
       // console.log("Updated Timesheet Data:", updatedData);
@@ -508,7 +526,7 @@ const TimesheetTable = ({
       // Return the updated timesheet data to set it in state
       return {
         ...updatedData,
-        listProjectDetailsEntity: updatedProjects
+        listProjectDetailsEntity: updatedProjects,
       };
     });
 
@@ -549,14 +567,17 @@ const TimesheetTable = ({
   }, [showDaTypeModal, currentProject]);
 
   const fun = (data) => {
-    debugger;
-    console.log("Hinm");
+    console.log("Hinm", data);
+    setPreviousEfforts(data);
     // setPreviousData;
   };
 
   // console.log("handleShowDaTypeModal9999000000", currentProject);
   return (
-    <table className="table table-bordered borderGrey TimesheetTbl mt-2" style={{ width: "100%" }}>
+    <table
+      className="table table-bordered borderGrey TimesheetTbl mt-2"
+      style={{ width: "100%" }}
+    >
       {/* Project Rows */}
       <ProjectTaskTable
         date={date}
@@ -579,7 +600,7 @@ const TimesheetTable = ({
         previousEfforts1={previousEfforts1}
         setPreviousData={fun}
         isFetchedPrevvalue={isFetchedPrevvalue}
-        setisFetchedPrevvalue={setisFetchedPrevvalue}
+        // setisFetchedPrevvalue={setisFetchedPrevvalue}
       />
 
       {/* Modal */}
@@ -641,7 +662,10 @@ const TimesheetTable = ({
             ))}
           </div>
           <div className="form-group mt-4">
-            <label htmlFor="description" className="form-label fw-semibold mb-2">
+            <label
+              htmlFor="description"
+              className="form-label fw-semibold mb-2"
+            >
               Description
             </label>
             <textarea
@@ -655,10 +679,18 @@ const TimesheetTable = ({
           </div>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-end">
-          <Button variant="primary" className="me-2 px-4" onClick={handleSubmitDaType}>
+          <Button
+            variant="primary"
+            className="me-2 px-4"
+            onClick={handleSubmitDaType}
+          >
             Save
           </Button>
-          <Button variant="secondary" className="px-4" onClick={handleCloseDaTypeModal}>
+          <Button
+            variant="secondary"
+            className="px-4"
+            onClick={handleCloseDaTypeModal}
+          >
             Cancel
           </Button>
         </Modal.Footer>

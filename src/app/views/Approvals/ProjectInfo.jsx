@@ -7,7 +7,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  TextField
+  TextField,
 } from "@mui/material";
 import axios from "axios";
 import ProjectDrawer from "./ProjectDrawer";
@@ -21,7 +21,7 @@ const ProjectInfo = ({
   handleApproveClick,
   showProjectInfo,
   toggleProjectInfo,
-  projectid
+  projectid,
 }) => {
   const [projectData, setProjectData] = useState(null);
   const [hold, setHold] = useState(null);
@@ -51,12 +51,13 @@ const ProjectInfo = ({
         `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyApprovals/GetProjectOnHoldComments?ProjectID=${projectid}&TagID=32`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
-      const projectDetails = response.data?.data?.listProjectCommentsEntity?.[0];
+      const projectDetails =
+        response.data?.data?.listProjectCommentsEntity?.[0];
       setHold(projectDetails || {});
       setHoldComment(projectDetails?.projectOnHoldComments);
     } catch (err) {
@@ -79,12 +80,13 @@ const ProjectInfo = ({
           `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyApprovals/GetProjectDetails?ProjectID=${projectid}`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`
-            }
+              Authorization: `Bearer ${accessToken}`,
+            },
           }
         );
 
-        const projectDetails = response.data?.data?.listMyApprovalProjectDetailEntity?.[0];
+        const projectDetails =
+          response.data?.data?.listMyApprovalProjectDetailEntity?.[0];
         setProjectData(projectDetails || {});
       } catch (err) {
         console.error("Error fetching project details:", err);
@@ -107,7 +109,7 @@ const ProjectInfo = ({
         `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyApprovals/PostResumeTimesheet?ProjectID=${projectid}&Comments=${resumeComment}`,
         {},
         {
-          headers: { Authorization: `Bearer ${accessToken}` }
+          headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
 
@@ -135,7 +137,7 @@ const ProjectInfo = ({
         `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyApprovals/PostProjectOnHold?ProjectID=${projectid}&Comments=${holdComment}&UseID=${UserID}`,
         {},
         {
-          headers: { Authorization: `Bearer ${accessToken}` }
+          headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
 
@@ -162,8 +164,8 @@ const ProjectInfo = ({
         `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyApprovals/validateProjectApproval?ProjectID=${projectid}&userID=${UserID}`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
       console.log("validateResponse", validateResponse);
@@ -190,8 +192,8 @@ const ProjectInfo = ({
         `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyApprovals/validateProjectApproval?ProjectID=${projectid}&userID=${UserID}`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
       if (validateResponse.data.data[0].result === "Success") {
@@ -227,8 +229,8 @@ const ProjectInfo = ({
           {},
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`
-            }
+              Authorization: `Bearer ${accessToken}`,
+            },
           }
         );
         if (response?.status === 200) {
@@ -247,8 +249,8 @@ const ProjectInfo = ({
           {},
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`
-            }
+              Authorization: `Bearer ${accessToken}`,
+            },
           }
         );
         if (response?.status === 200) {
@@ -264,10 +266,15 @@ const ProjectInfo = ({
 
       // Proceed to email sending if the approval/rejection was successful
       const approvalEntity =
-        response.data.data.projectWorkFlowApprover || response.data.data.projectWorkFlowApprover;
+        response.data.data.projectWorkFlowApprover ||
+        response.data.data.projectWorkFlowApprover;
 
-      const { fromEmailID, toEmailID, ccEmailID, subject, body } = approvalEntity[0];
-      console.log("listLeaveApprovalEntity", response.data.data.projectWorkFlowApprover);
+      const { fromEmailID, toEmailID, ccEmailID, subject, body } =
+        approvalEntity[0];
+      console.log(
+        "listLeaveApprovalEntity",
+        response.data.data.projectWorkFlowApprover
+      );
 
       // Construct the query string
       const requestBody = {
@@ -276,7 +283,7 @@ const ProjectInfo = ({
         ccAddress: ccEmailID || "", // Include CC if available
         subject: subject,
         body: body,
-        isHtml: 1
+        isHtml: 1,
       };
 
       console.log("listLeaveApprovalEntity", sessionStorage.getItem("token"));
@@ -288,8 +295,8 @@ const ProjectInfo = ({
           {
             headers: {
               Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-              "Content-Type": "application/json" // Ensure the content type is set as JSON
-            }
+              "Content-Type": "application/json", // Ensure the content type is set as JSON
+            },
           }
         );
 
@@ -316,15 +323,15 @@ const ProjectInfo = ({
         "& .MuiDrawer-paper": {
           width: "80vw",
           height: "100%",
-          overflow: "hidden" // Prevent scrolling on the drawer itself
-        }
+          overflow: "hidden", // Prevent scrolling on the drawer itself
+        },
       }}
     >
       <div
         className="offcanvas-body"
         style={{
           overflowY: "auto", // Enable vertical scrolling
-          overflowX: "hidden" // Hide horizontal scrolling
+          overflowX: "hidden", // Hide horizontal scrolling
         }}
       >
         {/* Drawer Header */}
@@ -413,7 +420,10 @@ const ProjectInfo = ({
 
             <div className="ProjInfoDetailsContent">
               <h6 className="text-end">
-                Status: <span className="color-red">{projectData.projectStatus || "N/A"}</span>
+                Status:{" "}
+                <span className="color-red">
+                  {projectData.projectStatus || "N/A"}
+                </span>
               </h6>
 
               {/* Project Information Accordion */}
@@ -469,8 +479,8 @@ const ProjectInfo = ({
           "& .MuiDialogPaper-root": {
             height: "70%", // Increased height from default to 70% of the viewport height
             maxHeight: "80vh", // Prevents the dialog from exceeding 80% of the viewport height
-            overflowY: "auto" // Adds scroll if content exceeds the set height
-          }
+            overflowY: "auto", // Adds scroll if content exceeds the set height
+          },
         }}
       >
         <DialogTitle>Resume Timesheet</DialogTitle>
@@ -490,10 +500,18 @@ const ProjectInfo = ({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleResumeTimesheetSubmit} variant="contained" color="success">
+          <Button
+            onClick={handleResumeTimesheetSubmit}
+            variant="contained"
+            color="success"
+          >
             OK
           </Button>
-          <Button onClick={() => setResumeModalOpen(false)} variant="contained" color="error">
+          <Button
+            onClick={() => setResumeModalOpen(false)}
+            variant="contained"
+            color="error"
+          >
             Cancel
           </Button>
         </DialogActions>
@@ -508,8 +526,8 @@ const ProjectInfo = ({
             height: "70%", // Increased height from default to 70% of the viewport height
             maxHeight: "80vh", // Prevents the dialog from exceeding 80% of the viewport height
             overflowY: "hidden", // Hides the scrollbar for vertical overflow
-            width: "80%" // Sets the width to 80% of the viewport width
-          }
+            width: "80%", // Sets the width to 80% of the viewport width
+          },
         }}
       >
         <DialogTitle>
@@ -523,7 +541,7 @@ const ProjectInfo = ({
               sx={{
                 position: "absolute",
                 right: "19px",
-                top: "8px"
+                top: "8px",
               }}
             >
               <CloseIcon />
@@ -548,10 +566,18 @@ const ProjectInfo = ({
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleHoldTimesheetSubmit} variant="contained" color="success">
+          <Button
+            onClick={handleHoldTimesheetSubmit}
+            variant="contained"
+            color="success"
+          >
             OK
           </Button>
-          <Button onClick={() => setHoldModalOpen(false)} variant="contained" color="error">
+          <Button
+            onClick={() => setHoldModalOpen(false)}
+            variant="contained"
+            color="error"
+          >
             Cancel
           </Button>
         </DialogActions>
@@ -565,12 +591,16 @@ const ProjectInfo = ({
           "& .MuiDialogPaper-root": {
             height: "70%", // Increased height from default to 70% of the viewport height
             maxHeight: "80vh", // Prevents the dialog from exceeding 80% of the viewport height
-            overflowY: "auto" // Adds scroll if content exceeds the set height
-          }
+            overflowY: "auto", // Adds scroll if content exceeds the set height
+          },
         }}
       >
         <DialogTitle
-          sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
           {statusID === 1 ? "Approve" : "Reject"}
           <Tooltip title="Close">
@@ -579,7 +609,7 @@ const ProjectInfo = ({
               style={{
                 cursor: "pointer",
                 marginLeft: "10px", // Add space after the "Issues" title
-                marginRight: "10px" // Add space after the close icon
+                marginRight: "10px", // Add space after the close icon
               }}
             />
           </Tooltip>
@@ -589,7 +619,9 @@ const ProjectInfo = ({
             {/* Optionally, you can add some text or other content here */}
           </Box>
           <TextField
-            label={statusID === 1 ? "Approval Comments:" : "Rejection Comments:"}
+            label={
+              statusID === 1 ? "Approval Comments:" : "Rejection Comments:"
+            }
             variant="outlined"
             fullWidth
             multiline
@@ -599,7 +631,11 @@ const ProjectInfo = ({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleApprovalSubmit} variant="contained" color="success">
+          <Button
+            onClick={handleApprovalSubmit}
+            variant="contained"
+            color="success"
+          >
             {statusID === 1 ? "Approve" : "Reject"}
           </Button>
           <Button onClick={handleModalClose} variant="contained" color="error">

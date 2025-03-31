@@ -39,43 +39,24 @@ const TimesheetEntry = ({ projects, tasks }) => {
   const UserID = userdata?.data?.employeeId;
   const [refresh1, setRefresh1] = useState(false);
   const [clearinitalvaluesflag, setclearinitalvaluesflag] = useState(false);
-  const [isFetchedPrevvalue, setisFetchedPrevvalue] = useState(false);
+  // const [isFetchedPrevvalue, setisFetchedPrevvalue] = useState(false);
   // Function to handle search term changes
   const [refresh12, setRefresh12] = useState(false);
+
   const filterRef = useRef(null);
 
+  // added by Parth.G
+
+  var isFetchedPrevvalue = useRef(false);
   const previousEfforts = useRef({});
 
-  console.log("Before updating previousEffortsRef:", previousEfforts.current);
   const setPreviousEfforts = (newEfforts) => {
     previousEfforts.current = { ...previousEfforts.current, ...newEfforts };
-    console.log("Updated previousEfforts in Parent (Ref):", previousEfforts.current);
   };
-  console.log("Before updating previousEffortsRef:", previousEfforts.current);
 
-  useEffect(() => {
-    setTimeout(() => {
-      console.log(" Filter ref assigned:", filterRef.current);
-    }, 1000); // Adding a slight delay to ensure component is mounted
-  }, []);
-  console.log("GetTimesheetEntryDetailsss9999", newdate);
   const handleSearchChange = async (event) => {
     await setSearchTerm(event.target.value);
   };
-  // useEffect(() => {
-  //   // Fetch the timesheet data from an API
-  //   const fetchTimesheetData = async () => {
-  //     try {
-  //       const response = await fetch("YOUR_API_ENDPOINT"); // Replace with your actual API endpoint
-  //       const data = await response.json();
-  //       setTimesheetData(data);
-  //     } catch (error) {
-  //       console.error("Error fetching timesheet data:", error);
-  //     }
-  //   };
-
-  //   fetchTimesheetData();
-  // }, []);
 
   const toggleFilters = () => {
     setShowFilters((prevState) => !prevState); // Toggles the filter panel visibility
@@ -84,6 +65,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
   const toggleAccordion = () => {
     setShowAccordion((prevState) => !prevState); // Toggles the accordion visibility
   };
+
   useEffect(() => {
     // Set showFilters to true on the first render
     setShowFilters(true);
@@ -96,8 +78,8 @@ const TimesheetEntry = ({ projects, tasks }) => {
     // Cleanup the timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
+
   useEffect(() => {
-    console.log("Applied Filters:", appliedFilters);
     //added by parth.G
     const isAppliedFiltersEmpty = Object.values(appliedFilters).every(
       (value) => value === "" || value === undefined
@@ -107,27 +89,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
     }
   }, [appliedFilters]);
 
-  // const removeFilter = (filterKey) => {
-  //   setAppliedFilters((prevFilters) => ({
-  //     ...prevFilters,
-  //     [filterKey]: undefined
-  //   }));
-  // };
-
   const removeFilter = async (filterKey) => {
-    // debugger;
-    // setShowFilters(true);
-    // debugger for remove filter
-    // debugger;
-    // if (filterKey === "selectedProject") {
-    //   // Clear all filters if the selected project filter is removed
-    //   setAppliedFilters({});
-    // } else {
-    //   // Remove the specific filter
-    //   const newFilters = { ...appliedFilters };
-    //   delete newFilters[filterKey];
-    //   setAppliedFilters(newFilters);
-    // }
     //added by parth.G
     var finalFilter;
     setAppliedFilters(async (prevFilters) => {
@@ -137,34 +99,17 @@ const TimesheetEntry = ({ projects, tasks }) => {
       } else {
         delete updatedFilters[filterKey]; // Delete other keys normally
       }
-      // delete updatedFilters[filterKey];
+
       finalFilter = updatedFilters;
-      // console.log("Filter bagu :", updatedFilters);
-      // console.log("filterRef.current:", filterRef.current);
 
       await postDaForremovefilter(finalFilter);
       setAppliedFilters(finalFilter);
 
       return updatedFilters;
     });
-
-    // if (filterRef.current) {
-    //   console.log("Calling applyFilters...");
-    //   // console.log("Final Filter need to apply:", updatedFilters);
-    //   console.log("Filter bagu inside :", finalFilter);
-    //   filterRef.current.applyFilters(finalFilter, true);
-    // } else {
-    //   console.error(
-    //     "filterRef.current is NULL - Ensure <TimesheetFilters ref={filterRef} /> is rendered."
-    //   );
-    // }
-
-    // return;
   };
 
   const postDaForremovefilter = async (filters) => {
-    // console.log("postDaForremovefilter", filters);
-
     const sanitizeValue = (value) => (value ? String(value) : "");
 
     const params = {
@@ -179,12 +124,11 @@ const TimesheetEntry = ({ projects, tasks }) => {
       moduleIDs: sanitizeValue(filters?.module),
       priorityIDs: sanitizeValue(filters?.priority),
       // billable: sanitizeValue(filters?.billable === 0 ? "No" : "Yes"),
-      billable: filters?.billable === 0 ? "No" : filters?.billable === 1 ? "Yes" : "",
+      billable:
+        filters?.billable === 0 ? "No" : filters?.billable === 1 ? "Yes" : "",
 
-      employeeID: sanitizeValue(UserID)
+      employeeID: sanitizeValue(UserID),
     };
-
-    // console.log("Request Body:", params);
 
     try {
       const response = await axios.post(
@@ -194,111 +138,123 @@ const TimesheetEntry = ({ projects, tasks }) => {
           headers: {
             accept: "*/*",
             "Content-Type": "application/json",
-            Authorization: `Bearer ${sessionStorage.getItem("token")}`
-          }
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
         }
       );
-      console.log("DA Entry Filters Saved Response:", response.data);
     } catch (error) {
       console.error("Error saving DA entry filters:", error);
     }
   };
 
   const handleSubmitTimesheet = async (data) => {
-    // debugger;
-    // console.log("timesheetData.listProjectDetailsEntity", timesheetData);
-
-    // console.log("parthineereffert", timesheetData);
-    console.log("parthinnerefforts", data);
-    // console.log("parthineereffert", previousEfforts1);
-
     // Retrieve selected tasks from sessionStorage
-    const selectedTasksFromSession = JSON.parse(sessionStorage.getItem("selectedTasks")) || [];
+    const selectedTasksFromSession =
+      JSON.parse(sessionStorage.getItem("selectedTasks")) || [];
+    console.log("implan", timesheetData);
 
     const payload = {
       userID: UserID, // Replace with actual userID value
       weekStartDate: new Date(
-        new Date(timesheetData.listTimesheetEntryHeader[0].weekStartDate).getTime() -
+        new Date(
+          timesheetData.listTimesheetEntryHeader[0].weekStartDate
+        ).getTime() -
           new Date().getTimezoneOffset() * 60000
       )
         .toISOString()
         .split("T")[0], // Format as 'YYYY-MM-DD'
 
       weekEndDate: new Date(
-        new Date(timesheetData.listTimesheetEntryHeader[0].weekEndDate).getTime() -
+        new Date(
+          timesheetData.listTimesheetEntryHeader[0].weekEndDate
+        ).getTime() -
           new Date().getTimezoneOffset() * 60000
       )
         .toISOString()
         .split("T")[0],
 
       // Check if selectedTasks are available, otherwise include all tasks
-      listDADetailsEntity: timesheetData.listProjectDetailsEntity.flatMap((project) =>
-        project.listTaskDetailsEntity.flatMap(
-          (task) =>
-            [1, 2, 3, 4, 5, 6, 7]
-              .map((day) => {
-                const dayDateKey = `dayDate${day}`;
-                const dayEffortsKey = `dayEfforst${day}`;
-                const daySumTotalKey = `daySumTotal${day}`;
-                const descriptionKey = `descriptiont${day}`;
-                const daTypeKey = `daTypet${day}`;
-                const daiD = `daiD${day}`;
+      listDADetailsEntity: timesheetData.listProjectDetailsEntity.flatMap(
+        (project) =>
+          project.listTaskDetailsEntity.flatMap(
+            (task) =>
+              [1, 2, 3, 4, 5, 6, 7]
+                .map((day) => {
+                  const dayDateKey = `dayDate${day}`;
+                  const dayEffortsKey = `dayEfforst${day}`;
+                  const daySumTotalKey = `daySumTotal${day}`;
+                  const descriptionKey = `descriptiont${day}`;
+                  const daTypeKey = `daTypet${day}`;
+                  const daiD = `daiD${day}`;
+                  const resourceTimesheetID = `resourceTimesheetID${day}`;
 
-                // Exclude task if duration is "00:00"
-                // if (task[dayEffortsKey] === "00:00") return null; // Skip this task
-                //Added by Parth.G for DA
+                  // Exclude task if duration is "00:00"
+                  // if (task[dayEffortsKey] === "00:00") return null; // Skip this task
+                  //Added by Parth.G for DA
 
-                const currentEffort = task[dayEffortsKey] || "00:00";
+                  const currentEffort = task[dayEffortsKey] || "00:00";
 
-                const prevEffort = previousEfforts[`${task.taskID}-${day}`] || "00:00";
-                var FromWhereFlag = "";
+                  const prevEffort =
+                    previousEfforts.current[`${task.taskID}-${day}`] || "00:00";
+                  var FromWhereFlag = "";
 
-                if (currentEffort === "00:00" && prevEffort === "00:00") {
-                  return null;
-                } else if (currentEffort === "00:00" && prevEffort !== "00:00") {
-                  FromWhereFlag = "MT";
-                }
+                  if (currentEffort === "00:00" && prevEffort === "00:00") {
+                    return null;
+                  } else if (
+                    currentEffort === "00:00" &&
+                    prevEffort !== "00:00"
+                  ) {
+                    FromWhereFlag = "MT";
+                    previousEfforts.current[`${task.taskID}-${day}`] = "00:00";
+                  }
 
-                // Check if task is in selectedTasks, only include it if selected
-                // if (
-                //   selectedTasksFromSession.length > 0 &&
-                //   !selectedTasksFromSession.includes(task.taskID)
-                // ) {
-                //   return null; // Exclude tasks not in selectedTasks
-                // }
+                  // Check if task is in selectedTasks, only include it if selected
+                  // if (
+                  //   selectedTasksFromSession.length > 0 &&
+                  //   !selectedTasksFromSession.includes(task.taskID)
+                  // ) {
+                  //   return null; // Exclude tasks not in selectedTasks
+                  // }
 
-                return {
-                  dailyActivityEntryID: task[daiD],
-                  taskID: task.taskID,
-                  projectID: project.projectID,
-                  entryDate: new Date(
-                    new Date(
-                      timesheetData.listTimesheetEntryHeader[0][dayDateKey]?.split("|")[0]
-                    ).getTime() -
-                      new Date().getTimezoneOffset() * 60000
-                  )
-                    .toISOString()
-                    .split("T")[0],
-                  duration: task[dayEffortsKey] || "0",
-                  totalDuration: timesheetData.listTimesheetEntryHeader[0][daySumTotalKey] || "0",
-                  description: task[descriptionKey] || "N/A",
-                  taskTypeID: task.taskTypeID,
-                  subTaskTypeID: 0,
-                  isDurationChange: true,
-                  isTaskComplete: false,
-                  actualPercentComplete: 0,
-                  isResourceTaskComplete: false,
-                  overtime: "0",
-                  daType: task[daTypeKey] || "N",
-                  storyPoint: 0,
-                  resourceTimesheetID: 0,
-                  FromWhere: FromWhereFlag
-                };
-              })
-              .filter(Boolean) // Remove null values (tasks with "00:00" duration or not selected)
-        )
-      )
+                  return {
+                    dailyActivityEntryID: task[daiD],
+                    taskID: task.taskID,
+                    projectID: project.projectID,
+                    entryDate: new Date(
+                      new Date(
+                        timesheetData.listTimesheetEntryHeader[0][
+                          dayDateKey
+                        ]?.split("|")[0]
+                      ).getTime() -
+                        new Date().getTimezoneOffset() * 60000
+                    )
+                      .toISOString()
+                      .split("T")[0],
+                    duration: task[dayEffortsKey] || "0",
+                    totalDuration:
+                      timesheetData.listTimesheetEntryHeader[0][
+                        daySumTotalKey
+                      ] || "0",
+                    description: task[descriptionKey] || "", //Added by Parth.G
+                    taskTypeID: task.taskTypeID,
+                    subTaskTypeID: 0,
+                    isDurationChange: true,
+                    isTaskComplete: false,
+                    actualPercentComplete: 0,
+                    isResourceTaskComplete: false,
+                    overtime: "0",
+                    daType: task[daTypeKey] || "N",
+                    storyPoint: 0,
+                    resourceTimesheetID: task[resourceTimesheetID] || 0, //need to handle now
+                    FromWhere: FromWhereFlag,
+                  };
+                })
+                .filter(Boolean) // Remove null values (tasks with "00:00" duration or not selected)
+          )
+      ),
     };
+
+    isFetchedPrevvalue.current = false;
 
     try {
       const response = await fetch(
@@ -308,9 +264,9 @@ const TimesheetEntry = ({ projects, tasks }) => {
           headers: {
             Accept: "*/*",
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
         }
       );
 
@@ -319,13 +275,16 @@ const TimesheetEntry = ({ projects, tasks }) => {
       }
 
       const result = await response.json();
-      console.log("Timesheet submit result:", result);
 
       // Extract validation data
       const validationData = result?.data;
       setRefresh1(!refresh1);
       if (validationData.validationMessage != null) {
-        if (validationData.validationMessage.includes("the Daily Activity will still be saved.")) {
+        if (
+          validationData.validationMessage.includes(
+            "the Daily Activity will still be saved."
+          )
+        ) {
           // Handle the case where the message contains the specific string
           toast.info(validationData.validationMessage);
         }
@@ -333,7 +292,10 @@ const TimesheetEntry = ({ projects, tasks }) => {
 
       if (!validationData || validationData.validationMessage === null) {
         toast.error("Please Fill Daily Activity");
-        console.error("Missing validation message in API response:", validationData);
+        console.error(
+          "Missing validation message in API response:",
+          validationData
+        );
       } else {
         let { validationMessage } = validationData;
 
@@ -347,17 +309,24 @@ const TimesheetEntry = ({ projects, tasks }) => {
           toast.success("Daily Activity Saved Successfully!");
         } else {
           // Replace '\r\n' with a new line `<br/>` for proper formatting
-          const formattedMessage = validationMessage.split("\r\n").join("<br/>");
+          const formattedMessage = validationMessage
+            .split("\r\n")
+            .join("<br/>");
 
           // Show red toast for validation errors
           if (
-            !validationData.validationMessage.includes("the Daily Activity will still be saved.")
+            !validationData.validationMessage.includes(
+              "the Daily Activity will still be saved."
+            )
           ) {
             // Handle the case where the message contains the specific string
             // toast.info(validationData.validationMessage);
-            toast.error(<div dangerouslySetInnerHTML={{ __html: formattedMessage }} />, {
-              style: { backgroundColor: "red", color: "white" }
-            });
+            toast.error(
+              <div dangerouslySetInnerHTML={{ __html: formattedMessage }} />,
+              {
+                style: { backgroundColor: "red", color: "white" },
+              }
+            );
           }
         }
       }
@@ -386,21 +355,25 @@ const TimesheetEntry = ({ projects, tasks }) => {
   };
   //ended by parth.G
 
-  console.log("timesheetData.listProjectDetailsEntity", timesheetData);
   const handleSubmitTimesheet1 = async () => {
-    console.log("timesheetData.listProjectDetailsEntity", timesheetData);
     const payload = {
       userID: UserID, // Replace with actual userID value
       weekStartDate: new Date(
-        new Date(timesheetData.listTimesheetEntryHeader[0].weekStartDate).setDate(
-          new Date(timesheetData.listTimesheetEntryHeader[0].weekStartDate).getDate() + 1
+        new Date(
+          timesheetData.listTimesheetEntryHeader[0].weekStartDate
+        ).setDate(
+          new Date(
+            timesheetData.listTimesheetEntryHeader[0].weekStartDate
+          ).getDate() + 1
         )
       ).toISOString(),
       weekEndDate: new Date(
         new Date(timesheetData.listTimesheetEntryHeader[0].weekEndDate).setDate(
-          new Date(timesheetData.listTimesheetEntryHeader[0].weekEndDate).getDate() + 1
+          new Date(
+            timesheetData.listTimesheetEntryHeader[0].weekEndDate
+          ).getDate() + 1
         )
-      ).toISOString()
+      ).toISOString(),
     };
 
     try {
@@ -411,12 +384,10 @@ const TimesheetEntry = ({ projects, tasks }) => {
           headers: {
             Accept: "*/*",
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
-
-      console.log("response.data?.data", response.data);
 
       const validationMessage = response.data?.data?.[0]?.validationMessage;
       const mailEntities = response.data?.data?.listDASendMailEntity;
@@ -431,7 +402,8 @@ const TimesheetEntry = ({ projects, tasks }) => {
       }
       if (mailEntities && mailEntities.length > 0) {
         for (const mail of mailEntities) {
-          const { result, fromEmailID, toEmailID, ccEmailID, subject, body } = mail;
+          const { result, fromEmailID, toEmailID, ccEmailID, subject, body } =
+            mail;
 
           if (result.toLowerCase() === "success" && fromEmailID) {
             toast.success("Timesheet submitted successfully");
@@ -441,10 +413,8 @@ const TimesheetEntry = ({ projects, tasks }) => {
               ccAddress: ccEmailID || "", // Include CC if available
               subject: subject,
               body: body,
-              isHtml: 1
+              isHtml: 1,
             };
-
-            console.log("Sending Email:", requestBody);
 
             await axios.post(
               `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/EmailService/SendMail`,
@@ -452,12 +422,10 @@ const TimesheetEntry = ({ projects, tasks }) => {
               {
                 headers: {
                   Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-                  "Content-Type": "application/json"
-                }
+                  "Content-Type": "application/json",
+                },
               }
             );
-
-            console.log("Email sent successfully!");
           }
         }
       }
@@ -475,16 +443,8 @@ const TimesheetEntry = ({ projects, tasks }) => {
   const handleTabClick = (tabName) => {
     setActiveTab(tabName); // Set active tab based on the button clicked
   };
-  console.log("appliedFilters", appliedFilters);
 
-  useEffect(() => {
-    console.log("Updated previousEfforts in Parent:", previousEfforts);
-  }, [previousEfforts]);
-
-  const setPreviousData = (data) => {
-    // debugger;
-    console.log("checkData", data);
-  };
+  const setPreviousData = (data) => {};
 
   return (
     <section
@@ -529,7 +489,11 @@ const TimesheetEntry = ({ projects, tasks }) => {
       <div className="tab-content" id="TS_entryTabContent">
         {/* Conditionally render content based on active tab */}
         {activeTab === "timesheetEntry" && (
-          <div className="tab-pane ApprTabs fade show active" id="TSEntryTab" role="tabpanel">
+          <div
+            className="tab-pane ApprTabs fade show active"
+            id="TSEntryTab"
+            role="tabpanel"
+          >
             <div className="TimesheetTopSec mb-2">
               <div className="weekly_calender">
                 <TimesheetAccordion
@@ -563,7 +527,10 @@ const TimesheetEntry = ({ projects, tasks }) => {
                               value={searchTerm}
                               onChange={handleSearchChange}
                             />
-                            <button className="btn btn-outline-secondary" type="button">
+                            <button
+                              className="btn btn-outline-secondary"
+                              type="button"
+                            >
                               <FontAwesomeIcon
                                 icon={faSearch}
                                 style={{ fontSize: "16px", cursor: "pointer" }}
@@ -585,7 +552,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
                                 border: "none", // Remove border
                                 marginRight: "10px", // Add margin to the right
                                 position: "relative", // Use position relative to adjust the vertical position
-                                top: "5px" // Move it a little down
+                                top: "5px", // Move it a little down
                               }}
                               onClick={toggleFilters}
                             />
@@ -664,7 +631,9 @@ const TimesheetEntry = ({ projects, tasks }) => {
                             </>
                           )}
 
-                          {["Approved", "Submitted"].includes(topdata.timesheetStatus) && null}
+                          {["Approved", "Submitted"].includes(
+                            topdata.timesheetStatus
+                          ) && null}
                         </div>
                       </div>
 
@@ -677,6 +646,8 @@ const TimesheetEntry = ({ projects, tasks }) => {
                           ref={filterRef}
                           appliedFilters={appliedFilters}
                           setAppliedFilters={setAppliedFilters}
+                          setDate={setDate}
+                          date={date}
                         />
                       </div>
                     )}
@@ -684,112 +655,126 @@ const TimesheetEntry = ({ projects, tasks }) => {
                     <div className="applied-filters mt-3">
                       <h6>Applied Filters:</h6>
                       <div className="d-flex flex-wrap">
-                        {Object.entries(appliedFilters).map(([filterKey, filterValue]) => {
-                          // console.log("alok");
-                          console.log("appliedFilters111", filterKey, filterValue);
-                          // debugger;
+                        {Object.entries(appliedFilters).map(
+                          ([filterKey, filterValue]) => {
+                            if (filterKey === "billable") {
+                              const billableValue = filterValue;
 
-                          if (filterKey === "billable") {
-                            const billableValue = filterValue;
-                            console.log("billableValue", billableValue);
-                            return (
-                              <>
-                                {billableValue != null &&
-                                  billableValue !== "" &&
-                                  billableValue !== undefined && (
-                                    <div
-                                      key={filterKey}
-                                      className="filter-item me-2"
-                                      style={{
-                                        backgroundColor: "#f0f0f0",
-                                        padding: "8px",
-                                        borderRadius: "5px",
-                                        marginBottom: "5px"
-                                      }}
-                                    >
-                                      <span>
-                                        Billable:{" "}
-                                        {billableValue === 0 ? "No" : billableValue ? "Yes" : ""}
-                                      </span>
-                                      <button
-                                        className="btn-close ms-1"
-                                        style={{ fontSize: "0.7rem" }}
-                                        onClick={() => removeFilter(filterKey)} // Removes the specific filter
-                                        aria-label={`Remove ${filterKey} filter`}
-                                      />
-                                    </div>
-                                  )}
-                              </>
-                            );
-                          }
+                              return (
+                                <>
+                                  {billableValue != null &&
+                                    billableValue !== "" &&
+                                    billableValue !== undefined && (
+                                      <div
+                                        key={filterKey}
+                                        className="filter-item me-2"
+                                        style={{
+                                          backgroundColor: "#f0f0f0",
+                                          padding: "8px",
+                                          borderRadius: "5px",
+                                          marginBottom: "5px",
+                                        }}
+                                      >
+                                        <span>
+                                          Billable:{" "}
+                                          {billableValue === 0
+                                            ? "No"
+                                            : billableValue
+                                            ? "Yes"
+                                            : ""}
+                                        </span>
+                                        <button
+                                          className="btn-close ms-1"
+                                          style={{ fontSize: "0.7rem" }}
+                                          onClick={() =>
+                                            removeFilter(filterKey)
+                                          } // Removes the specific filter
+                                          aria-label={`Remove ${filterKey} filter`}
+                                        />
+                                      </div>
+                                    )}
+                                </>
+                              );
+                            }
 
-                          // Handle other filters
-                          if (filterValue && filterValue.length > 0) {
-                            const localStorageKeyMap = {
-                              taskCategories: "taskscategories",
-                              subProject: "subproject",
-                              taskType: "tasktype",
-                              phase: "phase"
-                            };
-                            const localStorageKey = localStorageKeyMap[filterKey] || filterKey;
-                            const storedFilterData =
-                              JSON.parse(localStorage.getItem(localStorageKey)) || [];
-                            const filterNames = Array.isArray(filterValue)
-                              ? filterValue
-                                  .map((id) => {
+                            // Handle other filters
+                            if (filterValue && filterValue.length > 0) {
+                              const localStorageKeyMap = {
+                                taskCategories: "taskscategories",
+                                subProject: "subproject",
+                                taskType: "tasktype",
+                                phase: "phase",
+                              };
+                              const localStorageKey =
+                                localStorageKeyMap[filterKey] || filterKey;
+                              const storedFilterData =
+                                JSON.parse(
+                                  localStorage.getItem(localStorageKey)
+                                ) || [];
+                              const filterNames = Array.isArray(filterValue)
+                                ? filterValue
+                                    .map((id) => {
+                                      const matchedFilter =
+                                        storedFilterData.find(
+                                          (item) =>
+                                            item.id?.toString() ===
+                                            id.toString()
+                                        );
+                                      return matchedFilter
+                                        ? matchedFilter.name ||
+                                            matchedFilter.text
+                                        : ` ${id}`;
+                                    })
+                                    .join(", ")
+                                : (() => {
                                     const matchedFilter = storedFilterData.find(
-                                      (item) => item.id?.toString() === id.toString()
+                                      (item) =>
+                                        item.id?.toString() ===
+                                          filterValue.toString() ||
+                                        item.key?.toString() ===
+                                          filterValue.toString()
                                     );
                                     return matchedFilter
                                       ? matchedFilter.name || matchedFilter.text
-                                      : ` ${id}`;
-                                  })
-                                  .join(", ")
-                              : (() => {
-                                  const matchedFilter = storedFilterData.find(
-                                    (item) =>
-                                      item.id?.toString() === filterValue.toString() ||
-                                      item.key?.toString() === filterValue.toString()
-                                  );
-                                  return matchedFilter
-                                    ? matchedFilter.name || matchedFilter.text
-                                    : `${filterValue}`;
-                                })();
+                                      : `${filterValue}`;
+                                  })();
 
-                            const displayKey =
-                              filterKey === "selectedProject"
-                                ? "Project"
-                                : filterKey === "taskCategories"
-                                ? "Task Categories"
-                                : filterKey === "taskType"
-                                ? "Task Type"
-                                : filterKey.charAt(0).toUpperCase() + filterKey.slice(1);
+                              const displayKey =
+                                filterKey === "selectedProject"
+                                  ? "Project"
+                                  : filterKey === "taskCategories"
+                                  ? "Task Categories"
+                                  : filterKey === "taskType"
+                                  ? "Task Type"
+                                  : filterKey.charAt(0).toUpperCase() +
+                                    filterKey.slice(1);
 
-                            return (
-                              <div
-                                key={filterKey}
-                                className="filter-item me-2"
-                                style={{
-                                  backgroundColor: "#f0f0f0",
-                                  padding: "8px",
-                                  borderRadius: "5px",
-                                  marginBottom: "5px"
-                                }}
-                              >
-                                <span>
-                                  {displayKey}: {filterNames}
-                                </span>
-                                <button
-                                  className="btn-close ms-1"
-                                  style={{ fontSize: "0.7rem" }}
-                                  onClick={() => removeFilter(filterKey)} // Removes the specific filter
-                                  aria-label={`Remove ${filterKey} filter`}
-                                />
-                              </div>
-                            );
+                              return (
+                                <div
+                                  key={filterKey}
+                                  className="filter-item me-2"
+                                  style={{
+                                    backgroundColor: "#f0f0f0",
+                                    padding: "8px",
+                                    borderRadius: "5px",
+                                    marginBottom: "5px",
+                                  }}
+                                >
+                                  <span>
+                                    {displayKey}: {filterNames}
+                                  </span>
+                                  <button
+                                    className="btn-close ms-1"
+                                    style={{ fontSize: "0.7rem" }}
+                                    onClick={() => removeFilter(filterKey)} // Removes the specific filter
+                                    aria-label={`Remove ${filterKey} filter`}
+                                  />
+                                </div>
+                              );
+                            }
+                            return null; // Render nothing if filterValue is empty
                           }
-                          return null; // Render nothing if filterValue is empty
-                        })}
+                        )}
                       </div>
                     </div>
                   </div>
@@ -816,7 +801,7 @@ const TimesheetEntry = ({ projects, tasks }) => {
                   previousEfforts1={previousEfforts1}
                   setPreviousData={setPreviousData}
                   isFetchedPrevvalue={isFetchedPrevvalue}
-                  setisFetchedPrevvalue={setisFetchedPrevvalue}
+                  // setisFetchedPrevvalue={setisFetchedPrevvalue}
                   // clearinitals={}
                 />
                 <TimesheetBottomSec timesheetData={timesheetData} />
@@ -826,9 +811,16 @@ const TimesheetEntry = ({ projects, tasks }) => {
         )}
 
         {activeTab === "myTimesheet" && (
-          <div className="tab-pane ApprTabs fade show active" id="MyTS_ApprTab" role="tabpanel">
+          <div
+            className="tab-pane ApprTabs fade show active"
+            id="MyTS_ApprTab"
+            role="tabpanel"
+          >
             <div className="MyTimesheetContent">
-              <MyTimesheet setActiveTab1={setActiveTab} setNewdate={setNewdate} />
+              <MyTimesheet
+                setActiveTab1={setActiveTab}
+                setNewdate={setNewdate}
+              />
             </div>
           </div>
         )}

@@ -8,6 +8,10 @@ export default function AuthGuard({ children }) {
   const { pathname } = useLocation();
   console.log("AuthGuard", isAuthenticated, isInitialized);
 
+  if (!isInitialized) {
+    return <div>Loading...</div>; // Or a loading spinner
+  }
+
   if (isAuthenticated) {
     return <>{children}</>;
   }

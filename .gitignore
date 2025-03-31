@@ -23,3 +23,14 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+bkup/.env
+src/app/views/Approvals/ChecklistDrawerMobile.jsx.bak
+src/app/views/Approvals/DashboardMobile.jsx.bak
+src/app/views/Approvals/ProjectDrawerMobile.jsx.bak
+src/app/views/Approvals/css/DashBoardMobile.css.bak
+src/app/views/LandingPage/TimesheetDrawerMobile.jsx.bak
+
+src/app/views/Approvals/ChecklistDrawerMobile.jsx.bak
+src/app/views/Approvals/DashboardMobile.jsx.bak
+src/app/views/Approvals/ProjectDrawerMobile.jsx.bak
