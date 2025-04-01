@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }) => {
 
       microsoftTeams.authentication.getAuthToken({
         successCallback: async (result) => {
+          if (sessionStorage.getItem("isLoggedIn")) return;
           setToken(result);
           sessionStorage.setItem("token", result);
 
@@ -155,6 +156,7 @@ export const AuthProvider = ({ children }) => {
               type: "LOGIN",
               payload: { user: userProfileData }
             });
+            sessionStorage.setItem("isLoggedIn", "true");
 
             // Move the toast.success here, to ensure it only happens once per successful Login.
             toast.success("Microsoft login successful");
