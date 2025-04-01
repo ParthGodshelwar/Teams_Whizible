@@ -85,6 +85,10 @@ export const AuthProvider = ({ children }) => {
         toast.error("Teams SDK not initialized. Please reload the app.");
         return;
       }
+      if (state.isAuthenticated || sessionStorage.getItem("isLoggedIn")) {
+        console.log("User is already authenticated, skipping login.");
+        return;
+      }
 
       microsoftTeams.authentication.getAuthToken({
         successCallback: async (result) => {
