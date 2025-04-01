@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [moduleAccess, setModuleAccess] = useState(null);
   const [loading, setLoading] = useState(true); // Added loading state
+  const [teamsInitialized, setTeamsInitialized] = useState(false);
 
   // useEffect(() => {
   //   // Check if user data exists in sessionStorage
