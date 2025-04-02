@@ -3,34 +3,19 @@ import { useEffect, useState } from "react";
 // HOOK
 import useAuth from "app/hooks/useAuth";
 import { CircularProgress, Box } from "@mui/material";
-// CUSTOM COMPONENT
 
 export default function AuthGuard({ children }) {
   const { isAuthenticated, isInitialized } = useAuth();
   const { pathname } = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
-  console.log("AuthGuard", isAuthenticated, isInitialized);
+  const [checkedAuth, setCheckedAuth] = useState(false);
 
   useEffect(() => {
-    // Add a small delay to ensure all auth checks complete
-    // const timer = setTimeout(() => {
-    //   setIsLoading(false);
-    // }, 500);
+    if (isInitialized) {
+      setCheckedAuth(true);
+    }
+  }, [isInitialized]);
 
-    setIsLoading(false);
-
-    // return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-        <CircularProgress size={60} />
-      </Box>
-    );
-  }
-
-  if (!isInitialized) {
+  if (!checkedAuth) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress size={60} />
