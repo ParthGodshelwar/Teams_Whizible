@@ -21,7 +21,8 @@ export default function TeamsInitWrapper({ children }) {
   }, []);
 
   if (!initialized) {
-    return <LoadingPage message="Initializing Teams..." />;
+    // return <LoadingPage message="Initializing Teams..." />;
+    return <div>Loading TIW Load...</div>; // Temporary loading message
   }
 
   if (error) {

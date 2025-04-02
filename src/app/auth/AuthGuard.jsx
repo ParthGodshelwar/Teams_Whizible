@@ -10,7 +10,8 @@ export default function AuthGuard({ children }) {
   console.log("AuthGuard", isAuthenticated, isInitialized);
 
   if (!isInitialized) {
-    return <LoadingPage />; // Show loading spinner while initializing
+    // return <LoadingPage />; // Show loading spinner while initializing
+    return <div>Loading AG....</div>; // Show loading spinner while initializing
   }
 
   if (isAuthenticated) {
