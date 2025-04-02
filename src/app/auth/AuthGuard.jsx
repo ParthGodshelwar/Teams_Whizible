@@ -33,7 +33,7 @@ export default function AuthGuard({ children }) {
     setInitialized(isInitialized);
   }, [isInitialized]);
 
-  if (initialized) {
+  if (!initialized) {
     // return <LoadingPage />; // Show loading spinner while initializing
     return <div>Loading AG11....</div>; // Show loading spinner while initializing
   }
