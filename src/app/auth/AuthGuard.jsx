@@ -1,26 +1,15 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
 // HOOK
 import useAuth from "app/hooks/useAuth";
-import { CircularProgress, Box } from "@mui/material";
+// CUSTOM COMPONENT
 
 export default function AuthGuard({ children }) {
   const { isAuthenticated, isInitialized } = useAuth();
   const { pathname } = useLocation();
-  const [checkedAuth, setCheckedAuth] = useState(false);
+  console.log("AuthGuard", isAuthenticated, isInitialized);
 
-  useEffect(() => {
-    if (isInitialized) {
-      setCheckedAuth(true);
-    }
-  }, [isInitialized]);
-
-  if (!checkedAuth) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-        <CircularProgress size={60} />
-      </Box>
-    );
+  if (!isInitialized) {
+    return <div>Loading...</div>; // Or a loading spinner
   }
 
   if (isAuthenticated) {
