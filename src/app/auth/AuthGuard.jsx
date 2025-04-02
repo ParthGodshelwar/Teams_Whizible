@@ -2,6 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 // HOOK
 import useAuth from "app/hooks/useAuth";
 import LoadingPage from "app/views/LoadingPage";
+import { useEffect } from "react";
 // CUSTOM COMPONENT
 
 export default function AuthGuard({ children }) {
@@ -9,14 +10,25 @@ export default function AuthGuard({ children }) {
   const { pathname } = useLocation();
   console.log("AuthGuard", isAuthenticated, isInitialized);
 
-  if (!isInitialized) {
-    // return <LoadingPage />; // Show loading spinner while initializing
-    return <div>Loading AG....</div>; // Show loading spinner while initializing
-  }
+  useEffect(() => {
+    if (!isInitialized) {
+      // return <LoadingPage />; // Show loading spinner while initializing
+      return <div>Loading AG....</div>; // Show loading spinner while initializing
+    }
 
-  if (isAuthenticated) {
-    return <>{children}</>;
-  }
+    if (isAuthenticated) {
+      return <>{children}</>;
+    }
+  }, [isAuthenticated, isInitialized]);
+
+  // if (!isInitialized) {
+  //   // return <LoadingPage />; // Show loading spinner while initializing
+  //   return <div>Loading AG....</div>; // Show loading spinner while initializing
+  // }
+
+  // if (isAuthenticated) {
+  //   return <>{children}</>;
+  // }
 
   return <Navigate replace to="/signin" state={{ from: pathname }} />;
 }
