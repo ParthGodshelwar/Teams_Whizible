@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useReducer, useState } from "react";
+import React, { createContext, useEffect, useReducer, useState, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { useNavigate } from "react-router-dom";
@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }) => {
   const [moduleAccess, setModuleAccess] = useState(null);
   const [teamsInitialized, setTeamsInitialized] = useState(false);
   const [loading, setLoading] = useState(true);
+  const authInProgress = useRef(false);
 
   useEffect(() => {
     // const user = sessionStorage.getItem("user");
@@ -67,38 +68,27 @@ export const AuthProvider = ({ children }) => {
     // }
 
     const initialize = async () => {
-      try {
-        // First check session storage
-        const user = sessionStorage.getItem("user");
-        const token = sessionStorage.getItem("token");
+      const user = sessionStorage.getItem("user");
+      const token = sessionStorage.getItem("token");
 
-        if (user && token) {
-          dispatch({
-            type: "INIT",
-            payload: { isAuthenticated: true, user: JSON.parse(user) }
-          });
-        } else {
-          dispatch({
-            type: "INIT",
-            payload: { isAuthenticated: false, user: null }
-          });
-
-          // Initialize Teams only if we need to authenticate
-          if (window.parent !== window) {
-            try {
-              await microsoftTeams.app.initialize();
-              setTeamsInitialized(true);
-              handleMicrosoftSignIn(); // Auto-trigger auth flow
-            } catch (teamsError) {
-              console.error("Teams init error:", teamsError);
-              setTeamsInitialized(false);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Initialization error:", error);
-      } finally {
+      if (user && token) {
+        dispatch({
+          type: "INIT",
+          payload: { isAuthenticated: true, user: JSON.parse(user) }
+        });
         setLoading(false);
+        return;
+      }
+
+      dispatch({
+        type: "INIT",
+        payload: { isAuthenticated: false, user: null }
+      });
+      setLoading(false);
+
+      // Only auto-authenticate if in Teams context
+      if (window.parent !== window) {
+        handleMicrosoftSignIn();
       }
     };
 
@@ -119,6 +109,8 @@ export const AuthProvider = ({ children }) => {
   // }, []);
 
   const handleMicrosoftSignIn = async () => {
+    if (authInProgress.current) return; // Prevent multiple auth attempts
+    authInProgress.current = true;
     try {
       // if (!teamsInitialized) {
       //   toast.error("Teams SDK not initialized. Please reload the app.");
@@ -127,11 +119,6 @@ export const AuthProvider = ({ children }) => {
 
       if (state.isAuthenticated || sessionStorage.getItem("isLoggedIn")) {
         console.log("User is already authenticated, skipping login.");
-        return;
-      }
-
-      if (window.parent === window) {
-        navigate("/signin");
         return;
       }
 
@@ -212,14 +199,19 @@ export const AuthProvider = ({ children }) => {
               payload: { user: userProfileData }
             });
             sessionStorage.setItem("isLoggedIn", "true");
+            if (!state.isAuthenticated) {
+              toast.success("Microsoft login successful");
+            }
 
             // Move the toast.success here, to ensure it only happens once per successful Login.
-            toast.success("Microsoft login successful");
+            // toast.success("Microsoft login successful");
             navigate("/landingpage");
           } catch (apiError) {
             setError("Error calling API: " + apiError.message);
             sessionStorage.clear();
             toast.error("An error occurred during login. Please try again.");
+          } finally {
+            authInProgress.current = false;
           }
         },
         failureCallback: (error) => {
