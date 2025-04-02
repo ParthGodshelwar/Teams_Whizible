@@ -1831,6 +1831,15 @@ table thead th {
     --bs-offcanvas-height: 85%;
 }
 
+.offcanvasHeight-75 {
+    --bs-offcanvas-height: 75%;
+}
+
+.box_shodow{
+    margin: 6px;
+    border-radius: 10px;
+    box-shadow: 0 0 0.9rem #9d9d9f;
+}
 .offcanvasGreyBG {
     background-color: #f3f3f3;
 }

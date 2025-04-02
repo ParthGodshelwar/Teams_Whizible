@@ -150,11 +150,11 @@ const TimesheetEntryTab = ({ timesheetdate = "" }) => {
           />
 
           {/* Week Total | Expected Hours */}
-          <div className="d-flex justify-content-end align-items-center text_red">
-            <span className="fw-500">
-              Week Total | Expected Hours -{" "}
-              <i className="fa-regular fa-clock" /> {topdata.weekActualHours} |{" "}
-              {topdata.weekExpectedHours}
+          <div className="d-flex justify-content-end align-items-center fw-500">
+            Week Total | Expected Hours -&nbsp;
+            <span className="fw-500 text_red">
+              <i className="fa-regular fa-clock " /> {""}
+              {topdata.weekActualHours} | {topdata.weekExpectedHours}
             </span>
           </div>
 

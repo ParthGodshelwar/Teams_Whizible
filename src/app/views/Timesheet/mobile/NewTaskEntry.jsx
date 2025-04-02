@@ -476,7 +476,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
 
       {isDrawerOpen && (
         <div
-          className="offcanvas offcanvas-bottom offcanvasHeight-85 show"
+          className="offcanvas offcanvas-bottom offcanvasHeight-75 box_shodow show mb-3"
           style={{ overflowY: "hidden" }}
         >
           <div className="offcanvas-body" style={{ overflowY: "hidden" }}>
@@ -672,7 +672,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                             </div>
                           )}
 
-                          {/* Task details Tooltip */}                         
+                          {/* Task details Tooltip */}
 
                           {isCalloutVisible && (
                             <Callout
@@ -891,13 +891,15 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                         <label className="col-sm-4 text-start required mt-2">
                           Efforts
                         </label>
-                        <div className="col-sm-3">
+                        <div className="col-sm-3 col-4">
                           <input
                             type="text"
                             className="form-control text-center"
                             value={efforts}
                             onChange={handleEffortsChange}
-                            placeholder="00:00"
+                            placeholder="HH:MM"
+                            rows="3"
+                            style={{ height: "150%" }}
                           />
                         </div>
                       </div>
@@ -907,7 +909,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                         <label className="col-sm-4 text-start  mt-2">
                           Description
                         </label>
-                        <div className="col-sm-7">
+                        <div className="col-sm-7 pb-3 mb-3 ">
                           <textarea
                             className="form-control"
                             rows="3"

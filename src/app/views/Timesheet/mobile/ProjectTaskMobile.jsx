@@ -54,6 +54,7 @@ const ProjectTaskMobile = ({
   const [currentTaskID, setCurrentTaskID] = useState(null); // Tracks current task for tooltip
   const [fetchedTaskDetails, setFetchedTaskDetails] = useState(null);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   // const [effortValues, setEffortValues] = useState({});
   // const [defulttasks, setDefaultTasks] = useState([]);
   const [tasks, setTasks] = useState([
@@ -456,7 +457,7 @@ const ProjectTaskMobile = ({
   }, [selectedDate, , refresh]);
 
   const selectedDate1 = moment(selectedDate);
-  const formattedDate = selectedDate1.format("dddd, DD MMM YYYY");
+  const formattedDate = selectedDate1.format("ddd, DD MMM YYYY");
   // console.log("SelectedDate",selectedDate )
 
   const getCurrentDate = () => {
@@ -533,6 +534,7 @@ const ProjectTaskMobile = ({
 
     const fetchTimesheetData = async (filterData) => {
       try {
+        setLoading(true); // Start loading
         var fdate = await formatDateToISO(selectedDate);
 
         const constructRequestBody = () => {
@@ -645,6 +647,8 @@ const ProjectTaskMobile = ({
         // setTimesheetData(data); // Assuming setTimesheetData is a valid state setter
       } catch (error) {
         console.error("Error fetching timesheet data:", error);
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
     setTimeout(() => {
@@ -1184,213 +1188,245 @@ const ProjectTaskMobile = ({
           </div>
         </div>
 
-        {/* Timesheet Details */}
-        {/* kam baki hai */}
-        <div
-          className="TS_ProjTask_Card mb-3"
-          style={{ height: "calc(100vh - 240px)", overflow: "auto" }}
-        >
-          <div className="d-flex justify-content-between align-items-center">
-            <h6 className="txt_Blue text-center">
-              <FaCalendar /> <span>{`${formattedDate}`}</span>
-              {/* <FaCalendar /> <span>Tuesday, 14 Jan 2025</span> */}
-            </h6>
+        {/* {loading && <div className="spinner-border text-primary" role="status"><span className="sr-only">Loading...</span></div>} */}
 
-            <h6 className="txt_Blue text-center">
-              T Status - {topdata.timesheetStatus}
-              {/* <FaCalendar /> <span>Tuesday, 14 Jan 2025</span> */}
-            </h6>
-          </div>
-
-          {/* Accordion */}
+        {loading ? (
           <div
-            className="accordion"
-            id="AccordionProjTaskMob"
-            // style={{ height: "255px", overflow: "auto" }}
-            // style={{ overflow: "auto" }}
+            className="d-flex justify-content-center "
+            style={{ height: "100vh" }}
           >
-            {timesheetData?.listProjectDetailsEntity?.map((proj, index) => {
-              var colourData =
-                projects.find((project) => project?.days === `Day${dayNumber}`)
-                  ?.dayType || "";
+            <div className="spinner-border text-primary" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="TS_ProjTask_Card mb-3"
+            style={{ height: "calc(100vh - 240px)", overflow: "auto" }}
+          >
+            <div className="d-flex justify-content-between align-items-center">
+              <h6 className="txt_Blue text-center">
+                <FaCalendar /> <span>{`${formattedDate}`}</span>
+                {/* <FaCalendar /> <span>Tuesday, 14 Jan 2025</span> */}
+              </h6>
 
-              let className = "orange";
-              if (colourData === "WeekEnd") {
-                className = "Grey";
-              } else if (colourData == "Leave") {
-                className = "Blue";
-              } else if (colourData == "Holiday") {
-                className = "SkyBlue";
-              }
+              <h6 className="txt_Blue text-center">
+                T-Status - {topdata.timesheetStatus}
+                {/* <FaCalendar /> <span>Tuesday, 14 Jan 2025</span> */}
+              </h6>
+            </div>
 
-              return (
-                proj?.listTaskDetailsEntity?.length == 0 || (
-                  <div
-                    // className="accordion-item  accordion_projTaskMob_orange mb-3"
-                    className={`accordion-item  accordion_projTaskMob_${className} mb-3`}
-                    key={index}
-                  >
-                    <h2 className="accordion-header">
-                      <button
-                        className={`accordion-button ${
-                          activeIndex === index ? "" : "collapsed"
-                        }`}
-                        type="button"
-                        onClick={() => handleToggle(index)}
-                        aria-expanded={activeIndex === index ? "true" : "false"}
-                        aria-controls={`collapseProject${index}_Mob`}
-                      >
-                        <div className="flex-1 pe-2">
-                          <div className="d-flex justify-content-between align-items-end">
-                            <span>{proj.projectName}</span>
-                            <label className="text_pink fw-500">
-                              Actual Hours - {proj.projectWeekEfforts}
-                            </label>
-                          </div>
-                          <div className="row gx-1">
-                            <div className="col-4">
-                              <div className="projDetlsMob">
-                                <div>Start Date: </div>
-                                <div>{proj.assignmentStartDate}</div>
-                              </div>
-                            </div>
-                            <div className="col-4">
-                              <div className="projDetlsMob">
-                                <div>End Date: </div>
-                                <div>{proj.assignmentEndDate}</div>
-                              </div>
-                            </div>
-                            <div className="col-4">
-                              <div className="projDetlsMob">
-                                <div>% Allocation: </div>
-                                <div>{proj.resourcePercentage}</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </button>
-                    </h2>
+            {/* Accordion */}
+            <div
+              className="accordion"
+              id="AccordionProjTaskMob"
+              // style={{ height: "255px", overflow: "auto" }}
+              // style={{ overflow: "auto" }}
+            >
+              {timesheetData?.listProjectDetailsEntity?.map((proj, index) => {
+                var colourData =
+                  projects.find(
+                    (project) => project?.days === `Day${dayNumber}`
+                  )?.dayType || "";
+
+                let className = "orange";
+                if (colourData === "WeekEnd") {
+                  className = "Grey";
+                } else if (colourData == "Leave") {
+                  className = "Blue";
+                } else if (colourData == "Holiday") {
+                  className = "SkyBlue";
+                }
+
+                return (
+                  proj?.listTaskDetailsEntity?.length == 0 || (
                     <div
-                      id={`collapseProject${index}_Mob`}
-                      className={`accordion-collapse collapse ${
-                        activeIndex === index ? "show" : ""
-                      }`}
+                      // className="accordion-item  accordion_projTaskMob_orange mb-3"
+                      className={`accordion-item  accordion_projTaskMob_${className} mb-3`}
+                      key={index}
                     >
-                      <div className="accordion-body">
-                        <ul className="list-unstyled mb-0">
-                          {proj.listTaskDetailsEntity?.map((task, tIndex) => {
-                            const selectedDateFormatted =
-                              moment(selectedDate).format("DD MMM YYYY");
-                            const dayIndex = dayNumber;
+                      <h2 className="accordion-header">
+                        <button
+                          className={`accordion-button ${
+                            activeIndex === index ? "" : "collapsed"
+                          }`}
+                          type="button"
+                          onClick={() => handleToggle(index)}
+                          aria-expanded={
+                            activeIndex === index ? "true" : "false"
+                          }
+                          aria-controls={`collapseProject${index}_Mob`}
+                        >
+                          <div className="flex-1 pe-2">
+                            {/* <div className="d-flex justify-content-between align-items-end"> */}
+                            <div className="row mb-3">
+                              <div
+                                className="col-7"
+                                style={{ lineHeight: "1.2" }}
+                              >
+                                <span>{proj.projectName}</span>
+                              </div>
+                              <div className="col-5">
+                                <label className="text_pink fw-500">
+                                  Actual Hours -&nbsp;
+                                </label>
+                                <label className=" fw-500">
+                                  {proj.projectWeekEfforts}
+                                </label>
+                              </div>
+                            </div>
+                            <div className="row gx-1">
+                              <div className="col-4">
+                                <div className="projDetlsMob text-center">
+                                  <div className="text_pink">Start Date: </div>
+                                  <div className="fw-500">
+                                    {proj.assignmentStartDate}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-4">
+                                <div className="projDetlsMob text-center">
+                                  <div className="text_pink">End Date: </div>
+                                  <div className="fw-500">
+                                    {proj.assignmentEndDate}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-4">
+                                <div className="projDetlsMob text-center">
+                                  <div className="text_pink ">
+                                    % Allocation:{" "}
+                                  </div>
+                                  <div className="fw-500">
+                                    {proj.resourcePercentage}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      </h2>
+                      <div
+                        id={`collapseProject${index}_Mob`}
+                        className={`accordion-collapse collapse ${
+                          activeIndex === index ? "show" : ""
+                        }`}
+                      >
+                        <div className="accordion-body">
+                          <ul className="list-unstyled mb-0">
+                            {proj.listTaskDetailsEntity?.map((task, tIndex) => {
+                              const selectedDateFormatted =
+                                moment(selectedDate).format("DD MMM YYYY");
+                              const dayIndex = dayNumber;
 
-                            if (dayIndex === -1) return null;
+                              if (dayIndex === -1) return null;
 
-                            const effortKey = `dayEfforst${dayIndex}`;
-                            const daTypetKey = `daTypet${dayIndex}`;
-                            const descriptionKey = `descriptiont${dayIndex}`;
-                            const timesheetStatusKey = `timesheetStatusFlag${dayIndex}`;
-                            const resourceTimesheetIDKey = `resourceTimesheetID${dayIndex}`;
+                              const effortKey = `dayEfforst${dayIndex}`;
+                              const daTypetKey = `daTypet${dayIndex}`;
+                              const descriptionKey = `descriptiont${dayIndex}`;
+                              const timesheetStatusKey = `timesheetStatusFlag${dayIndex}`;
+                              const resourceTimesheetIDKey = `resourceTimesheetID${dayIndex}`;
 
-                            const effortValue = task[effortKey] || "00:00";
-                            const daTypet = task[daTypetKey] || "";
-                            const description = task[descriptionKey] || "";
-                            const timesheetStatusFlag =
-                              task[timesheetStatusKey] || "";
-                            const resourceTimesheetID =
-                              task[resourceTimesheetIDKey] || 0;
+                              const effortValue = task[effortKey] || "00:00";
+                              const daTypet = task[daTypetKey] || "";
+                              const description = task[descriptionKey] || "";
+                              const timesheetStatusFlag =
+                                task[timesheetStatusKey] || "";
+                              const resourceTimesheetID =
+                                task[resourceTimesheetIDKey] || 0;
 
-                            return (
-                              <li className="mb-2" key={tIndex}>
-                                <div className="row align-items-center">
-                                  <div className="col-6 d-flex justify-content-between">
-                                    <span className="taskTxt_mob">
-                                      {task.taskName}
-                                    </span>
+                              return (
+                                <li className="mb-2" key={tIndex}>
+                                  <div className="row align-items-center">
+                                    <div className="col-6 d-flex justify-content-between">
+                                      <span className="taskTxt_mob">
+                                        {task.taskName}
+                                      </span>
 
-                                    {/* kam */}
-                                    <div>
-                                      <Tooltip
-                                        title={
-                                          fetchedTaskDetails &&
-                                          currentTaskID === task.taskID ? (
-                                            <div style={{ width: "210px" }}>
-                                              <div className="row">
-                                                <div className="col-6 col-sm-12 text-end">
-                                                  Start Date :
+                                      {/* kam */}
+                                      <div>
+                                        <Tooltip
+                                          title={
+                                            fetchedTaskDetails &&
+                                            currentTaskID === task.taskID ? (
+                                              <div style={{ width: "210px" }}>
+                                                <div className="row">
+                                                  <div className="col-6 col-sm-12 text-end">
+                                                    Start Date :
+                                                  </div>
+                                                  <div className="col-6 col-sm-12">
+                                                    {fetchedTaskDetails?.startDate
+                                                      ? fetchedTaskDetails.startDate
+                                                      : "N/A"}
+                                                  </div>
                                                 </div>
-                                                <div className="col-6 col-sm-12">
-                                                  {fetchedTaskDetails?.startDate
-                                                    ? fetchedTaskDetails.startDate
-                                                    : "N/A"}
+                                                <div className="row">
+                                                  <div className="col-6 col-sm-12 text-end">
+                                                    End Date :
+                                                  </div>
+                                                  <div className="col-6 col-sm-12">
+                                                    {fetchedTaskDetails?.endDate
+                                                      ? fetchedTaskDetails.endDate
+                                                      : "N/A"}
+                                                  </div>
+                                                </div>
+                                                <div className="row">
+                                                  <div className="col-6 col-sm-4 text-end">
+                                                    Allocated Hours :
+                                                  </div>
+                                                  <div className="col-6 col-sm-8">
+                                                    {fetchedTaskDetails?.allocatedHrs ||
+                                                      "N/A"}
+                                                  </div>
+                                                </div>
+                                                <div className="row">
+                                                  <div className="col-6 col-sm-4 text-end">
+                                                    Actual Effort :
+                                                  </div>
+                                                  <div className="col-6 col-sm-8">
+                                                    {fetchedTaskDetails?.actualHrs ||
+                                                      "N/A"}
+                                                  </div>
                                                 </div>
                                               </div>
-                                              <div className="row">
-                                                <div className="col-6 col-sm-12 text-end">
-                                                  End Date :
-                                                </div>
-                                                <div className="col-6 col-sm-12">
-                                                  {fetchedTaskDetails?.endDate
-                                                    ? fetchedTaskDetails.endDate
-                                                    : "N/A"}
-                                                </div>
-                                              </div>
-                                              <div className="row">
-                                                <div className="col-6 col-sm-4 text-end">
-                                                  Allocated Hours :
-                                                </div>
-                                                <div className="col-6 col-sm-8">
-                                                  {fetchedTaskDetails?.allocatedHrs ||
-                                                    "N/A"}
-                                                </div>
-                                              </div>
-                                              <div className="row">
-                                                <div className="col-6 col-sm-4 text-end">
-                                                  Actual Effort :
-                                                </div>
-                                                <div className="col-6 col-sm-8">
-                                                  {fetchedTaskDetails?.actualHrs ||
-                                                    "N/A"}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          ) : (
-                                            ""
-                                          )
-                                        }
-                                        // onOpen={() => {
-                                        //   setCurrentTaskID(task.taskID);
-                                        //   fetchTaskDetails(task.taskID);
-                                        // }}
-                                        open={open}
-                                        onClose={handleTooltipClose}
-                                        disableHoverListener
-                                      >
-                                        <span
-                                          className="infoIconWrapper"
-                                          style={{ cursor: "pointer" }}
-                                          // onMouseDown={handleTooltipOpen} // Handles press on desktops
-                                          onMouseDown={() => {
-                                            setCurrentTaskID(task.taskID);
-                                            fetchTaskDetails(task.taskID);
-                                            setOpen(true);
-                                          }} // Handles press on desktops
-                                          // onTouchStart={handleTooltipOpen} // Handles press on mobile
-                                          onTouchStart={() => {
-                                            setCurrentTaskID(task.taskID);
-                                            fetchTaskDetails(task.taskID);
-                                            setOpen(true);
-                                          }}
-                                          // onMouseUp={handleTooltipClose} // Close on release (Desktop)
-                                          // onTouchEnd={handleTooltipClose} // Close on release (Mobile)
+                                            ) : (
+                                              ""
+                                            )
+                                          }
+                                          // onOpen={() => {
+                                          //   setCurrentTaskID(task.taskID);
+                                          //   fetchTaskDetails(task.taskID);
+                                          // }}
+                                          open={open}
+                                          onClose={handleTooltipClose}
+                                          disableHoverListener
                                         >
-                                          <FontAwesomeIcon
-                                            icon={faInfoCircle}
-                                            style={{ color: "#007bff" }}
-                                          />
-                                        </span>
-                                      </Tooltip>
-                                    </div>
-                                    {/* <div style={{
+                                          <span
+                                            className="infoIconWrapper"
+                                            style={{ cursor: "pointer" }}
+                                            // onMouseDown={handleTooltipOpen} // Handles press on desktops
+                                            onMouseDown={() => {
+                                              setCurrentTaskID(task.taskID);
+                                              fetchTaskDetails(task.taskID);
+                                              setOpen(true);
+                                            }} // Handles press on desktops
+                                            // onTouchStart={handleTooltipOpen} // Handles press on mobile
+                                            onTouchStart={() => {
+                                              setCurrentTaskID(task.taskID);
+                                              fetchTaskDetails(task.taskID);
+                                              setOpen(true);
+                                            }}
+                                            // onMouseUp={handleTooltipClose} // Close on release (Desktop)
+                                            // onTouchEnd={handleTooltipClose} // Close on release (Mobile)
+                                          >
+                                            <FontAwesomeIcon
+                                              icon={faInfoCircle}
+                                              style={{ color: "#007bff" }}
+                                            />
+                                          </span>
+                                        </Tooltip>
+                                      </div>
+                                      {/* <div style={{
                                           position: "relative"}}>
                                       <div
                                         ref={iconRef}
@@ -1480,88 +1516,203 @@ const ProjectTaskMobile = ({
                                       )}
                                     </div> */}
 
-                                    {/* kam */}
-                                  </div>
-                                  <div className="col-4">
-                                    <input
-                                      type="text"
-                                      disabled={
-                                        task.isTaskComplete ||
-                                        task.isVoid ||
-                                        timesheetStatusFlag === "R" ||
-                                        timesheetStatusFlag === "V"
-                                      }
-                                      // value={effortValue}
-                                      value={
-                                        intermediateValues[
-                                          `${task.taskID}-${dayIndex}`
-                                        ] ||
-                                        effortValue ||
-                                        "N/A"
-                                      }
-                                      onChange={(e) => {
-                                        setIntermediateValues((prev) => ({
-                                          ...prev,
-                                          [`${task.taskID}-${dayIndex}`]:
-                                            e.target.value,
-                                        }));
-                                      }}
-                                      onBlur={(e) =>
-                                        handleSaveEdit(
-                                          e,
-                                          task.taskID,
-                                          dayIndex,
-                                          e.target.value
-                                        )
-                                      }
-                                      className="form-control edtTimeInputMob"
-                                      // onChange={(e) =>
-                                      //   handleEffortChange(
-                                      //     index,
-                                      //     tIndex,
-                                      //     selectedDateFormatted,
-                                      //     e.target.value
-                                      //   )
-                                      // }
-                                    />
-                                  </div>
-                                  <div className="col-2 d-flex justify-content-center">
-                                    {/* Replace this div with FontAwesomeIcon */}
-                                    <div className="col-sm-3 ps-0">
-                                      {task[`dayEfforst${dayIndex}`] !==
-                                        "00:00" && (
-                                        // {true && (
-                                        <FontAwesomeIcon
-                                          icon={faInfoCircle}
-                                          style={{
-                                            cursor: "pointer",
-                                            color: "#007bff",
-                                          }}
-                                          onClick={() =>
-                                            handleShowDaTypeModal({
-                                              dayIndex,
-                                              task,
-                                              projectId: task.taskID,
-                                            })
-                                          }
-                                        />
-                                      )}
+                                      {/* kam */}
                                     </div>
-                                    {/* <div className="">Icon</div> */}
+                                    <div className="col-4">
+                                      <input
+                                        type="text"
+                                        disabled={
+                                          task.isTaskComplete ||
+                                          task.isVoid ||
+                                          timesheetStatusFlag === "R" ||
+                                          timesheetStatusFlag === "V"
+                                        }
+                                        // value={effortValue}
+                                        // value={
+                                        //   intermediateValues[
+                                        //     `${task.taskID}-${dayIndex}`
+                                        //   ] ||
+                                        //   effortValue ||
+                                        //   "N/A"
+                                        // }
+                                        value={
+                                          intermediateValues[
+                                            `${task.taskID}-${dayIndex}`
+                                          ] ??
+                                          effortValue ??
+                                          "00:00"
+                                        }
+                                        // pending for efforts value change
+                                        onChange={(e) => {
+                                          let value = e.target.value.replace(
+                                            /\D/g,
+                                            ""
+                                          ); // Remove non-numeric characters
+
+                                          if (value === "") {
+                                            // Allow empty value
+                                            setIntermediateValues((prev) => ({
+                                              ...prev,
+                                              [`${task.taskID}-${dayIndex}`]:
+                                                "",
+                                            }));
+                                            return;
+                                          }
+
+                                          // Automatically add colon after 2 digits
+                                          if (value.length > 2) {
+                                            value =
+                                              value.substring(0, 2) +
+                                              ":" +
+                                              value.substring(2, 4);
+                                          }
+
+                                          // Limit the value to 5 characters (hh:mm)
+                                          if (value.length > 5) {
+                                            value = value.substring(0, 5);
+                                          }
+
+                                          // Ensure hours are in the valid 24-hour range (00-23)
+                                          if (value.length >= 3) {
+                                            const hours = parseInt(
+                                              value.substring(0, 2),
+                                              10
+                                            );
+                                            if (hours > 23) {
+                                              value = "23" + value.substring(2);
+                                            }
+                                          }
+
+                                          // Ensure minutes are in the valid range (00-59)
+                                          if (value.length === 5) {
+                                            const minutes = parseInt(
+                                              value.substring(3),
+                                              10
+                                            );
+                                            if (minutes > 59) {
+                                              value =
+                                                value.substring(0, 3) + "59";
+                                            }
+                                          }
+
+                                          setIntermediateValues((prev) => ({
+                                            ...prev,
+                                            [`${task.taskID}-${dayIndex}`]:
+                                              value,
+                                          }));
+                                        }}
+                                        onBlur={(e) => {
+                                          var value = e.target.value.trim();
+                                          // if (value === "") {
+                                          //   value = "00:00";
+                                          // }
+                                          if (value === "") {
+                                            value = "00:00"; // If empty, set to "00:00"
+                                          } else if (value.length === 1) {
+                                            value = `0${value}:00`; // Convert "4" → "04:00"
+                                          } else if (value.length === 2) {
+                                            value = `${value}:00`; // Convert "12" → "12:00"
+                                          }
+                                          // else if (value.length === 3) {
+                                          //   value = `${value.substring(
+                                          //     0,
+                                          //     2
+                                          //   )}:0${value.substring(2)}`; // Convert "123" → "12:03"
+                                          // } else if (value.length === 4) {
+                                          //   value = `${value.substring(
+                                          //     0,
+                                          //     2
+                                          //   )}:${value.substring(2)}`; // Convert "1234" → "12:34"
+                                          // }
+
+                                          if (
+                                            value.length === 4 &&
+                                            value.includes(":")
+                                          ) {
+                                            value =
+                                              value.substring(0, 3) +
+                                              value.substring(3) +
+                                              "0";
+                                          }
+
+                                          // Ensure hours are in the valid 24-hour range (00-23)
+                                          let hours = parseInt(
+                                            value.substring(0, 2),
+                                            10
+                                          );
+                                          if (hours > 23) {
+                                            value = "23" + value.substring(2);
+                                          }
+
+                                          // Ensure minutes are in the valid range (00-59)
+                                          let minutes = parseInt(
+                                            value.substring(3),
+                                            10
+                                          );
+                                          if (minutes > 59) {
+                                            value =
+                                              value.substring(0, 3) + "59";
+                                          }
+
+                                          handleSaveEdit(
+                                            e,
+                                            task.taskID,
+                                            dayIndex,
+                                            value
+                                          );
+                                        }}
+                                        className="form-control edtTimeInputMob"
+                                        // onChange={(e) =>
+                                        //   handleEffortChange(
+                                        //     index,
+                                        //     tIndex,
+                                        //     selectedDateFormatted,
+                                        //     e.target.value
+                                        //   )
+                                        // }
+                                      />
+                                    </div>
+                                    <div className="col-2 d-flex justify-content-center">
+                                      {/* Replace this div with FontAwesomeIcon */}
+                                      <div className="col-sm-3 ps-0">
+                                        {task[`dayEfforst${dayIndex}`] !==
+                                          "00:00" && (
+                                          // {true && (
+                                          <FontAwesomeIcon
+                                            icon={faInfoCircle}
+                                            style={{
+                                              cursor: "pointer",
+                                              color: "#007bff",
+                                            }}
+                                            onClick={() =>
+                                              handleShowDaTypeModal({
+                                                dayIndex,
+                                                task,
+                                                projectId: task.taskID,
+                                              })
+                                            }
+                                          />
+                                        )}
+                                      </div>
+                                      {/* <div className="">Icon</div> */}
+                                    </div>
                                   </div>
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              );
-            })}
+                  )
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Timesheet Details */}
+        {/* kam baki hai */}
       </div>
 
       <Modal show={showDaTypeModal} onHide={handleCloseDaTypeModal} centered>

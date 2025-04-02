@@ -13,7 +13,6 @@ import { AuthProvider } from "./contexts/JWTAuthContext";
 import SettingsProvider from "./contexts/SettingsContext";
 // ROUTES
 import routes from "./routes";
-import TeamsInitWrapper from "./TeamsInitWrapper";
 // FAKE SERVER
 import "../fake-db";
 
@@ -36,16 +35,14 @@ const App = () => {
   }, [navigate]);
 
   return (
-    <TeamsInitWrapper>
-      <SettingsProvider>
-        <AuthProvider>
-          <WhizTheme>
-            <CssBaseline />
-            {content}
-          </WhizTheme>
-        </AuthProvider>
-      </SettingsProvider>
-    </TeamsInitWrapper>
+    <SettingsProvider>
+      <AuthProvider>
+        <WhizTheme>
+          <CssBaseline />
+          {content}
+        </WhizTheme>
+      </AuthProvider>
+    </SettingsProvider>
   );
 };
 

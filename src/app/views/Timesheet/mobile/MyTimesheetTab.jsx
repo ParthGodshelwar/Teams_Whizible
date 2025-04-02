@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ApprovedTimesheet from "./ApprovedTimesheet";
 import RejectedTimesheet from "./RejectedTimesheet";
 import SubmittedTimesheet from "./SubmittedTimesheet";
@@ -432,7 +432,7 @@ const MyTimesheetTab = ({}) => {
       {/*Details Drawer */}
       {isDrawerOpen && selectedTimesheet && (
         <div
-          className="offcanvas offcanvas-bottom offcanvasHeight-85 show"
+          className="offcanvas offcanvas-bottom offcanvasHeight-75 show box_shodow"
           style={{ display: "block", overflowY: "auto" }}
         >
           <div className="offcanvas-body">
@@ -451,8 +451,8 @@ const MyTimesheetTab = ({}) => {
       {/* History Drawer */}
       {isHistoryDrawerOpen && timesheetHistory && (
         <div
-          className="offcanvas offcanvas-bottom offcanvasHeight-85 show d-flex flex-column"
-          style={{ display: "block", height: "85vh" }}
+          className="offcanvas offcanvas-bottom offcanvasHeight-75 box_shodow show d-flex flex-column"
+          style={{ display: "block", height: "75vh" }}
         >
           <div className="offcanvas-body d-flex flex-column pt-0">
             <div className="TimesheetEntryDetlsSec d-flex flex-column flex-grow-1">
@@ -479,7 +479,7 @@ const MyTimesheetTab = ({}) => {
                       key={index}
                     >
                       <div className="card-body p-4">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
+                        {/* <div className="d-flex justify-content-between align-items-center mb-3">
                           <span
                             className={`badge ${getStatusBadgeClass(
                               history.statusDescription
@@ -487,6 +487,12 @@ const MyTimesheetTab = ({}) => {
                           >
                             {history.statusDescription}
                           </span>
+                        </div> */}
+                        <div className="mb-2">
+                          <small className="text-muted">Status:</small>
+                          <p className="mb-0 font-weight-bold">
+                            {history.statusDescription}
+                          </p>
                         </div>
 
                         <div className="mb-2">

@@ -4618,9 +4618,15 @@ html body table tr td.ui-datepicker-current-day a.ui-state-default.ui-priority-s
     border-radius: 5px;
   }
   
-  .selected-date {
-    background-color: #0078d4; /* Fluent UI Primary Blue */
+  /* .selected-date {
+    background-color: #0078d4; 
     color: white;
+  } */
+  .selected-date .TS_Date {
+    background-color: #f9e892;
+    display: inline-block;
+    padding: 0 5px;
+    border-radius: 50%;
   }
   
   .text_red {
