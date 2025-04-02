@@ -51,8 +51,8 @@ const AuthContext = createContext({
   ...initialState,
   login: () => {},
   logout: () => {},
-  register: () => {},
-  handleMicrosoftSignIn: () => {}
+  register: () => {}
+  // handleMicrosoftSignIn: () => {}
 });
 
 export const AuthProvider = ({ children }) => {

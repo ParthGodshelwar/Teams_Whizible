@@ -10,25 +10,25 @@ export default function AuthGuard({ children }) {
   const { pathname } = useLocation();
   console.log("AuthGuard", isAuthenticated, isInitialized);
 
-  useEffect(() => {
-    if (!isInitialized) {
-      // return <LoadingPage />; // Show loading spinner while initializing
-      return <div>Loading AG....</div>; // Show loading spinner while initializing
-    }
+  // useEffect(() => {
+  //   if (!isInitialized) {
+  //     // return <LoadingPage />; // Show loading spinner while initializing
+  //     return <div>Loading AG....</div>; // Show loading spinner while initializing
+  //   }
 
-    if (isAuthenticated) {
-      return <>{children}</>;
-    }
-  }, [isAuthenticated, isInitialized]);
+  //   if (isAuthenticated) {
+  //     return <>{children}</>;
+  //   }
+  // }, [isAuthenticated, isInitialized]);
 
-  // if (!isInitialized) {
-  //   // return <LoadingPage />; // Show loading spinner while initializing
-  //   return <div>Loading AG....</div>; // Show loading spinner while initializing
-  // }
+  if (!isInitialized) {
+    // return <LoadingPage />; // Show loading spinner while initializing
+    return <div>Loading AG....</div>; // Show loading spinner while initializing
+  }
 
-  // if (isAuthenticated) {
-  //   return <>{children}</>;
-  // }
+  if (isAuthenticated) {
+    return <>{children}</>;
+  }
 
   return <Navigate replace to="/signin" state={{ from: pathname }} />;
 }
