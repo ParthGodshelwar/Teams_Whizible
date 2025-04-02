@@ -48,46 +48,97 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [moduleAccess, setModuleAccess] = useState(null);
   const [teamsInitialized, setTeamsInitialized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = sessionStorage.getItem("user");
-    const token = sessionStorage.getItem("token");
+    // const user = sessionStorage.getItem("user");
+    // const token = sessionStorage.getItem("token");
 
-    if (user && token) {
-      dispatch({
-        type: "INIT",
-        payload: { isAuthenticated: true, user: JSON.parse(user) }
-      });
-    } else {
-      dispatch({
-        type: "INIT",
-        payload: { isAuthenticated: false, user: null }
-      });
-    }
-  }, []);
+    // if (user && token) {
+    //   dispatch({
+    //     type: "INIT",
+    //     payload: { isAuthenticated: true, user: JSON.parse(user) }
+    //   });
+    // } else {
+    //   dispatch({
+    //     type: "INIT",
+    //     payload: { isAuthenticated: false, user: null }
+    //   });
+    // }
 
-  useEffect(() => {
-    const initializeTeams = async () => {
+    const initialize = async () => {
       try {
-        await microsoftTeams.app.initialize();
-        console.log("Teams SDK initialized");
-        setTeamsInitialized(true);
-      } catch (err) {
-        console.error("Failed to initialize Teams SDK:", err);
+        // First check session storage
+        const user = sessionStorage.getItem("user");
+        const token = sessionStorage.getItem("token");
+
+        if (user && token) {
+          dispatch({
+            type: "INIT",
+            payload: { isAuthenticated: true, user: JSON.parse(user) }
+          });
+        } else {
+          dispatch({
+            type: "INIT",
+            payload: { isAuthenticated: false, user: null }
+          });
+
+          // Initialize Teams only if we need to authenticate
+          if (window.parent !== window) {
+            try {
+              await microsoftTeams.app.initialize();
+              setTeamsInitialized(true);
+              handleMicrosoftSignIn(); // Auto-trigger auth flow
+            } catch (teamsError) {
+              console.error("Teams init error:", teamsError);
+              setTeamsInitialized(false);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Initialization error:", error);
+      } finally {
+        setLoading(false);
       }
     };
-    initializeTeams();
+
+    initialize();
   }, []);
+
+  // useEffect(() => {
+  //   const initializeTeams = async () => {
+  //     try {
+  //       await microsoftTeams.app.initialize();
+  //       console.log("Teams SDK initialized");
+  //       setTeamsInitialized(true);
+  //     } catch (err) {
+  //       console.error("Failed to initialize Teams SDK:", err);
+  //     }
+  //   };
+  //   initializeTeams();
+  // }, []);
 
   const handleMicrosoftSignIn = async () => {
     try {
-      if (!teamsInitialized) {
-        toast.error("Teams SDK not initialized. Please reload the app.");
-        return;
-      }
+      // if (!teamsInitialized) {
+      //   toast.error("Teams SDK not initialized. Please reload the app.");
+      //   return;
+      // }
+
       if (state.isAuthenticated || sessionStorage.getItem("isLoggedIn")) {
         console.log("User is already authenticated, skipping login.");
         return;
+      }
+
+      if (window.parent === window) {
+        navigate("/signin");
+        return;
+      }
+
+      // Ensure Teams is initialized
+      if (!teamsInitialized) {
+        await microsoftTeams.app.initialize();
+        setTeamsInitialized(true);
       }
 
       microsoftTeams.authentication.getAuthToken({
