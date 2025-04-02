@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import * as microsoftTeams from "@microsoft/teams-js";
 import UnauthorizedPage from "app/views/UnauthorizedPage";
+import LoadingPage from "app/views/LoadingPage";
 
 // Initialize Fluent UI icons
 initializeIcons();
@@ -23,10 +24,17 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "INIT": {
-      const { isAuthenticated, user } = action.payload;
-      return { ...state, isAuthenticated, isInitialized: true, user };
-    }
+    // case "INIT": {
+    //   const { isAuthenticated, user } = action.payload;
+    //   return { ...state, isAuthenticated, isInitialized: true, user };
+    // }
+    case "INIT":
+      return {
+        ...state,
+        isInitialized: true,
+        isAuthenticated: action.payload.isAuthenticated,
+        user: action.payload.user
+      };
     case "LOGIN":
       console.log("New state:", { ...state, isAuthenticated: true, user: action.payload.user });
       return { ...state, isAuthenticated: true, user: action.payload.user };
@@ -64,6 +72,43 @@ export const AuthProvider = ({ children }) => {
   //     navigate("/UnauthorizedPage"); // Redirect to the unauthorized route
   //   }
   // }, [navigate, isUnregistered]);
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        // Initialize Teams SDK first
+        await microsoftTeams.app.initialize();
+
+        // Check for existing session
+        const existingToken = sessionStorage.getItem("token");
+        const existingUser = sessionStorage.getItem("user");
+
+        if (existingToken && existingUser) {
+          dispatch({
+            type: "INIT",
+            payload: {
+              isAuthenticated: true,
+              user: JSON.parse(existingUser)
+            }
+          });
+        } else {
+          // No existing session - start auth flow
+          await handleMicrosoftSignIn();
+        }
+      } catch (error) {
+        console.error("Initialization error:", error);
+        dispatch({
+          type: "INIT",
+          payload: {
+            isAuthenticated: false,
+            user: null
+          }
+        });
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
   const handleMicrosoftSignIn = async () => {
     try {
       dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
@@ -129,12 +174,10 @@ export const AuthProvider = ({ children }) => {
             sessionStorage.setItem("tAccess", JSON.stringify(moduleAccessData));
             const empId = moduleAccessData.data.length > 0 ? moduleAccessData.data[0].empId : null;
             const appAccess =
-              moduleAccessData.data.length > 0
-                ? moduleAccessData.data[0].appAccess
-                : null;
+              moduleAccessData.data.length > 0 ? moduleAccessData.data[0].appAccess : null;
             if (appAccess == 0) {
-              navigate("/UnauthorizedPage");            
-            }    
+              navigate("/UnauthorizedPage");
+            }
             if (empId && appAccess == 1) navigate("/landingpage");
           } catch (apiError) {
             setError("Error calling API: " + apiError.message);
