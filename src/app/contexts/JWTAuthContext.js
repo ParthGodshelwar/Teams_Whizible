@@ -229,11 +229,20 @@ export const AuthProvider = ({ children }) => {
   //     navigate("/UnauthorizedPage");
   //   }
   // }, [isUnregistered, navigate]);
+  // const logout = () => {
+  //   sessionStorage.removeItem("access_token");
+  //   dispatch({ type: "LOGOUT" });
+  //   toast.success("Logout successful");
+  // };
   const logout = () => {
     sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token_expiry");
     dispatch({ type: "LOGOUT" });
-    toast.success("Logout successful");
+    toast.success("Session expired. Logging out...");
+    window.location.href = "/signin"; // Redirect to sign-in page
   };
+
   console.log("userProfile", sessionStorage.getItem("user"));
 
   return (
