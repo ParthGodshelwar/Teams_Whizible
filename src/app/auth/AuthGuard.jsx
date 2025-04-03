@@ -3,10 +3,14 @@ import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "app/hooks/useAuth";
 // CUSTOM COMPONENT
 
-export default async function AuthGuard({ children }) {
-  const { isAuthenticated, isInitialized } = await useAuth();
+export default function AuthGuard({ children }) {
+  const { isAuthenticated, isInitialized } = useAuth();
   const { pathname } = useLocation();
   console.log("AuthGuard", isAuthenticated, isInitialized);
+
+  if (!isInitialized) {
+    return <div>LoadingAG...</div>; // Show a loading state until auth context is ready
+  }
 
   if (isAuthenticated) {
     return <>{children}</>;
