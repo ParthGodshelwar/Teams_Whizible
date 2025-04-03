@@ -69,23 +69,53 @@ export const AuthProvider = ({ children }) => {
   //   }
   // }, [navigate, isUnregistered]);
 
+  // useEffect(() => {
+  //   const storedUser = sessionStorage.getItem("user");
+  //   const token = sessionStorage.getItem("token");
+
+  //   // if (storedUser && token) {
+  //     if (storedUser && token) {
+  //     try {
+  //       const decodedToken = jwtDecode(token);
+  //       const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
+
+  //       if (decodedToken.exp && decodedToken.exp < currentTime) {
+  //         console.warn("Token expired. Logging out...");
+  //         logout(); // Call logout function to clear session and state
+  //       } else {
+  //         dispatch({
+  //           type: "INIT",
+  //           payload: { isAuthenticated: true, user: JSON.parse(storedUser) }
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error("Invalid token format. Logging out...");
+  //       logout();
+  //     }
+  //   } else {
+  //     dispatch({
+  //       type: "INIT",
+  //       payload: { isAuthenticated: false, user: null }
+  //     });
+  //   }
+  // }, []);
+
   useEffect(() => {
     const storedUser = sessionStorage.getItem("user");
     const token = sessionStorage.getItem("token");
 
-    // if (storedUser && token) {
-    if (false) {
+    if (token) {
       try {
         const decodedToken = jwtDecode(token);
-        const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
+        const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
 
         if (decodedToken.exp && decodedToken.exp < currentTime) {
           console.warn("Token expired. Logging out...");
-          logout(); // Call logout function to clear session and state
+          logout(); // Call logout if token is expired
         } else {
           dispatch({
             type: "INIT",
-            payload: { isAuthenticated: true, user: JSON.parse(storedUser) }
+            payload: { isAuthenticated: true, user: storedUser ? JSON.parse(storedUser) : null }
           });
         }
       } catch (error) {
