@@ -14,7 +14,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
     weekday: "long",
     day: "2-digit",
     month: "short",
-    year: "numeric"
+    year: "numeric",
   });
 
   const formateddate = formatter.format(selectedDate);
@@ -32,12 +32,24 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [taskDetails, setTaskDetails] = useState(null);
   const [daTypes, setDATypes] = useState([]);
-  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
-  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
-  const [selectedHour, setSelectedHour] = useState(timesheetData?.startHrh || "00");
-  const [selectedMinute, setSelectedMinute] = useState(timesheetData?.startMin || "00");
-  const [selectedHourT, setSelectedHourT] = useState(timesheetData?.toHrh || "00");
-  const [selectedMinuteT, setSelectedMinuteT] = useState(timesheetData?.toMin || "00");
+  const hours = Array.from({ length: 24 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
+  const minutes = Array.from({ length: 60 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
+  const [selectedHour, setSelectedHour] = useState(
+    timesheetData?.startHrh || "00"
+  );
+  const [selectedMinute, setSelectedMinute] = useState(
+    timesheetData?.startMin || "00"
+  );
+  const [selectedHourT, setSelectedHourT] = useState(
+    timesheetData?.toHrh || "00"
+  );
+  const [selectedMinuteT, setSelectedMinuteT] = useState(
+    timesheetData?.toMin || "00"
+  );
   const [selecteddaTypes, setSelecteddaTypes] = useState("N");
   const [efforts, setEfforts] = useState("00:00");
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -213,20 +225,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
     }
     console.log("ValidateDAEntry", date);
     const entryData = {
-      entryDate: new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString(),
-      userID: userid,
-      projectID: Number(selectedProject),
-      taskID: Number(selectedTask),
-      // subTaskID: selectedsubTasks,
-      fromTime: `${selectedHour}:${selectedMinute}`,
-      toTime: `${selectedHourT}:${selectedMinuteT}`,
-      daType: selecteddaTypes,
-      duration: efforts,
-      description: description
-    };
-
-    const entryData1 = {
-      entryDate: new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString(),
+      entryDate: new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      ).toISOString(),
       userID: userid,
       projectID: Number(selectedProject),
       taskID: Number(selectedTask),
@@ -236,7 +237,22 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
       daType: selecteddaTypes,
       duration: efforts,
       description: description,
-      TotalDuration: `00:00`
+    };
+
+    const entryData1 = {
+      entryDate: new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      ).toISOString(),
+      userID: userid,
+      projectID: Number(selectedProject),
+      taskID: Number(selectedTask),
+      // subTaskID: selectedsubTasks,
+      fromTime: `${selectedHour}:${selectedMinute}`,
+      toTime: `${selectedHourT}:${selectedMinuteT}`,
+      daType: selecteddaTypes,
+      duration: efforts,
+      description: description,
+      TotalDuration: `00:00`,
     };
     try {
       // Validate the entry first using POST with JSON body
@@ -247,9 +263,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
           headers: {
             Accept: "*/*",
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(entryData1) // Send the entryData in JSON body
+          body: JSON.stringify(entryData1), // Send the entryData in JSON body
         }
       );
 
@@ -275,9 +291,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
               },
-              body: JSON.stringify(entryData) // Send the entryData to post
+              body: JSON.stringify(entryData), // Send the entryData to post
             }
           );
 
@@ -293,11 +309,19 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
             closeDrawer();
           } else {
             const postValidationErrors = postResult?.data
-              ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage
+              ?.filter(
+                (item) =>
+                  !item.validationMessage ||
+                  item.validationMessage.trim() === ""
+              ) // Check for null or empty validationMessage
               .map((item) => "Please fill Daily Activity")
               .concat(
                 postResult?.data
-                  ?.filter((item) => item.validationMessage && item.validationMessage.trim() !== "") // Include non-empty validation messages
+                  ?.filter(
+                    (item) =>
+                      item.validationMessage &&
+                      item.validationMessage.trim() !== ""
+                  ) // Include non-empty validation messages
                   .map((item) => item.validationMessage)
               )
               .join(", ");
@@ -327,7 +351,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                 backgroundColor: "#4CAF50",
                 color: "white",
                 borderRadius: "4px",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               Yes
@@ -342,7 +366,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                 backgroundColor: "#f44336",
                 color: "white",
                 borderRadius: "4px",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               No
@@ -358,9 +382,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
               },
-              body: JSON.stringify(entryData) // Send the entryData to post
+              body: JSON.stringify(entryData), // Send the entryData to post
             }
           );
 
@@ -375,11 +399,19 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
             closeDrawer();
           } else {
             const postValidationErrors = postResult?.data
-              ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage
+              ?.filter(
+                (item) =>
+                  !item.validationMessage ||
+                  item.validationMessage.trim() === ""
+              ) // Check for null or empty validationMessage
               .map((item) => "Please fill Daily Activity")
               .concat(
                 postResult?.data
-                  ?.filter((item) => item.validationMessage && item.validationMessage.trim() !== "") // Include non-empty validation messages
+                  ?.filter(
+                    (item) =>
+                      item.validationMessage &&
+                      item.validationMessage.trim() !== ""
+                  ) // Include non-empty validation messages
                   .map((item) => item.validationMessage)
               )
               .join(", ");
@@ -472,7 +504,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                       color: "#ed1c24",
                       fontSize: "15px",
 
-                      margin: "20px 0"
+                      margin: "20px 0",
                     }}
                   ></div>
                   <div className="calendarDate ps-3">
@@ -510,9 +542,8 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
               className="TimesheetEntryDetlsSec"
               style={{
                 // height: "320px",
-                // height: "calc(100vh - 240px)",
                 height: "100%",
-                overflowY: "auto"
+                overflowY: "auto",
               }}
             >
               {/* <div className="stickyOffHeader pt-3">
@@ -542,7 +573,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                     <div className="col-sm-12">
                       {/* Project */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-start required mt-2">Project</label>
+                        <label className="col-sm-4 text-start required mt-2">
+                          Project
+                        </label>
                         <div className="col-sm-7">
                           <select
                             value={selectedProject} // need to add
@@ -553,7 +586,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                               fontSize: "12px", // Adjusts font size for readability
                               borderRadius: "4px", // Adds rounded corners for a modern look
                               border: "1px solid #ccc", // A soft border color
-                              boxSizing: "border-box" // Makes sure padding doesn't affect the overall width
+                              boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
                             }}
                           >
                             <option>Select Project</option>
@@ -572,8 +605,13 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
 
                       {/* Task */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-start required mt-2">Task</label>
-                        <div className="col-sm-7" style={{ position: "relative" }}>
+                        <label className="col-sm-4 text-start required mt-2">
+                          Task
+                        </label>
+                        <div
+                          className="col-sm-7"
+                          style={{ position: "relative" }}
+                        >
                           <select
                             onChange={handleTaskChange}
                             value={selectedTask}
@@ -583,7 +621,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                               fontSize: "12px", // Adjusts font size for readability
                               borderRadius: "4px", // Adds rounded corners for a modern look
                               border: "1px solid #ccc", // A soft border color
-                              boxSizing: "border-box" // Makes sure padding doesn't affect the overall width
+                              boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
                             }}
                           >
                             <option value="">Select Task</option>
@@ -620,7 +658,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                                 top: "50%",
                                 right: "27px",
                                 transform: "translateY(-50%)",
-                                cursor: "pointer"
+                                cursor: "pointer",
                               }}
                               onClick={() => {
                                 setIsCalloutVisible(!isCalloutVisible);
@@ -628,7 +666,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                                 handleTaskHover(selectedTask);
                               }}
                             >
-                              <FaInfoCircle style={{ fontSize: "15px", color: "#007bff" }} />
+                              <FaInfoCircle
+                                style={{ fontSize: "15px", color: "#007bff" }}
+                              />
                             </div>
                           )}
 
@@ -642,15 +682,21 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                               gapSpace={10}
                               setInitialFocus
                             >
-                              <div style={{ padding: "10px", maxWidth: "250px" }}>
+                              <div
+                                style={{ padding: "10px", maxWidth: "250px" }}
+                              >
                                 <div className="row">
-                                  <div className="col-sm-6 col-12 txt_Blue">Start Date:</div>
+                                  <div className="col-sm-6 col-12 txt_Blue">
+                                    Start Date:
+                                  </div>
                                   <div className="col-sm-6 col-12">
                                     {taskDetails?.startDate || "N/A"}
                                   </div>
                                 </div>
                                 <div className="row">
-                                  <div className="col-sm-6 col-12 txt_Blue">End Date:</div>
+                                  <div className="col-sm-6 col-12 txt_Blue">
+                                    End Date:
+                                  </div>
                                   <div className="col-sm-6 col-12">
                                     {taskDetails?.endDate || "N/A"}
                                   </div>
@@ -660,13 +706,17 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                                                         <div className="col-sm-6 col-12">{taskDetails?.taskName || "N/A"}</div>
                                                       </div> */}
                                 <div className="row">
-                                  <div className="col-sm-6 col-12 txt_Blue">Actual Effort:</div>
+                                  <div className="col-sm-6 col-12 txt_Blue">
+                                    Actual Effort:
+                                  </div>
                                   <div className="col-sm-6 col-12">
                                     {taskDetails?.actualWork || "N/A"}
                                   </div>
                                 </div>
                                 <div className="row">
-                                  <div className="col-sm-6 col-12 txt_Blue">Planned Efforts:</div>
+                                  <div className="col-sm-6 col-12 txt_Blue">
+                                    Planned Efforts:
+                                  </div>
                                   <div className="col-sm-6 col-12">
                                     {taskDetails?.plannedEfforts || "N/A"}
                                   </div>
@@ -704,7 +754,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
 
                       {/* From Time */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-start mt-2">From Time</label>
+                        <label className="col-sm-4 text-start mt-2">
+                          From Time
+                        </label>
                         <div className="col-sm-7 d-flex">
                           <select
                             disabled
@@ -718,7 +770,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                               fontSize: "15px",
                               borderRadius: "4px",
                               border: "1px solid #ccc",
-                              boxSizing: "border-box"
+                              boxSizing: "border-box",
                             }}
                           >
                             <option>Hour</option>
@@ -740,7 +792,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                               fontSize: "15px",
                               borderRadius: "4px",
                               border: "1px solid #ccc",
-                              boxSizing: "border-box"
+                              boxSizing: "border-box",
                             }}
                           >
                             <option>Minute</option>
@@ -755,7 +807,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                       </div>
 
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-start mt-2">To Time</label>
+                        <label className="col-sm-4 text-start mt-2">
+                          To Time
+                        </label>
                         <div className="col-sm-7 d-flex">
                           <select
                             disabled
@@ -768,7 +822,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                               fontSize: "16px",
                               borderRadius: "4px",
                               border: "1px solid #ccc",
-                              boxSizing: "border-box"
+                              boxSizing: "border-box",
                             }}
                           >
                             <option>Hour</option>
@@ -790,7 +844,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                               fontSize: "15px",
                               borderRadius: "4px",
                               border: "1px solid #ccc",
-                              boxSizing: "border-box"
+                              boxSizing: "border-box",
                             }}
                           >
                             <option>Minute</option>
@@ -806,7 +860,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
 
                       {/* DA Type */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-start  mt-2">DA Type</label>
+                        <label className="col-sm-4 text-start  mt-2">
+                          DA Type
+                        </label>
                         <div className="col-sm-7">
                           <select
                             style={{
@@ -815,7 +871,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                               fontSize: "12px", // Adjusts font size for readability
                               borderRadius: "4px", // Adds rounded corners for a modern look
                               border: "1px solid #ccc", // A soft border color
-                              boxSizing: "border-box" // Makes sure padding doesn't affect the overall width
+                              boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
                             }}
                             value={selecteddaTypes}
                             onChange={(e) => setSelecteddaTypes(e.target.value)}
@@ -832,7 +888,9 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
 
                       {/* Efforts */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-start required mt-2">Efforts</label>
+                        <label className="col-sm-4 text-start required mt-2">
+                          Efforts
+                        </label>
                         <div className="col-sm-3 col-4">
                           <input
                             type="text"
@@ -848,8 +906,13 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
 
                       {/* Description */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-start  mt-2">Description</label>
-                        <div className="col-sm-7 pb-3 mb-3 ">
+                        <label className="col-sm-4 text-start  mt-2">
+                          Description
+                        </label>
+                        <div
+                          className="col-sm-7 pb-3 "
+                          style={{ marginBottom: "27%" }}
+                        >
                           <textarea
                             className="form-control"
                             rows="3"
