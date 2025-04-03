@@ -18,7 +18,7 @@ initializeIcons();
 const initialState = {
   user: null,
   isInitialized: false,
-  isAuthenticated: false,
+  isAuthenticated: false
 };
 
 const reducer = (state, action) => {
@@ -31,7 +31,8 @@ const reducer = (state, action) => {
       console.log("New state:", {
         ...state,
         isAuthenticated: true,
-        user: action.payload.user,
+        isInitialized: true,
+        user: action.payload.user
       });
       return { ...state, isAuthenticated: true, user: action.payload.user };
     case "LOGOUT":
@@ -48,7 +49,7 @@ const AuthContext = createContext({
   login: () => {},
   logout: () => {},
   register: () => {},
-  handleMicrosoftSignIn: () => {},
+  handleMicrosoftSignIn: () => {}
 });
 
 export const AuthProvider = ({ children }) => {
@@ -95,24 +96,19 @@ export const AuthProvider = ({ children }) => {
                 method: "GET",
                 headers: {
                   Authorization: `Bearer ${result}`,
-                  "Content-Type": "application/json",
-                },
+                  "Content-Type": "application/json"
+                }
               }
             );
 
             if (!userProfileResponse.ok) {
-              throw new Error(
-                `Error fetching user profile: ${userProfileResponse.statusText}`
-              );
+              throw new Error(`Error fetching user profile: ${userProfileResponse.statusText}`);
             }
 
             const userProfileData = await userProfileResponse.json();
             setUserProfile(userProfileData);
             sessionStorage.setItem("user", JSON.stringify(userProfileData));
-            sessionStorage.setItem(
-              "UserProfilePic",
-              userProfileData?.data?.profilePicURL
-            );
+            sessionStorage.setItem("UserProfilePic", userProfileData?.data?.profilePicURL);
             // Extract empID from userProfileData
             const empID = userProfileData.data.employeeId;
             if (!empID) setIsUnregistered(true);
@@ -124,28 +120,21 @@ export const AuthProvider = ({ children }) => {
                 method: "GET",
                 headers: {
                   Authorization: `Bearer ${result}`,
-                  "Content-Type": "application/json",
-                },
+                  "Content-Type": "application/json"
+                }
               }
             );
 
             if (!moduleAccessResponse.ok) {
-              throw new Error(
-                `Error fetching module access: ${moduleAccessResponse.statusText}`
-              );
+              throw new Error(`Error fetching module access: ${moduleAccessResponse.statusText}`);
             }
 
             const moduleAccessData = await moduleAccessResponse.json();
             setModuleAccess(moduleAccessData);
             sessionStorage.setItem("tAccess", JSON.stringify(moduleAccessData));
-            const empId =
-              moduleAccessData.data.length > 0
-                ? moduleAccessData.data[0].empId
-                : null;
+            const empId = moduleAccessData.data.length > 0 ? moduleAccessData.data[0].empId : null;
             const appAccess =
-              moduleAccessData.data.length > 0
-                ? moduleAccessData.data[0].appAccess
-                : null;
+              moduleAccessData.data.length > 0 ? moduleAccessData.data[0].appAccess : null;
             if (appAccess == 0) {
               navigate("/UnauthorizedPage");
             }
@@ -162,7 +151,7 @@ export const AuthProvider = ({ children }) => {
         },
         failureCallback: (error) => {
           setError("Error getting token: " + error);
-        },
+        }
       });
     } catch (err) {
       setError("Initialization error: " + err.message);
@@ -190,7 +179,7 @@ export const AuthProvider = ({ children }) => {
         ...state,
         method: "JWT",
         logout,
-        handleMicrosoftSignIn,
+        handleMicrosoftSignIn
       }}
     >
       <ToastContainer position="top-right" autoClose={5000} />
