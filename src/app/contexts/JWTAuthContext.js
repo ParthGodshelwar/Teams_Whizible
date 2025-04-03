@@ -68,12 +68,13 @@ export const AuthProvider = ({ children }) => {
   //     navigate("/UnauthorizedPage"); // Redirect to the unauthorized route
   //   }
   // }, [navigate, isUnregistered]);
+  dispatch({ type: "INIT", payload: { user: null, isAuthenticated: false } });
 
   const handleMicrosoftSignIn = async () => {
     try {
       // dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
       console.log("Initializing Teams SDK...");
-      dispatch({ type: "INIT", payload: { user: null, isAuthenticated: false } });
+
       // await microsoftTeams.app.initialize();
       microsoftTeams.app
         .initialize()
