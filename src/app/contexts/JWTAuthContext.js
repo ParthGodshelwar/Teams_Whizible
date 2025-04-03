@@ -73,12 +73,12 @@ export const AuthProvider = ({ children }) => {
     try {
       // dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
       console.log("Initializing Teams SDK...");
+      dispatch({ type: "INIT", payload: { user: null, isAuthenticated: false } });
       // await microsoftTeams.app.initialize();
       microsoftTeams.app
         .initialize()
         .then(() => {
           console.log("Teams SDK initialized");
-          dispatch({ type: "INIT", payload: { user: null, isAuthenticated: false } });
         })
         .catch((error) => {
           console.error("Teams SDK initialization failed:", error);
