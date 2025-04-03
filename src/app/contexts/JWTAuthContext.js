@@ -1,16 +1,11 @@
 import React, { createContext, useEffect, useReducer, useState } from "react";
-import { PublicClientApplication } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
-import axios from "axios";
-import fetchUserProfile from "../hooks/fetchUserProfile";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { initializeIcons } from "@fluentui/react/lib/Icons";
-import msalInstance from "./msalConfig";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import * as microsoftTeams from "@microsoft/teams-js";
-import UnauthorizedPage from "app/views/UnauthorizedPage";
 
 // Initialize Fluent UI icons
 initializeIcons();
@@ -23,21 +18,17 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "INIT": {
-      const { isAuthenticated, user } = action.payload;
-      return { ...state, isAuthenticated, isInitialized: true, user };
-    }
-    case "LOGIN":
-      console.log("New state:", {
+    case "INIT":
+      return {
         ...state,
-        isAuthenticated: true,
+        isInitialized: true,
+        isAuthenticated: action.payload.isAuthenticated,
         user: action.payload.user
-      });
+      };
+    case "LOGIN":
       return { ...state, isAuthenticated: true, user: action.payload.user };
     case "LOGOUT":
       return { ...state, isAuthenticated: false, user: null };
-    case "REGISTER":
-      return { ...state, isAuthenticated: true, user: action.payload.user };
     default:
       return state;
   }
@@ -47,213 +38,109 @@ const AuthContext = createContext({
   ...initialState,
   login: () => {},
   logout: () => {},
-  register: () => {},
   handleMicrosoftSignIn: () => {}
 });
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { instance } = useMsal();
-  const [msalInitialized, setMsalInitialized] = useState(false);
   const navigate = useNavigate();
-  const [isUnregistered, setIsUnregistered] = useState(false);
   const [token, setToken] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [error, setError] = useState(null);
-  const [moduleAccess, setModuleAccess] = useState(null);
-
-  // useEffect(() => {
-  //   // Check if user data exists in sessionStorage
-  //   if (!sessionStorage.getItem("user")) {
-  //     navigate("/UnauthorizedPage"); // Redirect to the unauthorized route
-  //   }
-  // }, [navigate, isUnregistered]);
-
-  // useEffect(() => {
-  //   const storedUser = sessionStorage.getItem("user");
-  //   const token = sessionStorage.getItem("token");
-
-  //   // if (storedUser && token) {
-  //     if (storedUser && token) {
-  //     try {
-  //       const decodedToken = jwtDecode(token);
-  //       const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
-
-  //       if (decodedToken.exp && decodedToken.exp < currentTime) {
-  //         console.warn("Token expired. Logging out...");
-  //         logout(); // Call logout function to clear session and state
-  //       } else {
-  //         dispatch({
-  //           type: "INIT",
-  //           payload: { isAuthenticated: true, user: JSON.parse(storedUser) }
-  //         });
-  //       }
-  //     } catch (error) {
-  //       console.error("Invalid token format. Logging out...");
-  //       logout();
-  //     }
-  //   } else {
-  //     dispatch({
-  //       type: "INIT",
-  //       payload: { isAuthenticated: false, user: null }
-  //     });
-  //   }
-  // }, []);
 
   useEffect(() => {
-    const storedUser = sessionStorage.getItem("user");
-    const token = sessionStorage.getItem("token");
-
-    if (token) {
+    const fetchNewToken = async () => {
       try {
-        const decodedToken = jwtDecode(token);
-        const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+        await microsoftTeams.app.initialize();
+        console.log("Teams SDK initialized");
 
-        if (decodedToken.exp && decodedToken.exp < currentTime) {
-          console.warn("Token expired. Logging out...");
-          logout(); // Call logout if token is expired
-        } else {
-          dispatch({
-            type: "INIT",
-            payload: { isAuthenticated: true, user: storedUser ? JSON.parse(storedUser) : null }
-          });
-        }
-      } catch (error) {
-        console.error("Invalid token format. Logging out...");
-        logout();
-      }
-    } else {
-      dispatch({
-        type: "INIT",
-        payload: { isAuthenticated: false, user: null }
-      });
-    }
-  }, []);
+        microsoftTeams.authentication.getAuthToken({
+          successCallback: async (result) => {
+            console.log("New Token Fetched:", result);
+            setToken(result);
+            sessionStorage.setItem("token", result);
 
-  const handleMicrosoftSignIn = async () => {
-    try {
-      // dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
+            try {
+              const decodedToken = jwtDecode(result);
+              dispatch({ type: "LOGIN", payload: { isAuthenticated: true, user: decodedToken } });
 
-      await microsoftTeams.app.initialize();
-      dispatch({ type: "INIT", payload: { isInitialized: true } });
-
-      console.log("Teams SDK initialized");
-
-      microsoftTeams.authentication.getAuthToken({
-        successCallback: async (result) => {
-          console.log("Token received:", result);
-          setToken(result);
-          sessionStorage.setItem("token", result);
-          dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
-
-          toast.success("Microsoft login successful");
-          // Decode the JWT token to get the preferred_username
-          try {
-            const decodedToken = jwtDecode(result);
-            const emailId = decodedToken.preferred_username;
-
-            // Call the API with the Bearer token
-            const userProfileResponse = await fetch(
-              `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/UserProfile/Get?emailId=${emailId}`,
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${result}`,
-                  "Content-Type": "application/json"
+              const emailId = decodedToken.preferred_username;
+              const userProfileResponse = await fetch(
+                `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/UserProfile/Get?emailId=${emailId}`,
+                {
+                  method: "GET",
+                  headers: {
+                    Authorization: `Bearer ${result}`,
+                    "Content-Type": "application/json"
+                  }
                 }
+              );
+
+              if (!userProfileResponse.ok) throw new Error("Error fetching user profile");
+              const userProfileData = await userProfileResponse.json();
+              setUserProfile(userProfileData);
+              sessionStorage.setItem("user", JSON.stringify(userProfileData));
+
+              const empID = userProfileData.data.employeeId;
+              if (!empID) {
+                sessionStorage.clear();
+                toast.error("You are not a registered user");
+                navigate("/UnauthorizedPage");
+                return;
               }
-            );
 
-            if (!userProfileResponse.ok) {
-              throw new Error(`Error fetching user profile: ${userProfileResponse.statusText}`);
-            }
-
-            const userProfileData = await userProfileResponse.json();
-            setUserProfile(userProfileData);
-            sessionStorage.setItem("user", JSON.stringify(userProfileData));
-            sessionStorage.setItem("UserProfilePic", userProfileData?.data?.profilePicURL);
-            // Extract empID from userProfileData
-            const empID = userProfileData.data.employeeId;
-            if (!empID) setIsUnregistered(true);
-            console.log("employeeId", userProfileData.data);
-            // Call the second API with empID
-            const moduleAccessResponse = await fetch(
-              `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/ModuleAccess/Get?empID=${empID}`,
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${result}`,
-                  "Content-Type": "application/json"
+              const moduleAccessResponse = await fetch(
+                `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/ModuleAccess/Get?empID=${empID}`,
+                {
+                  method: "GET",
+                  headers: {
+                    Authorization: `Bearer ${result}`,
+                    "Content-Type": "application/json"
+                  }
                 }
+              );
+
+              if (!moduleAccessResponse.ok) throw new Error("Error fetching module access");
+              const moduleAccessData = await moduleAccessResponse.json();
+
+              sessionStorage.setItem("tAccess", JSON.stringify(moduleAccessData));
+              const appAccess =
+                moduleAccessData.data.length > 0 ? moduleAccessData.data[0].appAccess : null;
+
+              if (appAccess === 0) {
+                navigate("/UnauthorizedPage");
+              } else {
+                navigate("/landingpage");
               }
-            );
-
-            if (!moduleAccessResponse.ok) {
-              throw new Error(`Error fetching module access: ${moduleAccessResponse.statusText}`);
-            }
-
-            const moduleAccessData = await moduleAccessResponse.json();
-            setModuleAccess(moduleAccessData);
-            sessionStorage.setItem("tAccess", JSON.stringify(moduleAccessData));
-            const empId = moduleAccessData.data.length > 0 ? moduleAccessData.data[0].empId : null;
-            const appAccess =
-              moduleAccessData.data.length > 0 ? moduleAccessData.data[0].appAccess : null;
-            if (appAccess == 0) {
-              navigate("/UnauthorizedPage");
-            }
-            if (empId && appAccess == 1) navigate("/landingpage");
-          } catch (apiError) {
-            setError("Error calling API: " + apiError.message);
-            // Clear cache if userProfileData is null
-            if (!userProfile) {
+            } catch (apiError) {
+              console.error("API Error:", apiError);
               sessionStorage.clear();
-              toast.error("You are not a registered user");
-              setIsUnregistered(true);
+              toast.error("Authentication failed. Please try again.");
             }
-          }
-        },
-        failureCallback: (error) => {
-          setError("Error getting token: " + error);
-        }
-      });
-    } catch (err) {
-      setError("Initialization error: " + err.message);
-    }
-  };
+          },
+          failureCallback: (error) => {
+            console.error("Microsoft authentication failed:", error);
+            toast.error("Microsoft authentication failed.");
+            dispatch({ type: "LOGOUT" });
+          },
+          timeout: 10000
+        });
+      } catch (err) {
+        console.error("Teams SDK initialization error:", err);
+      }
+    };
 
-  // useEffect(() => {
-  //   const user = sessionStorage.getItem("user");
+    fetchNewToken();
+  }, []); // Runs on every reload
 
-  //   console.log("UnauthorizedPage", user);
-  //   if (!user) {
-  //     navigate("/UnauthorizedPage");
-  //   }
-  // }, [isUnregistered, navigate]);
-  // const logout = () => {
-  //   sessionStorage.removeItem("token");
-  //   dispatch({ type: "LOGOUT" });
-  //   toast.success("Logout successful");
-  // };
   const logout = () => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("token_expiry");
+    sessionStorage.clear();
     dispatch({ type: "LOGOUT" });
-    toast.success("Session expired. Logging out...");
-    window.location.href = "/signin"; // Redirect to sign-in page
+    toast.success("Logout successful");
   };
-
-  console.log("userProfile", sessionStorage.getItem("user"));
 
   return (
-    <AuthContext.Provider
-      value={{
-        ...state,
-        method: "JWT",
-        logout,
-        handleMicrosoftSignIn
-      }}
-    >
+    <AuthContext.Provider value={{ ...state, method: "JWT", logout }}>
       <ToastContainer position="top-right" autoClose={5000} />
       {children}
     </AuthContext.Provider>
