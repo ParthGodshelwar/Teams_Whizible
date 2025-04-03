@@ -25,13 +25,12 @@ const reducer = (state, action) => {
   switch (action.type) {
     case "INIT": {
       const { isAuthenticated, user } = action.payload;
-      return { ...state, isAuthenticated, user };
+      return { ...state, isAuthenticated, isInitialized: true, user };
     }
     case "LOGIN":
       console.log("New state:", {
         ...state,
         isAuthenticated: true,
-        isInitialized: true,
         user: action.payload.user
       });
       return { ...state, isAuthenticated: true, user: action.payload.user };
