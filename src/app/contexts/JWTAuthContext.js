@@ -236,7 +236,10 @@ export const AuthProvider = ({ children }) => {
       <ToastContainer position="top-right" autoClose={5000} pauseOnHover closeOnClick />
       {state.isLoading ? (
         <div className="full-page-loader">
-          <p>Signing in...</p>
+          {/* <p>Signing in...</p> */}
+          <div className="spinner-border text-primary" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
         </div>
       ) : (
         children
