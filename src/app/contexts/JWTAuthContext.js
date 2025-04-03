@@ -69,20 +69,21 @@ export const AuthProvider = ({ children }) => {
   //   }
   // }, [navigate, isUnregistered]);
 
-  useEffect(() => {
-    const user = JSON.parse(sessionStorage.getItem("user"));
-    if (user) {
-      dispatch({ type: "INIT", payload: { user, isAuthenticated: true } });
-    } else {
-      dispatch({ type: "INIT", payload: { user: null, isAuthenticated: false } });
-    }
-  }, []);
+  // useEffect(() => {
+  //   const user = JSON.parse(sessionStorage.getItem("user"));
+  //   if (user) {
+  //     dispatch({ type: "INIT", payload: { user, isAuthenticated: true } });
+  //   } else {
+  //     dispatch({ type: "INIT", payload: { user: null, isAuthenticated: false } });
+  //   }
+  // }, []);
 
   const handleMicrosoftSignIn = async () => {
     try {
-      dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
-
+      // dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
+      console.log("Initializing Teams SDK...");
       await microsoftTeams.app.initialize();
+      dispatch({ type: "INIT", payload: { user: null, isAuthenticated: false } });
       console.log("Teams SDK initialized");
 
       microsoftTeams.authentication.getAuthToken({
