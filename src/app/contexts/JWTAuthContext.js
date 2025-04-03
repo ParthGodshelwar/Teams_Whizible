@@ -45,10 +45,10 @@ const reducer = (state, action) => {
 
 const AuthContext = createContext({
   ...initialState,
-  handleMicrosoftSignIn: () => {},
   login: () => {},
   logout: () => {},
-  register: () => {}
+  register: () => {},
+  handleMicrosoftSignIn: () => {}
 });
 
 export const AuthProvider = ({ children }) => {
@@ -68,6 +68,37 @@ export const AuthProvider = ({ children }) => {
   //     navigate("/UnauthorizedPage"); // Redirect to the unauthorized route
   //   }
   // }, [navigate, isUnregistered]);
+
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem("user");
+    const token = sessionStorage.getItem("token");
+
+    if (storedUser && token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
+
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
+          console.warn("Token expired. Logging out...");
+          logout(); // Call logout function to clear session and state
+        } else {
+          dispatch({
+            type: "INIT",
+            payload: { isAuthenticated: true, user: JSON.parse(storedUser) }
+          });
+        }
+      } catch (error) {
+        console.error("Invalid token format. Logging out...");
+        logout();
+      }
+    } else {
+      dispatch({
+        type: "INIT",
+        payload: { isAuthenticated: false, user: null }
+      });
+    }
+  }, []);
+
   const handleMicrosoftSignIn = async () => {
     try {
       // dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
