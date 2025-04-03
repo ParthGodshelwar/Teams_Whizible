@@ -34,7 +34,7 @@ const reducer = (state, action) => {
         isInitialized: true,
         user: action.payload.user
       });
-      return { ...state, isAuthenticated: true, user: action.payload.user };
+      return { ...state, isAuthenticated: true, isInitialized: true, user: action.payload.user };
     case "LOGOUT":
       return { ...state, isAuthenticated: false, user: null };
     case "REGISTER":
