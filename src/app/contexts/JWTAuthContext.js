@@ -230,12 +230,12 @@ export const AuthProvider = ({ children }) => {
   //   }
   // }, [isUnregistered, navigate]);
   // const logout = () => {
-  //   sessionStorage.removeItem("access_token");
+  //   sessionStorage.removeItem("token");
   //   dispatch({ type: "LOGOUT" });
   //   toast.success("Logout successful");
   // };
   const logout = () => {
-    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("token_expiry");
     dispatch({ type: "LOGOUT" });
