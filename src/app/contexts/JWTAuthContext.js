@@ -45,10 +45,10 @@ const reducer = (state, action) => {
 
 const AuthContext = createContext({
   ...initialState,
+  handleMicrosoftSignIn: () => {},
   login: () => {},
   logout: () => {},
-  register: () => {},
-  handleMicrosoftSignIn: () => {}
+  register: () => {}
 });
 
 export const AuthProvider = ({ children }) => {
