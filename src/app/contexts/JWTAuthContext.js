@@ -25,7 +25,7 @@ const reducer = (state, action) => {
   switch (action.type) {
     case "INIT": {
       const { isAuthenticated, user } = action.payload;
-      return { ...state, isAuthenticated, isInitialized: true, user };
+      return { ...state, isAuthenticated, isInitialized, user };
     }
     case "LOGIN":
       console.log("New state:", {
@@ -34,7 +34,7 @@ const reducer = (state, action) => {
         isInitialized: true,
         user: action.payload.user
       });
-      return { ...state, isAuthenticated: true, isInitialized: true, user: action.payload.user };
+      return { ...state, isAuthenticated: true, user: action.payload.user };
     case "LOGOUT":
       return { ...state, isAuthenticated: false, user: null };
     case "REGISTER":
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }) => {
           console.log("Token received:", result);
           setToken(result);
           sessionStorage.setItem("token", result);
-          dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
+          dispatch({ type: "LOGIN", payload: { isAuthenticated: true, isInitialized: true } });
 
           toast.success("Microsoft login successful");
           // Decode the JWT token to get the preferred_username
