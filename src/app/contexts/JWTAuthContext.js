@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   // }, [navigate, isUnregistered]);
   useEffect(() => {
     // Check if user data exists in sessionStorage
-
+    microsoftTeams.app.initialize();
     dispatch({ type: "INIT", payload: { user: null, isAuthenticated: false } });
   }, []);
 
@@ -80,14 +80,14 @@ export const AuthProvider = ({ children }) => {
       console.log("Initializing Teams SDK...");
 
       // await microsoftTeams.app.initialize();
-      microsoftTeams.app
-        .initialize()
-        .then(() => {
-          console.log("Teams SDK initialized");
-        })
-        .catch((error) => {
-          console.error("Teams SDK initialization failed:", error);
-        });
+      // microsoftTeams.app
+      //   .initialize()
+      //   .then(() => {
+      //     console.log("Teams SDK initialized");
+      //   })
+      //   .catch((error) => {
+      //     console.error("Teams SDK initialization failed:", error);
+      //   });
       // console.log("Teams SDK initialized");
 
       microsoftTeams.authentication.getAuthToken({
