@@ -14,32 +14,39 @@ const initialState = {
   user: null,
   isInitialized: false,
   isAuthenticated: false,
-  isLoading: true
+  isLoading: true,
+  authChecked: false
 };
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "INIT": {
+    case "INIT":
       return { ...state, isInitialized: true };
-    }
     case "LOGIN":
       return {
         ...state,
         isAuthenticated: true,
         user: action.payload.user,
-        isLoading: false
+        isLoading: false,
+        authChecked: true
       };
     case "LOGOUT":
       return {
         ...state,
         isAuthenticated: false,
         user: null,
-        isLoading: false
+        isLoading: false,
+        authChecked: true
       };
     case "LOADING":
       return {
         ...state,
         isLoading: action.payload
+      };
+    case "AUTH_CHECKED":
+      return {
+        ...state,
+        authChecked: true
       };
     default:
       return state;
@@ -58,13 +65,6 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [token, setToken] = useState(null);
   const [error, setError] = useState(null);
-
-  // Clear previous session on initial load to force new token generation
-  useEffect(() => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("tAccess");
-  }, []);
 
   const fetchUserData = useCallback(async (token) => {
     try {
@@ -114,62 +114,88 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const handleMicrosoftSignIn = useCallback(async () => {
-    dispatch({ type: "LOADING", payload: true });
+  const handleMicrosoftSignIn = useCallback(
+    async (forceRefresh = false) => {
+      // Skip if we already have a valid session and not forcing refresh
+      const existingToken = sessionStorage.getItem("token");
+      const existingUser = sessionStorage.getItem("user");
 
-    try {
-      microsoftTeams.authentication.getAuthToken({
-        successCallback: async (result) => {
-          try {
-            setToken(result);
-            sessionStorage.setItem("token", result);
+      if (!forceRefresh && existingToken && existingUser) {
+        try {
+          const userProfileData = JSON.parse(existingUser);
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              user: userProfileData
+            }
+          });
+          return;
+        } catch (e) {
+          // If session restoration fails, continue with new auth
+          sessionStorage.clear();
+        }
+      }
 
-            const { userProfileData, moduleAccessData } = await fetchUserData(result);
+      dispatch({ type: "LOADING", payload: true });
 
-            dispatch({
-              type: "LOGIN",
-              payload: {
-                user: userProfileData
+      try {
+        microsoftTeams.authentication.getAuthToken({
+          successCallback: async (result) => {
+            try {
+              setToken(result);
+              sessionStorage.setItem("token", result);
+
+              const { userProfileData, moduleAccessData } = await fetchUserData(result);
+
+              dispatch({
+                type: "LOGIN",
+                payload: {
+                  user: userProfileData
+                }
+              });
+
+              // Handle navigation based on access
+              const appAccess = moduleAccessData.data[0]?.appAccess;
+              if (appAccess === 1) {
+                // Only navigate if this is the initial auth
+                if (forceRefresh || !state.authChecked) {
+                  navigate("/landingpage");
+                }
+                toast.success("Microsoft login successful");
+              } else {
+                navigate("/UnauthorizedPage");
               }
-            });
-
-            // Handle navigation based on access
-            const appAccess = moduleAccessData.data[0]?.appAccess;
-            if (appAccess === 1) {
-              navigate("/landingpage");
-              toast.success("Microsoft login successful");
-            } else {
+            } catch (error) {
+              dispatch({ type: "LOADING", payload: false });
+              toast.error("You are not a registered user");
               navigate("/UnauthorizedPage");
             }
-          } catch (error) {
+          },
+          failureCallback: (error) => {
             dispatch({ type: "LOADING", payload: false });
-            toast.error("You are not a registered user");
+            setError("Error getting token: " + error);
             navigate("/UnauthorizedPage");
           }
-        },
-        failureCallback: (error) => {
-          dispatch({ type: "LOADING", payload: false });
-          setError("Error getting token: " + error);
-          navigate("/UnauthorizedPage");
-        }
-      });
-    } catch (err) {
-      dispatch({ type: "LOADING", payload: false });
-      setError("Login error: " + err.message);
-      navigate("/UnauthorizedPage");
-    }
-  }, [fetchUserData, navigate]);
+        });
+      } catch (err) {
+        dispatch({ type: "LOADING", payload: false });
+        setError("Login error: " + err.message);
+        navigate("/UnauthorizedPage");
+      }
+    },
+    [fetchUserData, navigate, state.authChecked]
+  );
 
   const initializeTeams = useCallback(async () => {
     try {
       await microsoftTeams.app.initialize();
       console.log("Teams SDK initialized");
       dispatch({ type: "INIT" });
-      handleMicrosoftSignIn(); // Trigger auth flow after initialization
+      handleMicrosoftSignIn(false); // Try to use existing session first
     } catch (error) {
       console.error("Teams SDK initialization failed:", error);
       dispatch({ type: "INIT" });
-      handleMicrosoftSignIn(); // Still attempt auth flow
+      handleMicrosoftSignIn(true); // Force new auth if initialization fails
     }
   }, [handleMicrosoftSignIn]);
 
@@ -181,8 +207,15 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.clear();
     dispatch({ type: "LOGOUT" });
     toast.success("Logout successful");
-    handleMicrosoftSignIn(); // Start new auth flow after logout
+    handleMicrosoftSignIn(true); // Force new auth after logout
   }, [handleMicrosoftSignIn]);
+
+  // Skip re-authentication if we already have a valid session
+  useEffect(() => {
+    if (state.isAuthenticated && !state.authChecked) {
+      dispatch({ type: "AUTH_CHECKED" });
+    }
+  }, [state.isAuthenticated, state.authChecked]);
 
   return (
     <AuthContext.Provider
@@ -197,7 +230,6 @@ export const AuthProvider = ({ children }) => {
       <ToastContainer position="top-right" autoClose={5000} pauseOnHover closeOnClick />
       {state.isLoading ? (
         <div className="full-page-loader">
-          {/* Add your loading spinner here */}
           <p>Loading application...</p>
         </div>
       ) : (
