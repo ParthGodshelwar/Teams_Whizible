@@ -73,7 +73,8 @@ export const AuthProvider = ({ children }) => {
     const storedUser = sessionStorage.getItem("user");
     const token = sessionStorage.getItem("token");
 
-    if (storedUser && token) {
+    // if (storedUser && token) {
+    if (false) {
       try {
         const decodedToken = jwtDecode(token);
         const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
