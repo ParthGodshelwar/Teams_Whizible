@@ -9,9 +9,9 @@ export default function AuthGuard({ children }) {
   const { pathname } = useLocation();
   console.log("AuthGuard", isAuthenticated, isInitialized);
 
-  // if (!isInitialized) {
-  //   return <div>Loading...</div>; // Show a loading state until auth context is ready
-  // }
+  if (!isInitialized) {
+    return <div>Loading...</div>; // Show a loading state until auth context is ready
+  }
 
   if (isAuthenticated) {
     return <>{children}</>;
