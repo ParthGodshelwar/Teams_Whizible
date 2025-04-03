@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
           console.log("Token received:", result);
           setToken(result);
           sessionStorage.setItem("token", result);
-          dispatch({ type: "LOGIN", payload: { isAuthenticated: true, isInitialized: true } });
+          dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
 
           toast.success("Microsoft login successful");
           // Decode the JWT token to get the preferred_username
