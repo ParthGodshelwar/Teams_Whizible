@@ -15,9 +15,9 @@ export default function AuthGuard({ children }) {
   //   console.log("AuthGuard effect triggered", isAuthenticated, isInitialized);
   // }, [isInitialized, isAuthenticated]);
 
-  // if (!isInitialized) {
-  //   return <div>Loading...</div>; // Show a loading state until auth context is ready
-  // }
+  if (!isInitialized) {
+    return <div>Loading...</div>; // Show a loading state until auth context is ready
+  }
 
   if (isAuthenticated) {
     return <>{children}</>;

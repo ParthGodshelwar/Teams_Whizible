@@ -70,9 +70,11 @@ export const AuthProvider = ({ children }) => {
   // }, [navigate, isUnregistered]);
   const handleMicrosoftSignIn = async () => {
     try {
-      dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
+      // dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
 
       await microsoftTeams.app.initialize();
+      dispatch({ type: "INIT", payload: { isInitialized: true } });
+
       console.log("Teams SDK initialized");
 
       microsoftTeams.authentication.getAuthToken({
