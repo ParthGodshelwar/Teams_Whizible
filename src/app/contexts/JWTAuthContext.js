@@ -146,7 +146,8 @@ export const AuthProvider = ({ children }) => {
         if (appAccess === 1) {
           navigate("/landingpage");
           if (forceLogin) {
-            toast.success("Signed in successfully");
+            // toast.success("Signed in successfully");
+            toast.success("Microsoft login successful");
           }
         } else {
           navigate("/UnauthorizedPage");
@@ -230,8 +231,14 @@ export const AuthProvider = ({ children }) => {
     >
       <ToastContainer position="top-right" autoClose={5000} pauseOnHover closeOnClick />
       {state.isLoading ? (
-        <div className="full-page-loader">
-          <p>Loading application...</p>
+        <div
+          className="full-page-loader d-flex justify-content-center align-items-center"
+          style={{ height: "100vh" }}
+        >
+          {/* <p>Signing in...</p> */}
+          <div className="spinner-border text-primary" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
         </div>
       ) : (
         children
