@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import * as microsoftTeams from "@microsoft/teams-js";
 import UnauthorizedPage from "app/views/UnauthorizedPage";
 import "react-toastify/dist/ReactToastify.css";
-import "./loader.css"; // <-- custom loader CSS
+// import "./loader.css"; // <-- custom loader CSS
 
 initializeIcons();
 
