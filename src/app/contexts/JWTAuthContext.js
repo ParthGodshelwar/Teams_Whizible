@@ -154,6 +154,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       setToken(authToken);
+      toast.success("Microsoft login successful");
       sessionStorage.setItem("token", authToken);
 
       const { userProfileData, moduleAccessData } = await fetchUserData(authToken);
