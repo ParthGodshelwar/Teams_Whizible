@@ -15,7 +15,7 @@ const initialState = {
   isInitialized: false,
   isAuthenticated: false,
   isLoading: true,
-  hasFirstLogin: false // Track if first login completed
+  isFirstLoad: true // Track first load
 };
 
 const reducer = (state, action) => {
@@ -28,7 +28,7 @@ const reducer = (state, action) => {
         isAuthenticated: true,
         user: action.payload.user,
         isLoading: false,
-        hasFirstLogin: true
+        isFirstLoad: false
       };
     case "LOGOUT":
       return {
@@ -36,12 +36,17 @@ const reducer = (state, action) => {
         isAuthenticated: false,
         user: null,
         isLoading: false,
-        hasFirstLogin: false
+        isFirstLoad: true
       };
     case "LOADING":
       return {
         ...state,
         isLoading: action.payload
+      };
+    case "SET_FIRST_LOAD":
+      return {
+        ...state,
+        isFirstLoad: action.payload
       };
     default:
       return state;
@@ -59,6 +64,7 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [token, setToken] = useState(null);
   const [error, setError] = useState(null);
+  const [isTeamsReload, setIsTeamsReload] = useState(false);
 
   const fetchUserData = useCallback(async (token) => {
     try {
@@ -108,8 +114,8 @@ export const AuthProvider = ({ children }) => {
 
   const handleMicrosoftSignIn = useCallback(
     async (forceLogin = false) => {
-      // Skip if we already have a valid session and not forcing login
-      if (!forceLogin && sessionStorage.getItem("token") && state.hasFirstLogin) {
+      // Skip if we have a valid session and not forcing login
+      if (!forceLogin && sessionStorage.getItem("token")) {
         try {
           const existingUser = JSON.parse(sessionStorage.getItem("user"));
           dispatch({ type: "LOGIN", payload: { user: existingUser } });
@@ -156,17 +162,37 @@ export const AuthProvider = ({ children }) => {
         navigate("/UnauthorizedPage");
       }
     },
-    [fetchUserData, navigate, state.hasFirstLogin]
+    [fetchUserData, navigate]
   );
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
         await microsoftTeams.app.initialize();
+
+        // Detect if this is a reload from Teams
+        microsoftTeams.app.getContext().then((context) => {
+          // Different ways to detect reload on desktop vs mobile
+          const isReload =
+            context.page.subPageId === "reload" || // Desktop
+            (context.app.host.clientType === "web" &&
+              performance.getEntriesByType("navigation")[0]?.type === "reload"); // Mobile
+
+          if (isReload) {
+            sessionStorage.removeItem("token");
+            sessionStorage.removeItem("user");
+            sessionStorage.removeItem("tAccess");
+            dispatch({ type: "SET_FIRST_LOAD", payload: true });
+          }
+        });
+
         dispatch({ type: "INIT" });
 
-        // Check if we have an existing valid session
-        if (sessionStorage.getItem("token")) {
+        // Check if we need to force login (first load or Teams reload)
+        if (state.isFirstLoad || !sessionStorage.getItem("token")) {
+          handleMicrosoftSignIn(true);
+        } else {
+          // Use existing session
           try {
             const existingUser = JSON.parse(sessionStorage.getItem("user"));
             dispatch({ type: "LOGIN", payload: { user: existingUser } });
@@ -174,9 +200,6 @@ export const AuthProvider = ({ children }) => {
             sessionStorage.clear();
             handleMicrosoftSignIn(true);
           }
-        } else {
-          // First-time login
-          handleMicrosoftSignIn(true);
         }
       } catch (error) {
         console.error("Initialization failed:", error);
@@ -186,7 +209,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeApp();
-  }, []);
+  }, [state.isFirstLoad]);
 
   const logout = useCallback(() => {
     sessionStorage.clear();
