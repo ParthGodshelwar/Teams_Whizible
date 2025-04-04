@@ -14,8 +14,7 @@ const initialState = {
   user: null,
   isInitialized: false,
   isAuthenticated: false,
-  isLoading: true,
-  requiresFreshLogin: true // Added flag to track fresh logins
+  isLoading: true
 };
 
 const reducer = (state, action) => {
@@ -27,26 +26,19 @@ const reducer = (state, action) => {
         ...state,
         isAuthenticated: true,
         user: action.payload.user,
-        isLoading: false,
-        requiresFreshLogin: false
+        isLoading: false
       };
     case "LOGOUT":
       return {
         ...state,
         isAuthenticated: false,
         user: null,
-        isLoading: false,
-        requiresFreshLogin: true
+        isLoading: false
       };
     case "LOADING":
       return {
         ...state,
         isLoading: action.payload
-      };
-    case "REQUEST_FRESH_LOGIN":
-      return {
-        ...state,
-        requiresFreshLogin: true
       };
     default:
       return state;
@@ -56,8 +48,7 @@ const reducer = (state, action) => {
 const AuthContext = createContext({
   ...initialState,
   logout: () => {},
-  handleMicrosoftSignIn: () => {},
-  refreshAuth: () => {} // Added method to manually trigger fresh login
+  handleMicrosoftSignIn: () => {}
 });
 
 export const AuthProvider = ({ children }) => {
@@ -66,31 +57,43 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [token, setToken] = useState(null);
   const [error, setError] = useState(null);
+  const [isTeamsReload, setIsTeamsReload] = useState(false);
 
-  // Effect to handle page reload detection
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      // Set flag in sessionStorage to detect reload
-      sessionStorage.setItem("isReloading", "true");
+    const initializeApp = async () => {
+      try {
+        await microsoftTeams.app.initialize();
+
+        // Check if this is a reload from Teams' more options
+        const context = await microsoftTeams.app.getContext();
+        if (context.page.subPageId === "reload") {
+          setIsTeamsReload(true);
+          sessionStorage.clear();
+        }
+
+        dispatch({ type: "INIT" });
+
+        // Check for existing valid session if not a Teams reload
+        if (!isTeamsReload && sessionStorage.getItem("token")) {
+          try {
+            const existingUser = JSON.parse(sessionStorage.getItem("user"));
+            dispatch({ type: "LOGIN", payload: { user: existingUser } });
+            return;
+          } catch (e) {
+            sessionStorage.clear();
+          }
+        }
+
+        // Otherwise initiate authentication
+        handleMicrosoftSignIn();
+      } catch (error) {
+        console.error("Initialization failed:", error);
+        dispatch({ type: "INIT" });
+        handleMicrosoftSignIn();
+      }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
-
-  // Effect to clear session and force fresh login on reload
-  useEffect(() => {
-    const isReloading = sessionStorage.getItem("isReloading") === "true";
-    if (isReloading) {
-      sessionStorage.removeItem("isReloading");
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("user");
-      sessionStorage.removeItem("tAccess");
-      dispatch({ type: "REQUEST_FRESH_LOGIN" });
-    }
+    initializeApp();
   }, []);
 
   const fetchUserData = useCallback(async (token) => {
@@ -98,7 +101,6 @@ export const AuthProvider = ({ children }) => {
       const decodedToken = jwtDecode(token);
       const emailId = decodedToken.preferred_username;
 
-      // Fetch user profile
       const userProfileResponse = await fetch(
         `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/UserProfile/Get?emailId=${emailId}`,
         {
@@ -115,7 +117,6 @@ export const AuthProvider = ({ children }) => {
       sessionStorage.setItem("user", JSON.stringify(userProfileData));
       sessionStorage.setItem("UserProfilePic", userProfileData?.data?.profilePicURL);
 
-      // Fetch module access
       const empID = userProfileData.data.employeeId;
       if (!empID) throw new Error("No employee ID found");
 
@@ -141,85 +142,48 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const handleMicrosoftSignIn = useCallback(
-    async (forceFresh = state.requiresFreshLogin) => {
-      // Skip if we have a valid session and don't need fresh login
-      if (!forceFresh && sessionStorage.getItem("token")) {
-        try {
-          const existingUser = JSON.parse(sessionStorage.getItem("user"));
-          dispatch({ type: "LOGIN", payload: { user: existingUser } });
-          return;
-        } catch (e) {
-          // If session restoration fails, proceed with fresh login
-          sessionStorage.clear();
-        }
-      }
+  const handleMicrosoftSignIn = useCallback(async () => {
+    dispatch({ type: "LOADING", payload: true });
 
-      dispatch({ type: "LOADING", payload: true });
-
-      try {
-        const authToken = await new Promise((resolve, reject) => {
-          microsoftTeams.authentication.getAuthToken({
-            successCallback: resolve,
-            failureCallback: reject
-          });
+    try {
+      const authToken = await new Promise((resolve, reject) => {
+        microsoftTeams.authentication.getAuthToken({
+          successCallback: resolve,
+          failureCallback: reject
         });
+      });
 
-        setToken(authToken);
-        sessionStorage.setItem("token", authToken);
+      setToken(authToken);
+      sessionStorage.setItem("token", authToken);
 
-        const { userProfileData, moduleAccessData } = await fetchUserData(authToken);
+      const { userProfileData, moduleAccessData } = await fetchUserData(authToken);
 
-        dispatch({ type: "LOGIN", payload: { user: userProfileData } });
+      dispatch({ type: "LOGIN", payload: { user: userProfileData } });
 
-        // Handle navigation based on access
-        const appAccess = moduleAccessData.data[0]?.appAccess;
-        if (appAccess === 1) {
-          navigate("/landingpage");
-          toast.success("Signed in successfully");
-        } else {
-          navigate("/UnauthorizedPage");
-        }
-      } catch (err) {
-        sessionStorage.clear();
-        dispatch({ type: "LOADING", payload: false });
-        toast.error(
-          err.message.includes("profile")
-            ? "You are not a registered user"
-            : "Sign in failed. Please try again."
-        );
+      const appAccess = moduleAccessData.data[0]?.appAccess;
+      if (appAccess === 1) {
+        navigate("/landingpage");
+        toast.success("Signed in successfully");
+      } else {
         navigate("/UnauthorizedPage");
       }
-    },
-    [fetchUserData, navigate, state.requiresFreshLogin]
-  );
-
-  const initializeTeams = useCallback(async () => {
-    try {
-      await microsoftTeams.app.initialize();
-      dispatch({ type: "INIT" });
-      handleMicrosoftSignIn();
-    } catch (error) {
-      console.error("Teams initialization failed:", error);
-      dispatch({ type: "INIT" });
-      handleMicrosoftSignIn(true); // Force fresh login on initialization failure
+    } catch (err) {
+      sessionStorage.clear();
+      dispatch({ type: "LOADING", payload: false });
+      toast.error(
+        err.message.includes("profile")
+          ? "You are not a registered user"
+          : "Sign in failed. Please try again."
+      );
+      navigate("/UnauthorizedPage");
     }
-  }, [handleMicrosoftSignIn]);
-
-  useEffect(() => {
-    initializeTeams();
-  }, [initializeTeams]);
+  }, [fetchUserData, navigate]);
 
   const logout = useCallback(() => {
     sessionStorage.clear();
     dispatch({ type: "LOGOUT" });
     toast.success("Logout successful");
-    handleMicrosoftSignIn(true); // Force fresh login after logout
-  }, [handleMicrosoftSignIn]);
-
-  const refreshAuth = useCallback(() => {
-    dispatch({ type: "REQUEST_FRESH_LOGIN" });
-    handleMicrosoftSignIn(true);
+    handleMicrosoftSignIn();
   }, [handleMicrosoftSignIn]);
 
   return (
@@ -229,20 +193,13 @@ export const AuthProvider = ({ children }) => {
         method: "JWT",
         logout,
         handleMicrosoftSignIn,
-        refreshAuth, // Expose manual refresh method
         error
       }}
     >
       <ToastContainer position="top-right" autoClose={5000} pauseOnHover closeOnClick />
       {state.isLoading ? (
-        <div
-          className="full-page-loader d-flex justify-content-center align-items-center"
-          style={{ height: "100vh" }}
-        >
-          {/* <p>Signing in...</p> */}
-          <div className="spinner-border text-primary" role="status">
-            <span className="sr-only">Loading...</span>
-          </div>
+        <div className="full-page-loader">
+          <p>Signing in...</p>
         </div>
       ) : (
         children
