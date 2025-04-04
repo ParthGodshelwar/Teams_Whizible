@@ -1,47 +1,48 @@
-import React, { createContext, useEffect, useReducer, useState, useCallback } from "react";
+import React, { createContext, useEffect, useReducer, useState } from "react";
 import { useMsal } from "@azure/msal-react";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { initializeIcons } from "@fluentui/react/lib/Icons";
-import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 import * as microsoftTeams from "@microsoft/teams-js";
+import UnauthorizedPage from "app/views/UnauthorizedPage";
+import "react-toastify/dist/ReactToastify.css";
+import "./loader.css"; // <-- custom loader CSS
 
-// Initialize Fluent UI icons
 initializeIcons();
 
 const initialState = {
   user: null,
   isInitialized: false,
-  isAuthenticated: false,
-  isLoading: true,
-  hasFirstLogin: false // Track if first login completed
+  isAuthenticated: false
 };
 
 const reducer = (state, action) => {
   switch (action.type) {
     case "INIT":
-      return { ...state, isInitialized: true };
+      return {
+        ...state,
+        isAuthenticated: action.payload.isAuthenticated,
+        isInitialized: true,
+        user: action.payload.user
+      };
     case "LOGIN":
       return {
         ...state,
         isAuthenticated: true,
-        user: action.payload.user,
-        isLoading: false,
-        hasFirstLogin: true
+        user: action.payload.user
       };
     case "LOGOUT":
       return {
         ...state,
         isAuthenticated: false,
-        user: null,
-        isLoading: false,
-        hasFirstLogin: false
+        user: null
       };
-    case "LOADING":
+    case "REGISTER":
       return {
         ...state,
-        isLoading: action.payload
+        isAuthenticated: true,
+        user: action.payload.user
       };
     default:
       return state;
@@ -50,150 +51,118 @@ const reducer = (state, action) => {
 
 const AuthContext = createContext({
   ...initialState,
+  login: () => {},
   logout: () => {},
+  register: () => {},
   handleMicrosoftSignIn: () => {}
 });
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { instance } = useMsal();
   const navigate = useNavigate();
+  const [isUnregistered, setIsUnregistered] = useState(false);
   const [token, setToken] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [error, setError] = useState(null);
+  const [moduleAccess, setModuleAccess] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // NEW STATE
 
-  const fetchUserData = useCallback(async (token) => {
+  const handleMicrosoftSignIn = async () => {
     try {
-      const decodedToken = jwtDecode(token);
-      const emailId = decodedToken.preferred_username;
+      setIsLoading(true); // Show loader
+      dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
 
-      const userProfileResponse = await fetch(
-        `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/UserProfile/Get?emailId=${emailId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        }
-      );
+      await microsoftTeams.app.initialize();
+      console.log("Teams SDK initialized");
 
-      if (!userProfileResponse.ok) throw new Error("Failed to fetch profile");
+      microsoftTeams.authentication.getAuthToken({
+        successCallback: async (result) => {
+          console.log("Token received:", result);
+          setToken(result);
+          sessionStorage.setItem("token", result);
+          dispatch({ type: "LOGIN", payload: { isAuthenticated: true } });
 
-      const userProfileData = await userProfileResponse.json();
-      sessionStorage.setItem("user", JSON.stringify(userProfileData));
-      sessionStorage.setItem("UserProfilePic", userProfileData?.data?.profilePicURL);
+          toast.success("Microsoft login successful");
 
-      const empID = userProfileData.data.employeeId;
-      if (!empID) throw new Error("No employee ID found");
-
-      const moduleAccessResponse = await fetch(
-        `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/ModuleAccess/Get?empID=${empID}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        }
-      );
-
-      if (!moduleAccessResponse.ok) throw new Error("Failed to fetch module access");
-
-      const moduleAccessData = await moduleAccessResponse.json();
-      sessionStorage.setItem("tAccess", JSON.stringify(moduleAccessData));
-
-      return { userProfileData, moduleAccessData };
-    } catch (error) {
-      sessionStorage.clear();
-      throw error;
-    }
-  }, []);
-
-  const handleMicrosoftSignIn = useCallback(
-    async (forceLogin = false) => {
-      // Skip if we already have a valid session and not forcing login
-      if (!forceLogin && sessionStorage.getItem("token") && state.hasFirstLogin) {
-        try {
-          const existingUser = JSON.parse(sessionStorage.getItem("user"));
-          dispatch({ type: "LOGIN", payload: { user: existingUser } });
-          return;
-        } catch (e) {
-          sessionStorage.clear();
-        }
-      }
-
-      dispatch({ type: "LOADING", payload: true });
-
-      try {
-        const authToken = await new Promise((resolve, reject) => {
-          microsoftTeams.authentication.getAuthToken({
-            successCallback: resolve,
-            failureCallback: reject
-          });
-        });
-
-        setToken(authToken);
-        sessionStorage.setItem("token", authToken);
-
-        const { userProfileData, moduleAccessData } = await fetchUserData(authToken);
-
-        dispatch({ type: "LOGIN", payload: { user: userProfileData } });
-
-        const appAccess = moduleAccessData.data[0]?.appAccess;
-        if (appAccess === 1) {
-          navigate("/landingpage");
-          if (forceLogin) {
-            toast.success("Signed in successfully");
-          }
-        } else {
-          navigate("/UnauthorizedPage");
-        }
-      } catch (err) {
-        sessionStorage.clear();
-        dispatch({ type: "LOADING", payload: false });
-        toast.error(
-          err.message.includes("profile")
-            ? "You are not a registered user"
-            : "Sign in failed. Please try again."
-        );
-        navigate("/UnauthorizedPage");
-      }
-    },
-    [fetchUserData, navigate, state.hasFirstLogin]
-  );
-
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        await microsoftTeams.app.initialize();
-        dispatch({ type: "INIT" });
-
-        // Check if we have an existing valid session
-        if (sessionStorage.getItem("token")) {
           try {
-            const existingUser = JSON.parse(sessionStorage.getItem("user"));
-            dispatch({ type: "LOGIN", payload: { user: existingUser } });
-          } catch (e) {
-            sessionStorage.clear();
-            handleMicrosoftSignIn(true);
+            const decodedToken = jwtDecode(result);
+            const emailId = decodedToken.preferred_username;
+
+            const userProfileResponse = await fetch(
+              `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/UserProfile/Get?emailId=${emailId}`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${result}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            if (!userProfileResponse.ok) {
+              throw new Error(`Error fetching user profile: ${userProfileResponse.statusText}`);
+            }
+
+            const userProfileData = await userProfileResponse.json();
+            setUserProfile(userProfileData);
+            sessionStorage.setItem("user", JSON.stringify(userProfileData));
+            sessionStorage.setItem("UserProfilePic", userProfileData?.data?.profilePicURL);
+
+            const empID = userProfileData.data.employeeId;
+            if (!empID) setIsUnregistered(true);
+
+            const moduleAccessResponse = await fetch(
+              `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/api/ModuleAccess/Get?empID=${empID}`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${result}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            if (!moduleAccessResponse.ok) {
+              throw new Error(`Error fetching module access: ${moduleAccessResponse.statusText}`);
+            }
+
+            const moduleAccessData = await moduleAccessResponse.json();
+            setModuleAccess(moduleAccessData);
+            sessionStorage.setItem("tAccess", JSON.stringify(moduleAccessData));
+
+            const empId = moduleAccessData.data[0]?.empId ?? null;
+            const appAccess = moduleAccessData.data[0]?.appAccess ?? null;
+
+            if (appAccess == 0) navigate("/UnauthorizedPage");
+            else if (empId && appAccess == 1) navigate("/landingpage");
+          } catch (apiError) {
+            setError("Error calling API: " + apiError.message);
+            if (!userProfile) {
+              sessionStorage.clear();
+              toast.error("You are not a registered user");
+              setIsUnregistered(true);
+            }
+          } finally {
+            setIsLoading(false); // Hide loader
           }
-        } else {
-          // First-time login
-          handleMicrosoftSignIn(true);
+        },
+        failureCallback: (error) => {
+          setError("Error getting token: " + error);
+          setIsLoading(false); // Hide loader
         }
-      } catch (error) {
-        console.error("Initialization failed:", error);
-        dispatch({ type: "INIT" });
-        handleMicrosoftSignIn(true);
-      }
-    };
+      });
+    } catch (err) {
+      setError("Initialization error: " + err.message);
+      setIsLoading(false); // Hide loader
+    }
+  };
 
-    initializeApp();
-  }, []);
-
-  const logout = useCallback(() => {
-    sessionStorage.clear();
+  const logout = () => {
+    sessionStorage.removeItem("access_token");
     dispatch({ type: "LOGOUT" });
     toast.success("Logout successful");
-    handleMicrosoftSignIn(true);
-  }, [handleMicrosoftSignIn]);
+  };
 
   return (
     <AuthContext.Provider
@@ -201,18 +170,16 @@ export const AuthProvider = ({ children }) => {
         ...state,
         method: "JWT",
         logout,
-        handleMicrosoftSignIn,
-        error
+        handleMicrosoftSignIn
       }}
     >
-      <ToastContainer position="top-right" autoClose={5000} pauseOnHover closeOnClick />
-      {state.isLoading ? (
-        <div className="full-page-loader">
-          <p>Loading application...</p>
+      <ToastContainer position="top-right" autoClose={5000} />
+      {isLoading && (
+        <div className="loader-container">
+          <div className="spinner"></div>
         </div>
-      ) : (
-        children
       )}
+      {children}
     </AuthContext.Provider>
   );
 };
