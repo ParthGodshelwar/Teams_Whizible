@@ -4636,4 +4636,24 @@ html body table tr td.ui-datepicker-current-day a.ui-state-default.ui-priority-s
   .cursor_icon {
     cursor: pointer;
   }
+
+  .drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.3); /* optional dimming effect */
+    z-index: 1040; /* Make sure it's under the drawer but over the rest of the page */
+  }
+
+  .offcanvasHeight-75 {
+    height: 75vh;
+  }
+  
+  .full-height {
+    height: 100vh !important;
+  }
+  
+  
   

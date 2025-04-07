@@ -64,6 +64,9 @@ const MyTimesheetTab = ({}) => {
   const dropdownRef = useRef(null);
 
   const [activeCard, setActiveCard] = useState(null); // Tracks clicked card
+  const [isFullHeight, setIsFullHeight] = useState(false);
+  const scrollRef = useRef(null);
+  const lastScrollTop = useRef(0);
 
   const toggleActions = (timesheetID) => {
     // setActiveCard(activeCard === timesheetID ? null : timesheetID);
@@ -220,6 +223,30 @@ const MyTimesheetTab = ({}) => {
       minute: "numeric",
     });
   };
+
+  useEffect(() => {
+    const drawer = scrollRef.current;
+    if (!drawer) return;
+
+    const handleScroll = () => {
+      const currentScroll = drawer.scrollTop;
+
+      // If scrolling down
+      if (currentScroll > lastScrollTop.current + 10) {
+        closeDrawer(); // close on scroll down
+      }
+
+      // If scrolling up
+      if (currentScroll < lastScrollTop.current - 10) {
+        setIsFullHeight(true); // make it full screen
+      }
+
+      lastScrollTop.current = currentScroll;
+    };
+
+    drawer.addEventListener("scroll", handleScroll);
+    return () => drawer.removeEventListener("scroll", handleScroll);
+  }, [closeDrawer]);
 
   // useEffect(() => {
   //   fetchTimesheetData(statusMap.Approved, currentPage); // Load initial data
@@ -431,55 +458,77 @@ const MyTimesheetTab = ({}) => {
 
       {/*Details Drawer */}
       {isDrawerOpen && selectedTimesheet && (
-        <div
-          className="offcanvas offcanvas-bottom offcanvasHeight-75 show box_shodow"
-          style={{ display: "block", overflowY: "auto" }}
-        >
-          <div className="offcanvas-body">
-            <div className="TimesheetEntryDetlsSec">
-              <div className="stickyOffHeader pt-3">
-                <div className="greyCloseOffcanvas" onClick={closeDrawer}>
-                  &nbsp;
+        <>
+          <div
+            className="drawer-backdrop"
+            onClick={closeDrawer} // or remove this if you want it to be non-clickable
+          ></div>
+          {/* <div
+            className="offcanvas offcanvas-bottom offcanvasHeight-75 show box_shodow"
+            style={{ display: "block", overflowY: "auto" }}
+          > */}
+          <div
+            ref={scrollRef}
+            className={`offcanvas offcanvas-bottom box_shodow show ${
+              isFullHeight ? "full-height" : "offcanvasHeight-75"
+            }`}
+            style={{
+              display: "block",
+              overflowY: "auto",
+              transition: "height 0.3s ease",
+            }}
+          >
+            <div className="offcanvas-body">
+              <div className="TimesheetEntryDetlsSec">
+                <div className="stickyOffHeader pt-3">
+                  <div className="greyCloseOffcanvas" onClick={closeDrawer}>
+                    &nbsp;
+                  </div>
                 </div>
+                <TimesheetEntryTab timesheetdate={fromDate} />
               </div>
-              <TimesheetEntryTab timesheetdate={fromDate} />
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* History Drawer */}
       {isHistoryDrawerOpen && timesheetHistory && (
-        <div
-          className="offcanvas offcanvas-bottom offcanvasHeight-75 box_shodow show d-flex flex-column"
-          style={{ display: "block", height: "75vh" }}
-        >
-          <div className="offcanvas-body d-flex flex-column pt-0">
-            <div className="TimesheetEntryDetlsSec d-flex flex-column flex-grow-1">
-              <div className="stickyOffHeader bg-white pt-3">
-                <div
-                  className="greyCloseOffcanvas mb-3"
-                  onClick={closeHisDrawer}
-                >
-                  &nbsp;
+        <>
+          <div
+            className="drawer-backdrop"
+            onClick={closeHisDrawer} // or remove this if you want it to be non-clickable
+          ></div>
+          <div
+            className="offcanvas offcanvas-bottom offcanvasHeight-75 box_shodow show d-flex flex-column"
+            style={{ display: "block", height: "75vh" }}
+          >
+            <div className="offcanvas-body d-flex flex-column pt-0">
+              <div className="TimesheetEntryDetlsSec d-flex flex-column flex-grow-1">
+                <div className="stickyOffHeader bg-white pt-3">
+                  <div
+                    className="greyCloseOffcanvas mb-3"
+                    onClick={closeHisDrawer}
+                  >
+                    &nbsp;
+                  </div>
+
+                  <h5 className=" pgtitle">My Timesheet History</h5>
                 </div>
 
-                <h5 className=" pgtitle">My Timesheet History</h5>
-              </div>
-
-              {/* History Cards */}
-              <div
-                className="history-card-container flex-grow-1"
-                style={{ overflowY: "auto", paddingRight: "10px" }}
-              >
-                {timesheetHistory.length > 0 ? (
-                  timesheetHistory.map((history, index) => (
-                    <div
-                      className="card mb-3 shadow-sm border-0 rounded-lg"
-                      key={index}
-                    >
-                      <div className="card-body p-4">
-                        {/* <div className="d-flex justify-content-between align-items-center mb-3">
+                {/* History Cards */}
+                <div
+                  className="history-card-container flex-grow-1"
+                  style={{ overflowY: "auto", paddingRight: "10px" }}
+                >
+                  {timesheetHistory.length > 0 ? (
+                    timesheetHistory.map((history, index) => (
+                      <div
+                        className="card mb-3 shadow-sm border-0 rounded-lg"
+                        key={index}
+                      >
+                        <div className="card-body p-4">
+                          {/* <div className="d-flex justify-content-between align-items-center mb-3">
                           <span
                             className={`badge ${getStatusBadgeClass(
                               history.statusDescription
@@ -488,61 +537,66 @@ const MyTimesheetTab = ({}) => {
                             {history.statusDescription}
                           </span>
                         </div> */}
-                        <div className="mb-2">
-                          <small className="text-muted">Status:</small>
-                          <p className="mb-0 font-weight-bold">
-                            {history.statusDescription}
-                          </p>
-                        </div>
+                          <div className="mb-2">
+                            <small className="text-muted">Status:</small>
+                            <p className="mb-0 font-weight-bold">
+                              {history.statusDescription}
+                            </p>
+                          </div>
 
-                        <div className="mb-2">
-                          <small className="text-muted">Generation Date:</small>
-                          <p className="mb-0 font-weight-bold">
-                            {formatDate(history.createdDate)}
-                          </p>
-                        </div>
+                          <div className="mb-2">
+                            <small className="text-muted">
+                              Generation Date:
+                            </small>
+                            <p className="mb-0 font-weight-bold">
+                              {formatDate(history.createdDate)}
+                            </p>
+                          </div>
 
-                        <div className="mb-2">
-                          <small className="text-muted">Updated Date:</small>
-                          <p className="mb-0 font-weight-bold">
-                            {history.updatedDate
-                              ? formatDate(history.updatedDate)
-                              : "N/A"}
-                          </p>
-                        </div>
+                          <div className="mb-2">
+                            <small className="text-muted">Updated Date:</small>
+                            <p className="mb-0 font-weight-bold">
+                              {history.updatedDate
+                                ? formatDate(history.updatedDate)
+                                : "N/A"}
+                            </p>
+                          </div>
 
-                        <div className="mb-2">
-                          <small className="text-muted">Action Taken By:</small>
-                          <p className="mb-0 font-weight-bold">
-                            {history.actionTakenBy || "N/A"}
-                          </p>
-                        </div>
+                          <div className="mb-2">
+                            <small className="text-muted">
+                              Action Taken By:
+                            </small>
+                            <p className="mb-0 font-weight-bold">
+                              {history.actionTakenBy || "N/A"}
+                            </p>
+                          </div>
 
-                        <div className="mb-2">
-                          <small className="text-muted">Action Taken:</small>
-                          <p className="mb-0 font-weight-bold">
-                            {history.actionTaken}
-                          </p>
-                        </div>
+                          <div className="mb-2">
+                            <small className="text-muted">Action Taken:</small>
+                            <p className="mb-0 font-weight-bold">
+                              {history.actionTaken}
+                            </p>
+                          </div>
 
-                        <div className="mb-0">
-                          <small className="text-muted">Approver Name:</small>
-                          <p className="mb-0 font-weight-bold">
-                            {history.approverName || "N/A"}
-                          </p>
+                          <div className="mb-0">
+                            <small className="text-muted">Approver Name:</small>
+                            <p className="mb-0 font-weight-bold">
+                              {history.approverName || "N/A"}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-muted py-4">
-                    No history available.
-                  </p>
-                )}
+                    ))
+                  ) : (
+                    <p className="text-center text-muted py-4">
+                      No history available.
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -475,89 +475,94 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
       </div>
 
       {isDrawerOpen && (
-        <div
-          className="offcanvas offcanvas-bottom offcanvasHeight-75 box_shodow show mb-3"
-          style={{ overflowY: "hidden" }}
-        >
-          <div className="offcanvas-body" style={{ overflowY: "hidden" }}>
-            <div>
-              <div className="graybg container-fluid py-1 mb-2">
-                <div className="row">
-                  <div className="col-12 d-flex align-items-center justify-content-between">
-                    <h5 className="pgtitle mb-0 ">Timesheet Entry</h5>
-                    <Tooltip1 title="Close">
-                      <button
-                        type="button"
-                        className="btn-close text-end"
-                        onClick={closeDrawer}
-                        aria-label="Close"
-                      ></button>
-                    </Tooltip1>
+        <>
+          <div
+            className="drawer-backdrop"
+            // onClick={closeDrawer} // or remove this if you want it to be non-clickable
+          ></div>
+          <div
+            className="offcanvas offcanvas-bottom offcanvasHeight-75 box_shodow show mb-3"
+            style={{ overflowY: "hidden" }}
+          >
+            <div className="offcanvas-body" style={{ overflowY: "hidden" }}>
+              <div>
+                <div className="graybg container-fluid py-1 mb-2">
+                  <div className="row">
+                    <div className="col-12 d-flex align-items-center justify-content-between">
+                      <h5 className="pgtitle mb-0 ">Timesheet Entry</h5>
+                      <Tooltip1 title="Close">
+                        <button
+                          type="button"
+                          className="btn-close text-end"
+                          onClick={closeDrawer}
+                          aria-label="Close"
+                        ></button>
+                      </Tooltip1>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="row mb-2">
-                <div className="col-sm-6">
-                  <div
-                    style={{
-                      textAlign: "center",
-                      color: "#ed1c24",
-                      fontSize: "15px",
+                <div className="row mb-2">
+                  <div className="col-sm-6">
+                    <div
+                      style={{
+                        textAlign: "center",
+                        color: "#ed1c24",
+                        fontSize: "15px",
 
-                      margin: "20px 0",
-                    }}
-                  ></div>
-                  <div className="calendarDate ps-3">
-                    <FaCalendarCheck className="pe-1" />
+                        margin: "20px 0",
+                      }}
+                    ></div>
+                    <div className="calendarDate ps-3">
+                      <FaCalendarCheck className="pe-1" />
 
-                    {formateddate}
+                      {formateddate}
 
-                    {/* <span className="ps-3">{timesheetData?.daMonth}</span> */}
+                      {/* <span className="ps-3">{timesheetData?.daMonth}</span> */}
+                    </div>
                   </div>
-                </div>
-                <div className="col-sm-6 text-end">
-                  <div className="pe-3">
-                    (<span className="mandatoryTxt">*</span> Mandatory)
-                  </div>
-                  <div className="col-sm-12 text-end">
-                    <div className="nextBtnDiv d-flex justify-content-end gap-2 pe-3">
-                      <button
-                        className="btn btnyellow"
-                        id="saveTimesheetBtn"
-                        data-bs-toggle="tooltip"
-                        data-bs-original-title="Save"
-                        onClick={() => {
-                          handleSave();
-                        }}
-                      >
-                        Save
-                      </button>
+                  <div className="col-sm-6 text-end">
+                    <div className="pe-3">
+                      (<span className="mandatoryTxt">*</span> Mandatory)
+                    </div>
+                    <div className="col-sm-12 text-end">
+                      <div className="nextBtnDiv d-flex justify-content-end gap-2 pe-3">
+                        <button
+                          className="btn btnyellow"
+                          id="saveTimesheetBtn"
+                          data-bs-toggle="tooltip"
+                          data-bs-original-title="Save"
+                          onClick={() => {
+                            handleSave();
+                          }}
+                        >
+                          Save
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div
-              className="TimesheetEntryDetlsSec"
-              style={{
-                // height: "320px",
-                height: "100%",
-                overflowY: "auto",
-              }}
-            >
-              {/* <div className="stickyOffHeader pt-3">
+              <div
+                className="TimesheetEntryDetlsSec"
+                style={{
+                  // height: "320px",
+                  height: "100%",
+                  overflowY: "auto",
+                }}
+              >
+                {/* <div className="stickyOffHeader pt-3">
                 <div className="greyCloseOffcanvas" onClick={closeDrawer}>
                   &nbsp;
                 </div>
               </div> */}
 
-              <div>
-                {/* <TimesheetEntryTab timesheetdate={fromDate} /> */}
+                <div>
+                  {/* <TimesheetEntryTab timesheetdate={fromDate} /> */}
 
-                <div className="timesheetFields ">
-                  <div className="row">
-                    {/* <div className="row mb-3 justify-content-end">
+                  <div className="timesheetFields ">
+                    <div className="row">
+                      {/* <div className="row mb-3 justify-content-end">
                       <div className="ApplyFilSec d-flex justify-content-end">
                         <button
                           className="btn btn-primary"
@@ -570,69 +575,70 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                       </div>
                     </div> */}
 
-                    <div className="col-sm-12">
-                      {/* Project */}
-                      <div className="row mb-3">
-                        <label className="col-sm-4 text-start required mt-2">
-                          Project
-                        </label>
-                        <div className="col-sm-7">
-                          <select
-                            value={selectedProject} // need to add
-                            onChange={handleChange}
-                            style={{
-                              width: "100%", // Ensures the select takes full width of its container
-                              padding: "8px 12px", // Adds some padding for better visual space
-                              fontSize: "12px", // Adjusts font size for readability
-                              borderRadius: "4px", // Adds rounded corners for a modern look
-                              border: "1px solid #ccc", // A soft border color
-                              boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
-                            }}
-                          >
-                            <option>Select Project</option>
-                            {Array.isArray(projects) && projects.length > 0 ? (
-                              projects.map((project) => (
-                                <option key={project.id} value={project.id}>
-                                  {project.name}{" "}
-                                </option>
-                              ))
-                            ) : (
-                              <option disabled>No projects available</option>
-                            )}
-                          </select>
+                      <div className="col-sm-12">
+                        {/* Project */}
+                        <div className="row mb-3">
+                          <label className="col-sm-4 text-start required mt-2">
+                            Project
+                          </label>
+                          <div className="col-sm-7">
+                            <select
+                              value={selectedProject} // need to add
+                              onChange={handleChange}
+                              style={{
+                                width: "100%", // Ensures the select takes full width of its container
+                                padding: "8px 12px", // Adds some padding for better visual space
+                                fontSize: "12px", // Adjusts font size for readability
+                                borderRadius: "4px", // Adds rounded corners for a modern look
+                                border: "1px solid #ccc", // A soft border color
+                                boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
+                              }}
+                            >
+                              <option>Select Project</option>
+                              {Array.isArray(projects) &&
+                              projects.length > 0 ? (
+                                projects.map((project) => (
+                                  <option key={project.id} value={project.id}>
+                                    {project.name}{" "}
+                                  </option>
+                                ))
+                              ) : (
+                                <option disabled>No projects available</option>
+                              )}
+                            </select>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Task */}
-                      <div className="row mb-3">
-                        <label className="col-sm-4 text-start required mt-2">
-                          Task
-                        </label>
-                        <div
-                          className="col-sm-7"
-                          style={{ position: "relative" }}
-                        >
-                          <select
-                            onChange={handleTaskChange}
-                            value={selectedTask}
-                            style={{
-                              width: "100%", // Ensures the select takes full width of its container
-                              padding: "8px 12px", // Adds some padding for better visual space
-                              fontSize: "12px", // Adjusts font size for readability
-                              borderRadius: "4px", // Adds rounded corners for a modern look
-                              border: "1px solid #ccc", // A soft border color
-                              boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
-                            }}
+                        {/* Task */}
+                        <div className="row mb-3">
+                          <label className="col-sm-4 text-start required mt-2">
+                            Task
+                          </label>
+                          <div
+                            className="col-sm-7"
+                            style={{ position: "relative" }}
                           >
-                            <option value="">Select Task</option>
-                            {tasks.map((task) => (
-                              <option key={task.id} value={task.id}>
-                                {task.name}
-                              </option>
-                            ))}
-                          </select>
+                            <select
+                              onChange={handleTaskChange}
+                              value={selectedTask}
+                              style={{
+                                width: "100%", // Ensures the select takes full width of its container
+                                padding: "8px 12px", // Adds some padding for better visual space
+                                fontSize: "12px", // Adjusts font size for readability
+                                borderRadius: "4px", // Adds rounded corners for a modern look
+                                border: "1px solid #ccc", // A soft border color
+                                boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
+                              }}
+                            >
+                              <option value="">Select Task</option>
+                              {tasks.map((task) => (
+                                <option key={task.id} value={task.id}>
+                                  {task.name}
+                                </option>
+                              ))}
+                            </select>
 
-                          {/* <div
+                            {/* <div
                             style={{
                               position: "absolute",
                               top: "50%",
@@ -650,85 +656,85 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                             )}
                           </div> */}
 
-                          {selectedTask && (
-                            <div
-                              ref={iconRef}
-                              style={{
-                                position: "absolute",
-                                top: "50%",
-                                right: "27px",
-                                transform: "translateY(-50%)",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => {
-                                setIsCalloutVisible(!isCalloutVisible);
-                                // handleTaskHover(selectedTask);
-                                handleTaskHover(selectedTask);
-                              }}
-                            >
-                              <FaInfoCircle
-                                style={{ fontSize: "15px", color: "#007bff" }}
-                              />
-                            </div>
-                          )}
-
-                          {/* Task details Tooltip */}
-
-                          {isCalloutVisible && (
-                            <Callout
-                              target={iconRef.current}
-                              onDismiss={() => setIsCalloutVisible(false)}
-                              directionalHint={DirectionalHint.rightCenter}
-                              gapSpace={10}
-                              setInitialFocus
-                            >
+                            {selectedTask && (
                               <div
-                                style={{ padding: "10px", maxWidth: "250px" }}
+                                ref={iconRef}
+                                style={{
+                                  position: "absolute",
+                                  top: "50%",
+                                  right: "27px",
+                                  transform: "translateY(-50%)",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => {
+                                  setIsCalloutVisible(!isCalloutVisible);
+                                  // handleTaskHover(selectedTask);
+                                  handleTaskHover(selectedTask);
+                                }}
                               >
-                                <div className="row">
-                                  <div className="col-sm-6 col-12 txt_Blue">
-                                    Start Date:
+                                <FaInfoCircle
+                                  style={{ fontSize: "15px", color: "#007bff" }}
+                                />
+                              </div>
+                            )}
+
+                            {/* Task details Tooltip */}
+
+                            {isCalloutVisible && (
+                              <Callout
+                                target={iconRef.current}
+                                onDismiss={() => setIsCalloutVisible(false)}
+                                directionalHint={DirectionalHint.rightCenter}
+                                gapSpace={10}
+                                setInitialFocus
+                              >
+                                <div
+                                  style={{ padding: "10px", maxWidth: "250px" }}
+                                >
+                                  <div className="row">
+                                    <div className="col-sm-6 col-12 txt_Blue">
+                                      Start Date:
+                                    </div>
+                                    <div className="col-sm-6 col-12">
+                                      {taskDetails?.startDate || "N/A"}
+                                    </div>
                                   </div>
-                                  <div className="col-sm-6 col-12">
-                                    {taskDetails?.startDate || "N/A"}
+                                  <div className="row">
+                                    <div className="col-sm-6 col-12 txt_Blue">
+                                      End Date:
+                                    </div>
+                                    <div className="col-sm-6 col-12">
+                                      {taskDetails?.endDate || "N/A"}
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="row">
-                                  <div className="col-sm-6 col-12 txt_Blue">
-                                    End Date:
-                                  </div>
-                                  <div className="col-sm-6 col-12">
-                                    {taskDetails?.endDate || "N/A"}
-                                  </div>
-                                </div>
-                                {/* <div className="row">
+                                  {/* <div className="row">
                                                         <div className="col-sm-6 col-12 txt_Blue">Task Name :</div>
                                                         <div className="col-sm-6 col-12">{taskDetails?.taskName || "N/A"}</div>
                                                       </div> */}
-                                <div className="row">
-                                  <div className="col-sm-6 col-12 txt_Blue">
-                                    Actual Effort:
+                                  <div className="row">
+                                    <div className="col-sm-6 col-12 txt_Blue">
+                                      Actual Effort:
+                                    </div>
+                                    <div className="col-sm-6 col-12">
+                                      {taskDetails?.actualWork || "N/A"}
+                                    </div>
                                   </div>
-                                  <div className="col-sm-6 col-12">
-                                    {taskDetails?.actualWork || "N/A"}
+                                  <div className="row">
+                                    <div className="col-sm-6 col-12 txt_Blue">
+                                      Planned Efforts:
+                                    </div>
+                                    <div className="col-sm-6 col-12">
+                                      {taskDetails?.plannedEfforts || "N/A"}
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="row">
-                                  <div className="col-sm-6 col-12 txt_Blue">
-                                    Planned Efforts:
-                                  </div>
-                                  <div className="col-sm-6 col-12">
-                                    {taskDetails?.plannedEfforts || "N/A"}
-                                  </div>
-                                </div>
-                              </div>
-                            </Callout>
-                          )}
+                              </Callout>
+                            )}
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Sub Task */}
-                      {/* <div className="row mb-3">
+                        {/* Sub Task */}
+                        {/* <div className="row mb-3">
                                         <label className="col-sm-4 text-end mt-2">Sub Task</label>
                                         <div className="col-sm-7">
                                           <select
@@ -752,175 +758,182 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
                                         </div>
                                       </div> */}
 
-                      {/* From Time */}
-                      <div className="row mb-3">
-                        <label className="col-sm-4 text-start mt-2">
-                          From Time
-                        </label>
-                        <div className="col-sm-7 d-flex">
-                          <select
-                            disabled
-                            className="form-control w-50 mb-2"
-                            // value={selectedHour || start?.hour} // Default to start.hour if selectedHour is not set
-                            value={selectedHour || "aa"} // Default to start.hour if selectedHour is not set
-                            onChange={(e) => setSelectedHour(e.target.value)}
-                            style={{
-                              width: "100%",
-                              padding: "2px 15px",
-                              fontSize: "15px",
-                              borderRadius: "4px",
-                              border: "1px solid #ccc",
-                              boxSizing: "border-box",
-                            }}
-                          >
-                            <option>Hour</option>
-                            {hours.map((hour) => (
-                              <option key={hour} value={hour}>
-                                {hour}
-                              </option>
-                            ))}
-                          </select>
-                          <label className="px-2">Hr</label>
-                          <select
-                            disabled
-                            className="form-control w-50"
-                            value={selectedMinute || "aa"} // Default to start.minute if selectedMinute is not set
-                            onChange={(e) => setSelectedMinute(e.target.value)}
-                            style={{
-                              width: "100%",
-                              padding: "2px 12px",
-                              fontSize: "15px",
-                              borderRadius: "4px",
-                              border: "1px solid #ccc",
-                              boxSizing: "border-box",
-                            }}
-                          >
-                            <option>Minute</option>
-                            {minutes.map((minute) => (
-                              <option key={minute} value={minute}>
-                                {minute}
-                              </option>
-                            ))}
-                          </select>
-                          <label className="px-2">Min</label>
+                        {/* From Time */}
+                        <div className="row mb-3">
+                          <label className="col-sm-4 text-start mt-2">
+                            From Time
+                          </label>
+                          <div className="col-sm-7 d-flex">
+                            <select
+                              disabled
+                              className="form-control w-50 mb-2"
+                              // value={selectedHour || start?.hour} // Default to start.hour if selectedHour is not set
+                              value={selectedHour || ""} // Default to start.hour if selectedHour is not set
+                              onChange={(e) => setSelectedHour(e.target.value)}
+                              style={{
+                                width: "100%",
+                                padding: "2px 15px",
+                                fontSize: "15px",
+                                borderRadius: "4px",
+                                border: "1px solid #ccc",
+                                boxSizing: "border-box",
+                              }}
+                            >
+                              <option>Hour</option>
+                              {hours.map((hour) => (
+                                <option key={hour} value={hour}>
+                                  {hour}
+                                </option>
+                              ))}
+                            </select>
+                            <label className="px-2">Hr</label>
+                            <select
+                              disabled
+                              className="form-control w-50"
+                              value={selectedMinute || "aa"} // Default to start.minute if selectedMinute is not set
+                              onChange={(e) =>
+                                setSelectedMinute(e.target.value)
+                              }
+                              style={{
+                                width: "100%",
+                                padding: "2px 12px",
+                                fontSize: "15px",
+                                borderRadius: "4px",
+                                border: "1px solid #ccc",
+                                boxSizing: "border-box",
+                              }}
+                            >
+                              <option>Minute</option>
+                              {minutes.map((minute) => (
+                                <option key={minute} value={minute}>
+                                  {minute}
+                                </option>
+                              ))}
+                            </select>
+                            <label className="px-2">Min</label>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="row mb-3">
-                        <label className="col-sm-4 text-start mt-2">
-                          To Time
-                        </label>
-                        <div className="col-sm-7 d-flex">
-                          <select
-                            disabled
-                            className="form-control w-50"
-                            value={selectedHourT || "aa"} // Default to end.hour if selectedHourT is not set
-                            onChange={(e) => setSelectedHourT(e.target.value)}
-                            style={{
-                              width: "100%",
-                              padding: "2px 12px",
-                              fontSize: "16px",
-                              borderRadius: "4px",
-                              border: "1px solid #ccc",
-                              boxSizing: "border-box",
-                            }}
-                          >
-                            <option>Hour</option>
-                            {hours.map((hour) => (
-                              <option key={hour} value={hour}>
-                                {hour}
-                              </option>
-                            ))}
-                          </select>
-                          <label className="px-2">Hr</label>
-                          <select
-                            disabled
-                            className="form-control w-50"
-                            value={selectedMinuteT || "aa"} // Default to end.minute if selectedMinuteT is not set
-                            onChange={(e) => setSelectedMinuteT(e.target.value)}
-                            style={{
-                              width: "100%",
-                              padding: "2px 12px",
-                              fontSize: "15px",
-                              borderRadius: "4px",
-                              border: "1px solid #ccc",
-                              boxSizing: "border-box",
-                            }}
-                          >
-                            <option>Minute</option>
-                            {minutes.map((minute) => (
-                              <option key={minute} value={minute}>
-                                {minute}
-                              </option>
-                            ))}
-                          </select>
-                          <label className="px-2">Min</label>
+                        <div className="row mb-3">
+                          <label className="col-sm-4 text-start mt-2">
+                            To Time
+                          </label>
+                          <div className="col-sm-7 d-flex">
+                            <select
+                              disabled
+                              className="form-control w-50"
+                              value={selectedHourT || "aa"} // Default to end.hour if selectedHourT is not set
+                              onChange={(e) => setSelectedHourT(e.target.value)}
+                              style={{
+                                width: "100%",
+                                padding: "2px 12px",
+                                fontSize: "16px",
+                                borderRadius: "4px",
+                                border: "1px solid #ccc",
+                                boxSizing: "border-box",
+                              }}
+                            >
+                              <option>Hour</option>
+                              {hours.map((hour) => (
+                                <option key={hour} value={hour}>
+                                  {hour}
+                                </option>
+                              ))}
+                            </select>
+                            <label className="px-2">Hr</label>
+                            <select
+                              disabled
+                              className="form-control w-50"
+                              value={selectedMinuteT || "aa"} // Default to end.minute if selectedMinuteT is not set
+                              onChange={(e) =>
+                                setSelectedMinuteT(e.target.value)
+                              }
+                              style={{
+                                width: "100%",
+                                padding: "2px 12px",
+                                fontSize: "15px",
+                                borderRadius: "4px",
+                                border: "1px solid #ccc",
+                                boxSizing: "border-box",
+                              }}
+                            >
+                              <option>Minute</option>
+                              {minutes.map((minute) => (
+                                <option key={minute} value={minute}>
+                                  {minute}
+                                </option>
+                              ))}
+                            </select>
+                            <label className="px-2">Min</label>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* DA Type */}
-                      <div className="row mb-3">
-                        <label className="col-sm-4 text-start  mt-2">
-                          DA Type
-                        </label>
-                        <div className="col-sm-7">
-                          <select
-                            style={{
-                              width: "100%", // Ensures the select takes full width of its container
-                              padding: "8px 12px", // Adds some padding for better visual space
-                              fontSize: "12px", // Adjusts font size for readability
-                              borderRadius: "4px", // Adds rounded corners for a modern look
-                              border: "1px solid #ccc", // A soft border color
-                              boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
-                            }}
-                            value={selecteddaTypes}
-                            onChange={(e) => setSelecteddaTypes(e.target.value)}
+                        {/* DA Type */}
+                        <div className="row mb-3">
+                          <label className="col-sm-4 text-start  mt-2">
+                            DA Type
+                          </label>
+                          <div className="col-sm-7">
+                            <select
+                              style={{
+                                width: "100%", // Ensures the select takes full width of its container
+                                padding: "8px 12px", // Adds some padding for better visual space
+                                fontSize: "12px", // Adjusts font size for readability
+                                borderRadius: "4px", // Adds rounded corners for a modern look
+                                border: "1px solid #ccc", // A soft border color
+                                boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
+                              }}
+                              value={selecteddaTypes}
+                              onChange={(e) =>
+                                setSelecteddaTypes(e.target.value)
+                              }
+                            >
+                              {/* <option value="">Select DA Type</option> */}
+                              {daTypes?.map((daType) => (
+                                <option key={daType.id} value={daType.id}>
+                                  {daType.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Efforts */}
+                        <div className="row mb-3">
+                          <label className="col-sm-4 text-start required mt-2">
+                            Efforts
+                          </label>
+                          <div className="col-sm-3 col-4">
+                            <input
+                              type="text"
+                              className="form-control text-center"
+                              value={efforts}
+                              onChange={handleEffortsChange}
+                              placeholder="HH:MM"
+                              rows="3"
+                              style={{ height: "150%" }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        <div className="row mb-3">
+                          <label className="col-sm-4 text-start  mt-2">
+                            Description
+                          </label>
+                          <div
+                            className="col-sm-7 pb-3 "
+                            style={{ marginBottom: "27%" }}
                           >
-                            {/* <option value="">Select DA Type</option> */}
-                            {daTypes?.map((daType) => (
-                              <option key={daType.id} value={daType.id}>
-                                {daType.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Efforts */}
-                      <div className="row mb-3">
-                        <label className="col-sm-4 text-start required mt-2">
-                          Efforts
-                        </label>
-                        <div className="col-sm-3 col-4">
-                          <input
-                            type="text"
-                            className="form-control text-center"
-                            value={efforts}
-                            onChange={handleEffortsChange}
-                            placeholder="HH:MM"
-                            rows="3"
-                            style={{ height: "150%" }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <div className="row mb-3">
-                        <label className="col-sm-4 text-start  mt-2">
-                          Description
-                        </label>
-                        <div
-                          className="col-sm-7 pb-3 "
-                          style={{ marginBottom: "27%" }}
-                        >
-                          <textarea
-                            className="form-control"
-                            rows="3"
-                            placeholder="Enter Description"
-                            maxLength="255"
-                            value={description}
-                            onChange={handleDescriptionChange}
-                          ></textarea>
+                            <textarea
+                              className="form-control"
+                              rows="3"
+                              placeholder="Enter Description"
+                              maxLength="255"
+                              value={description}
+                              onChange={handleDescriptionChange}
+                            ></textarea>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -929,7 +942,7 @@ const NewTaskEntry = ({ selectedDate, date1, setRefresh }) => {
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
