@@ -130,7 +130,7 @@ const TabModal = ({ showTabModal, handleCloseTabModal, selectedTab, handleTabSel
 
   // Fetch additional details when a task is selected and map the response
   const fetchAdditionalDetails = async (taskID) => {
-    // debugger;
+    
     try {
       const response = await fetch(
         `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyTimesheetEntry/GetAdditionalDetails?TaskID=${taskID}`,

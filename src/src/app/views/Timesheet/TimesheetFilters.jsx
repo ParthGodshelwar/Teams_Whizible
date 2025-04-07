@@ -1,9 +1,18 @@
 // import React, { useState, useEffect, useRef } from "react";
-import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 import axios from "axios";
 
 const TimesheetFilters = forwardRef(
-  ({ handleFilterChange, appliedFilters, setAppliedFilters }, ref) => {
+  (
+    { handleFilterChange, appliedFilters, setAppliedFilters, date, setDate },
+    ref
+  ) => {
     // States for filter values
     const [selectedProject, setSelectedProject] = useState("");
     var selectedProject23;
@@ -20,6 +29,7 @@ const TimesheetFilters = forwardRef(
     const [projects, setProjects] = useState([]);
     const userdata = JSON.parse(sessionStorage.getItem("user"));
     const employeeId = userdata?.data?.employeeId;
+    const [billable, setBillable] = useState("");
     const [preSelectedFilters, setPreSelectedFilters] = useState({
       projectName: "",
       modules: "",
@@ -31,16 +41,18 @@ const TimesheetFilters = forwardRef(
       taskType: "",
       priority: "",
       deliverable: "",
-      billable: ""
+      billable: "",
     });
-    const [billable, setBillable] = useState("");
 
     const handleBillableToggle = (e) => {
       const selectedValue = e.target.value; // "Yes", "No", or ""
-      setBillable(selectedValue === "Yes" ? 1 : selectedValue === "No" ? 0 : null); // Set billable to 1, 0, or null
+      setBillable(
+        selectedValue === "Yes" ? 1 : selectedValue === "No" ? 0 : null
+      ); // Set billable to 1, 0, or null
       setPreSelectedFilters((prev) => ({
         ...prev,
-        billable: selectedValue === "Yes" ? 1 : selectedValue === "No" ? 0 : null // Set "Yes", "No", or "" in preSelectedFilters
+        billable:
+          selectedValue === "Yes" ? 1 : selectedValue === "No" ? 0 : null, // Set "Yes", "No", or "" in preSelectedFilters
       }));
 
       console.log(
@@ -58,7 +70,7 @@ const TimesheetFilters = forwardRef(
       deliverable: [],
       milestone: [],
       taskType: [],
-      taskCategories: []
+      taskCategories: [],
       // status: []
     });
 
@@ -92,15 +104,14 @@ const TimesheetFilters = forwardRef(
     // Fetch User DA Entry Filters when component mounts
 
     const fetchUserDAEntryFilter = async () => {
-      // debugger;
-      // debugger;
+      
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyTimesheetEntry/GetUserDAEntryFilter?UserID=${employeeId}`,
           {
             headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("token")}`
-            }
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            },
           }
         );
         console.log("User DA Entry Filter Response:", response.data);
@@ -121,7 +132,13 @@ const TimesheetFilters = forwardRef(
           // setStatus(filterData.tasksStatus);
           setSelectedProject(Number(filterData.projectName));
           setProject(Number(filterData.projectName));
-          setBillable(filterData.billable == "Yes" ? 1 : filterData.billable == "No" ? 0 : "");
+          setBillable(
+            filterData.billable == "Yes"
+              ? 1
+              : filterData.billable == "No"
+              ? 0
+              : ""
+          );
           selectedProject23 = Number(filterData.projectName);
           fetchFiltersData();
 
@@ -137,10 +154,15 @@ const TimesheetFilters = forwardRef(
             taskCategories: filterData.tasksCategories,
             // commented by parth.g
             // status: filterData.priority,
-            billable: filterData.billable == "Yes" ? 1 : filterData.billable == "No" ? 0 : ""
+            billable:
+              filterData.billable == "Yes"
+                ? 1
+                : filterData.billable == "No"
+                ? 0
+                : "",
           };
 
-          console.log("Applied Filters check 1:", newAppliedFilters);
+          // console.log("Applied Filters check 1:", newAppliedFilters);
           setAppliedFilters(newAppliedFilters);
 
           setPreSelectedFilters({
@@ -154,7 +176,7 @@ const TimesheetFilters = forwardRef(
             taskType: filterData.taskType || "",
             priority: filterData.priority || "",
             deliverable: filterData.deliverable || "",
-            billable: filterData.billable || "No"
+            billable: filterData.billable || "No",
           });
         }
       } catch (error) {
@@ -171,22 +193,25 @@ const TimesheetFilters = forwardRef(
 
     // Fetch all projects initially
     useEffect(() => {
+      const todaysDate = getCurrentDate();
+      var tempdate = date;
+      // var vardate = date? date || todaysDate;
+      var vardate = tempdate || todaysDate;
       const fetchProjectDetails = async () => {
+        
         try {
-          const todaysDate = getCurrentDate();
-
           const response = await fetch(
             `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyTimesheetEntry/GetTimesheetEntryDetail`,
             {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}` // Add token if required
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`, // Add token if required
               },
               body: JSON.stringify({
                 userID: employeeId,
-                inputDate: todaysDate
-              })
+                inputDate: vardate,
+              }),
             }
           );
 
@@ -198,7 +223,7 @@ const TimesheetFilters = forwardRef(
           if (data?.data?.listProjectDetailsEntity) {
             const options = data.data.listProjectDetailsEntity.map((item) => ({
               key: item.projectID, // Unique identifier
-              text: item.projectName // Label to display
+              text: item.projectName, // Label to display
             }));
             setProjects(options);
             localStorage.setItem("selectedProject", JSON.stringify(options));
@@ -208,9 +233,8 @@ const TimesheetFilters = forwardRef(
         }
       };
       fetchProjectDetails();
-    }, [employeeId]);
+    }, [employeeId, date]);
     useEffect(() => {
-      // debugger;
       if (appliedFilters) {
         setSelectedProject(appliedFilters.selectedProject || "");
         setPriority(appliedFilters.priority || []);
@@ -246,9 +270,7 @@ const TimesheetFilters = forwardRef(
       }
     }, [appliedFilters]);
     const handleApplyFilters = async (filterParam, flag) => {
-      // debugger for apply filter
-      // debugger;
-
+      
       // if (flag) {
       //   setAppliedFilters(filterParam);
       //   postDAEntryFilters(filterParam);
@@ -266,7 +288,7 @@ const TimesheetFilters = forwardRef(
         taskType,
         taskCategories,
         status,
-        billable
+        billable,
       };
 
       setAppliedFilters(newAppliedFilters);
@@ -277,7 +299,7 @@ const TimesheetFilters = forwardRef(
     useImperativeHandle(
       ref,
       () => ({
-        applyFilters: (filters, flag) => handleApplyFilters(filters, flag)
+        applyFilters: (filters, flag) => handleApplyFilters(filters, flag),
       }),
       []
     );
@@ -299,9 +321,10 @@ const TimesheetFilters = forwardRef(
         moduleIDs: sanitizeValue(filters?.module),
         priorityIDs: sanitizeValue(filters?.priority),
         // billable: sanitizeValue(filters?.billable === 0 ? "No" : "Yes"),
-        billable: filters?.billable === 0 ? "No" : filters?.billable === 1 ? "Yes" : "",
+        billable:
+          filters?.billable === 0 ? "No" : filters?.billable === 1 ? "Yes" : "",
 
-        employeeID: sanitizeValue(employeeId)
+        employeeID: sanitizeValue(employeeId),
       };
 
       console.log("Request Body:", params);
@@ -314,8 +337,8 @@ const TimesheetFilters = forwardRef(
             headers: {
               accept: "*/*",
               "Content-Type": "application/json",
-              Authorization: `Bearer ${sessionStorage.getItem("token")}`
-            }
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            },
           }
         );
         console.log("DA Entry Filters Saved Response:", response.data);
@@ -325,6 +348,7 @@ const TimesheetFilters = forwardRef(
     };
 
     const fetchFiltersData = async () => {
+      
       if (hasFetchedFilters.current) return; // Prevent multiple calls
       hasFetchedFilters.current = true;
       try {
@@ -338,7 +362,7 @@ const TimesheetFilters = forwardRef(
           "Deliverable",
           "TaskType",
           "TasksCategories",
-          "milestone"
+          "milestone",
           // "Status"
         ];
 
@@ -349,18 +373,20 @@ const TimesheetFilters = forwardRef(
             `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyTimesheetEntry/GetDropDownForFiletes?UserID=${employeeId}&ProjectIDs=${selectedProject23}&FlagWise=${category}`,
             {
               headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`
-              }
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              },
             }
           );
 
           // Save fetched data for each category
-          filterData[category.toLowerCase()] = response.data.data.listDropDownForFiletes;
+          filterData[category.toLowerCase()] =
+            response.data.data.listDropDownForFiletes;
         }
 
         // Update the filters state
         setFilters(filterData);
-        if (project.length > 0) localStorage.setItem("selectedProject1", JSON.stringify(projects));
+        if (project.length > 0)
+          localStorage.setItem("selectedProject1", JSON.stringify(projects));
 
         // Store filter data in local storage with category names
         Object.entries(filterData).forEach(([key, value]) => {
@@ -374,8 +400,8 @@ const TimesheetFilters = forwardRef(
         console.error("Error fetching filter data:", error);
       }
     };
+
     useEffect(() => {
-      // debugger;
       // Check if selectedProject is empty
       if (selectedProject === "") {
         // Clear all the dropdown states
@@ -735,7 +761,10 @@ const TimesheetFilters = forwardRef(
           <div className="col-12 col-sm-2 mb-3">
             <div className="row mb-3">
               <div className="ApplyFilSec">
-                <button className="btn btn-primary" onClick={handleApplyFilters}>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleApplyFilters}
+                >
                   Apply
                 </button>
               </div>

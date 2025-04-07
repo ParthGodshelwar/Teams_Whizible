@@ -30,7 +30,7 @@ const QuickInbox = ({ refrsh, setRefresh }) => {
     { key: "9", text: "September" },
     { key: "10", text: "October" },
     { key: "11", text: "November" },
-    { key: "12", text: "December" }
+    { key: "12", text: "December" },
   ];
 
   const yearOptions = [
@@ -45,12 +45,12 @@ const QuickInbox = ({ refrsh, setRefresh }) => {
     { key: "2022", text: "2022" },
     { key: "2023", text: "2023" },
     { key: "2024", text: "2024" },
-    { key: "2025", text: "2025" }
+    { key: "2025", text: "2025" },
   ];
 
   const weekOptions = Array.from({ length: 52 }, (_, i) => ({
     key: (i + 1).toString(),
-    text: `Week ${String(i + 1).padStart(2, "0")}`
+    text: `Week ${String(i + 1).padStart(2, "0")}`,
   }));
 
   // Adding "Select Week" as the first option
@@ -139,7 +139,9 @@ const QuickInbox = ({ refrsh, setRefresh }) => {
                             {report.header} <br />
                             <span className="fw-500">{report.headerValue}</span>
                           </div>
-                          <div className="report_txt">{report.actualValue}%</div>
+                          <div className="report_txt">
+                            {report.actualValue}%
+                          </div>
                         </div>
                         <div
                           className="progress ms-2 ps-0"

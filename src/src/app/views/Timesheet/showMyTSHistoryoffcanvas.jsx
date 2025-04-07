@@ -13,7 +13,7 @@ function showMyTSHistoryoffcanvas() {
           <div className="graybg container-fluid py-1 mb-4">
             <div className="row">
               <div className="col-sm-6">
-                <h5 className="pgtitle">My Timesheet History</h5>
+                <h5 className="pgtitle">My Timesheet History1</h5>
               </div>
               <div className="col-sm-6 text-end">
                 <button

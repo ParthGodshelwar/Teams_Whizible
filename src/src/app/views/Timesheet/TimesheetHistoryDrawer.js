@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Drawer } from "@mui/material";
 import axios from "axios";
 
-const TimesheetHistoryDrawer = ({ showHistory, setShowHistory, timesheetID }) => {
+const TimesheetHistoryDrawer = ({
+  showHistory,
+  setShowHistory,
+  timesheetID,
+}) => {
   const [timesheetHistory, setTimesheetHistory] = useState([]);
   const token = sessionStorage.getItem("token");
   useEffect(() => {
@@ -28,13 +32,12 @@ const TimesheetHistoryDrawer = ({ showHistory, setShowHistory, timesheetID }) =>
       anchor="right"
       open={showHistory}
       onClose={() => setShowHistory(false)}
-      sx={{ width: "70vw", flexShrink: 0 }}
       sx={{
         "& .MuiDrawer-paper": {
           width: "80vw",
           height: "100%",
-          overflow: "hidden" // Prevent scrolling on the drawer itself
-        }
+          overflow: "hidden", // Prevent scrolling on the drawer itself
+        },
       }}
     >
       <div className="offcanvas-body">
@@ -79,7 +82,11 @@ const TimesheetHistoryDrawer = ({ showHistory, setShowHistory, timesheetID }) =>
                     >
                       <td>{historyItem.statusDescription}</td>
                       <td>{historyItem.createdDate || "N/A"}</td>
-                      <td>{historyItem.updatedDate ? historyItem.updatedDate : "N/A"}</td>
+                      <td>
+                        {historyItem.updatedDate
+                          ? historyItem.updatedDate
+                          : "N/A"}
+                      </td>
                       <td>{historyItem.actionTakenBy || "N/A"}</td>
                       <td>{historyItem.actionTaken}</td>
                       <td>{historyItem.approverName || "N/A"}</td>

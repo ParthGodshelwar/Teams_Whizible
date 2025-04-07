@@ -37,7 +37,7 @@ const tileContent = ({ date, view }, highlightedDates) => {
           <div
             className="circle"
             style={{
-              backgroundColor: matchingDate.color
+              backgroundColor: matchingDate.color,
             }}
           >
             {date.getDate()}
@@ -71,24 +71,38 @@ const MyTimeline = ({
   setPrevMonth,
   setPrevYear,
   refrsh,
-  setRefresh
+  setRefresh,
 }) => {
   const [date, setDate] = useState(new Date());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [timesheetData, setTimesheetData] = useState(null);
-  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
-  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
+  const hours = Array.from({ length: 24 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
+  const minutes = Array.from({ length: 60 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
   const [projects, setProjects] = useState([]);
   const [isHovered, setIsHovered] = useState(false);
   const [selectedprojects, setSelectedProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState("");
   // Set default selected hour and minute from timesheet data
-  const [selectedHour, setSelectedHour] = useState(timesheetData?.startHrh || "00");
-  const [selectedMinute, setSelectedMinute] = useState(timesheetData?.startMin || "00");
-  const [selectedHourT, setSelectedHourT] = useState(timesheetData?.toHrh || "00");
-  const [selecteddaTypes, setSelecteddaTypes] = useState(timesheetData?.toHrh || "N");
-  const [selectedMinuteT, setSelectedMinuteT] = useState(timesheetData?.toMin || "00");
+  const [selectedHour, setSelectedHour] = useState(
+    timesheetData?.startHrh || "00"
+  );
+  const [selectedMinute, setSelectedMinute] = useState(
+    timesheetData?.startMin || "00"
+  );
+  const [selectedHourT, setSelectedHourT] = useState(
+    timesheetData?.toHrh || "00"
+  );
+  const [selecteddaTypes, setSelecteddaTypes] = useState(
+    timesheetData?.toHrh || "N"
+  );
+  const [selectedMinuteT, setSelectedMinuteT] = useState(
+    timesheetData?.toMin || "00"
+  );
   const [tasks, setTasks] = useState([]);
   const [subTasks, setSubTasks] = useState([]);
   const [selectedsubTasks, setSelectedSubTasks] = useState([]);
@@ -246,7 +260,7 @@ const MyTimeline = ({
             entry.day
           ),
           color,
-          initiativeTitle: entry.initiativeTitle
+          initiativeTitle: entry.initiativeTitle,
         };
       }
       return null;
@@ -286,8 +300,8 @@ const MyTimeline = ({
         {
           params: { Day: day, Month: month, Year: year, UserID: UserID },
           headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("token")}`
-          }
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
         }
       );
       setTimesheetData(response.data.data.listTimesheetDADetails[0]);
@@ -348,21 +362,9 @@ const MyTimeline = ({
     }
     const entryData = {
       entryDate: new Date(
-        new Date(timesheetData?.daDate).setDate(new Date(timesheetData?.daDate).getDate() + 1)
-      ).toISOString(),
-      userID: userid,
-      projectID: Number(selectedProject),
-      taskID: Number(selectedTask),
-      fromTime: `${selectedHour}:${selectedMinute}`,
-      toTime: `${selectedHourT}:${selectedMinuteT}`,
-      daType: selecteddaTypes,
-      duration: efforts,
-      description: description
-    };
-
-    const entryData1 = {
-      entryDate: new Date(
-        new Date(timesheetData?.daDate).setDate(new Date(timesheetData?.daDate).getDate() + 1)
+        new Date(timesheetData?.daDate).setDate(
+          new Date(timesheetData?.daDate).getDate() + 1
+        )
       ).toISOString(),
       userID: userid,
       projectID: Number(selectedProject),
@@ -372,7 +374,23 @@ const MyTimeline = ({
       daType: selecteddaTypes,
       duration: efforts,
       description: description,
-      TotalDuration: timesheetData?.actualDA
+    };
+
+    const entryData1 = {
+      entryDate: new Date(
+        new Date(timesheetData?.daDate).setDate(
+          new Date(timesheetData?.daDate).getDate() + 1
+        )
+      ).toISOString(),
+      userID: userid,
+      projectID: Number(selectedProject),
+      taskID: Number(selectedTask),
+      fromTime: `${selectedHour}:${selectedMinute}`,
+      toTime: `${selectedHourT}:${selectedMinuteT}`,
+      daType: selecteddaTypes,
+      duration: efforts,
+      description: description,
+      TotalDuration: timesheetData?.actualDA,
     };
 
     try {
@@ -384,9 +402,9 @@ const MyTimeline = ({
           headers: {
             Accept: "*/*",
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(entryData1) // Send the entryData in JSON body
+          body: JSON.stringify(entryData1), // Send the entryData in JSON body
         }
       );
 
@@ -412,9 +430,9 @@ const MyTimeline = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
               },
-              body: JSON.stringify(entryData) // Send the entryData to post
+              body: JSON.stringify(entryData), // Send the entryData to post
             }
           );
 
@@ -425,11 +443,19 @@ const MyTimeline = ({
             toast.success("Timesheet Entry saved successfully");
           } else {
             const postValidationErrors = postResult?.data
-              ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage
+              ?.filter(
+                (item) =>
+                  !item.validationMessage ||
+                  item.validationMessage.trim() === ""
+              ) // Check for null or empty validationMessage
               .map((item) => "Please fill Daily Activity")
               .concat(
                 postResult?.data
-                  ?.filter((item) => item.validationMessage && item.validationMessage.trim() !== "") // Include non-empty validation messages
+                  ?.filter(
+                    (item) =>
+                      item.validationMessage &&
+                      item.validationMessage.trim() !== ""
+                  ) // Include non-empty validation messages
                   .map((item) => item.validationMessage)
               )
               .join(", ");
@@ -459,7 +485,7 @@ const MyTimeline = ({
                 backgroundColor: "#4CAF50",
                 color: "white",
                 borderRadius: "4px",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               Yes
@@ -474,7 +500,7 @@ const MyTimeline = ({
                 backgroundColor: "#f44336",
                 color: "white",
                 borderRadius: "4px",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               No
@@ -490,9 +516,9 @@ const MyTimeline = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
               },
-              body: JSON.stringify(entryData) // Send the entryData to post
+              body: JSON.stringify(entryData), // Send the entryData to post
             }
           );
           setRefresh(!refrsh);
@@ -502,11 +528,19 @@ const MyTimeline = ({
             toast.success("Timesheet Entry saved successfully");
           } else {
             const postValidationErrors = postResult?.data
-              ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage
+              ?.filter(
+                (item) =>
+                  !item.validationMessage ||
+                  item.validationMessage.trim() === ""
+              ) // Check for null or empty validationMessage
               .map((item) => "Please fill Daily Activity")
               .concat(
                 postResult?.data
-                  ?.filter((item) => item.validationMessage && item.validationMessage.trim() !== "") // Include non-empty validation messages
+                  ?.filter(
+                    (item) =>
+                      item.validationMessage &&
+                      item.validationMessage.trim() !== ""
+                  ) // Include non-empty validation messages
                   .map((item) => item.validationMessage)
               )
               .join(", ");
@@ -536,12 +570,15 @@ const MyTimeline = ({
           maxWidth: "100%",
           boxSizing: "border-box",
           "@media (max-width: 768px)": {
-            padding: "12px"
-          }
-        }
+            padding: "12px",
+          },
+        },
       }}
     >
-      <Text variant="medium" styles={{ root: { fontWeight: "bold", marginBottom: "16px" } }}>
+      <Text
+        variant="medium"
+        styles={{ root: { fontWeight: "bold", marginBottom: "16px" } }}
+      >
         My Timeline
       </Text>
       <Stack>
@@ -551,7 +588,7 @@ const MyTimeline = ({
               <label className="mx-1">Legends :</label>
             </li>
             <li className="pt-1">
-              <Tooltip1 title="Efforts filled">
+              <Tooltip1 title="Reported Efforts">
                 <span
                   className="lgdHoliday"
                   data-bs-toggle="tooltip"
@@ -585,9 +622,9 @@ const MyTimeline = ({
                 marginBottom: "16px",
                 "@media (max-width: 768px)": {
                   flexDirection: "column",
-                  childrenGap: 10
-                }
-              }
+                  childrenGap: 10,
+                },
+              },
             }}
           >
             <Calendar
@@ -599,8 +636,8 @@ const MyTimeline = ({
               style={{
                 width: "100%",
                 "@media (max-width: 768px)": {
-                  width: "100%"
-                }
+                  width: "100%",
+                },
               }}
             />
           </Stack>
@@ -615,8 +652,8 @@ const MyTimeline = ({
           "& .MuiDrawer-paper": {
             width: "80vw",
             height: "100%",
-            overflow: "hidden" // Prevent scrolling on the drawer itself
-          }
+            overflow: "hidden", // Prevent scrolling on the drawer itself
+          },
         }}
       >
         <Box
@@ -624,7 +661,7 @@ const MyTimeline = ({
             position: "relative",
             width: "100%",
             height: "100%",
-            p: 3
+            p: 3,
           }}
         >
           {/* Drawer Header */}
@@ -652,7 +689,7 @@ const MyTimeline = ({
                 flex: 1,
                 overflowY: "scroll",
                 msOverflowStyle: "none", // Hides scrollbar for IE/Edge
-                scrollbarWidth: "none" // Hides scrollbar for Firefox
+                scrollbarWidth: "none", // Hides scrollbar for Firefox
               }}
             >
               {/* Add custom styles for WebKit browsers */}
@@ -672,7 +709,7 @@ const MyTimeline = ({
                       color: "#ed1c24",
                       fontSize: "15px",
 
-                      margin: "20px 0"
+                      margin: "20px 0",
                     }}
                   >
                     Overall Effort of the Day - {timesheetData?.actualDA}/
@@ -711,7 +748,9 @@ const MyTimeline = ({
                   <div className="col-sm-7">
                     {/* Project */}
                     <div className="row mb-3">
-                      <label className="col-sm-4 text-end required mt-2">Project</label>
+                      <label className="col-sm-4 text-end required mt-2">
+                        Project
+                      </label>
                       <div className="col-sm-7">
                         <select
                           style={{
@@ -720,7 +759,7 @@ const MyTimeline = ({
                             fontSize: "12px", // Adjusts font size for readability
                             borderRadius: "4px", // Adds rounded corners for a modern look
                             border: "1px solid #ccc", // A soft border color
-                            boxSizing: "border-box" // Makes sure padding doesn't affect the overall width
+                            boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
                           }}
                           value={selectedProject}
                           onChange={handleChange}
@@ -729,7 +768,8 @@ const MyTimeline = ({
                           {Array.isArray(projects) && projects.length > 0 ? (
                             projects.map((project) => (
                               <option key={project.id} value={project.id}>
-                                {project.name} {/* Displaying the project name */}
+                                {project.name}{" "}
+                                {/* Displaying the project name */}
                               </option>
                             ))
                           ) : (
@@ -741,8 +781,13 @@ const MyTimeline = ({
 
                     {/* Task */}
                     <div className="row mb-3">
-                      <label className="col-sm-4 text-end required mt-2">Task</label>
-                      <div className="col-sm-7" style={{ position: "relative" }}>
+                      <label className="col-sm-4 text-end required mt-2">
+                        Task
+                      </label>
+                      <div
+                        className="col-sm-7"
+                        style={{ position: "relative" }}
+                      >
                         <select
                           onChange={handleTaskChange}
                           value={selectedTask}
@@ -752,7 +797,7 @@ const MyTimeline = ({
                             fontSize: "12px", // Adjusts font size for readability
                             borderRadius: "4px", // Adds rounded corners for a modern look
                             border: "1px solid #ccc", // A soft border color
-                            boxSizing: "border-box" // Makes sure padding doesn't affect the overall width
+                            boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
                           }}
                         >
                           <option value="">Select Task</option>
@@ -768,13 +813,15 @@ const MyTimeline = ({
                             top: "50%",
                             right: "20px", // Move icon to the left by increasing the right value
                             transform: "translateY(-50%)", // Aligns the icon vertically in the middle
-                            cursor: "pointer"
+                            cursor: "pointer",
                           }}
                           onMouseEnter={() => handleTaskHover(selectedTask)}
                           onMouseLeave={() => setIsHovered(false)}
                         >
                           {selectedTask && (
-                            <FaInfoCircle style={{ fontSize: "15px", color: "#007bff" }} />
+                            <FaInfoCircle
+                              style={{ fontSize: "15px", color: "#007bff" }}
+                            />
                           )}
                         </div>
 
@@ -791,28 +838,44 @@ const MyTimeline = ({
                               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
                               zIndex: "10",
                               width: "250px", // Adjust width as necessary
-                              marginLeft: "10px" // Adds space between icon and tooltip
+                              marginLeft: "10px", // Adds space between icon and tooltip
                             }}
                           >
                             <div className="row">
-                              <div className="col-sm-6 text-end txt_Blue">Start Date:</div>
-                              <div className="col-sm-6">{taskDetails?.startDate || "N/A"}</div>
+                              <div className="col-sm-6 text-end txt_Blue">
+                                Start Date:
+                              </div>
+                              <div className="col-sm-6">
+                                {taskDetails?.startDate || "N/A"}
+                              </div>
                             </div>
                             <div className="row">
-                              <div className="col-sm-6 text-end txt_Blue">End Date:</div>
-                              <div className="col-sm-6">{taskDetails?.endDate || "N/A"}</div>
+                              <div className="col-sm-6 text-end txt_Blue">
+                                End Date:
+                              </div>
+                              <div className="col-sm-6">
+                                {taskDetails?.endDate || "N/A"}
+                              </div>
                             </div>
                             {/* <div className="row">
                               <div className="col-sm-6 text-end txt_Blue">Task Name :</div>
                               <div className="col-sm-6">{taskDetails?.taskName || "N/A"}</div>
                             </div> */}
                             <div className="row">
-                              <div className="col-sm-6 text-end txt_Blue">Actual Effort:</div>
-                              <div className="col-sm-6">{taskDetails?.actualWork || "N/A"}</div>
+                              <div className="col-sm-6 text-end txt_Blue">
+                                Actual Effort:
+                              </div>
+                              <div className="col-sm-6">
+                                {taskDetails?.actualWork || "N/A"}
+                              </div>
                             </div>
                             <div className="row">
-                              <div className="col-sm-6 text-end txt_Blue">Planned Efforts:</div>
-                              <div className="col-sm-6">{taskDetails?.plannedEfforts || "N/A"}</div>
+                              <div className="col-sm-6 text-end txt_Blue">
+                                Planned Efforts:
+                              </div>
+                              <div className="col-sm-6">
+                                {taskDetails?.plannedEfforts || "N/A"}
+                              </div>
                             </div>
                           </div>
                         )}
@@ -846,7 +909,9 @@ const MyTimeline = ({
 
                     {/* From Time */}
                     <div className="row mb-3">
-                      <label className="col-sm-4 text-end  mt-2">From Time</label>
+                      <label className="col-sm-4 text-end  mt-2">
+                        From Time
+                      </label>
                       <div className="col-sm-7 d-flex">
                         <select
                           disabled
@@ -926,7 +991,7 @@ const MyTimeline = ({
                             fontSize: "12px", // Adjusts font size for readability
                             borderRadius: "4px", // Adds rounded corners for a modern look
                             border: "1px solid #ccc", // A soft border color
-                            boxSizing: "border-box" // Makes sure padding doesn't affect the overall width
+                            boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
                           }}
                           onChange={(e) => setSelecteddaTypes(e.target.value)}
                         >
@@ -942,7 +1007,9 @@ const MyTimeline = ({
 
                     {/* Efforts */}
                     <div className="row mb-3">
-                      <label className="col-sm-4 text-end required mt-2">Efforts</label>
+                      <label className="col-sm-4 text-end required mt-2">
+                        Efforts
+                      </label>
                       <div className="col-sm-3">
                         <input
                           type="text"
@@ -956,7 +1023,9 @@ const MyTimeline = ({
 
                     {/* Description */}
                     <div className="row mb-3">
-                      <label className="col-sm-4 text-end mt-2">Description</label>
+                      <label className="col-sm-4 text-end mt-2">
+                        Description
+                      </label>
                       <div className="col-sm-7">
                         <textarea
                           className="form-control"
@@ -974,15 +1043,28 @@ const MyTimeline = ({
                     <Carousel>
                       {timesheetData?.isDAFullyFilled === true && (
                         <Carousel.Item>
-                          <div className="card text-center" style={{ border: "none" }}>
+                          <div
+                            className="card text-center"
+                            style={{ border: "none" }}
+                          >
                             <img
                               src={image1}
                               alt="Description for image 1"
-                              style={{ maxWidth: "100px", height: "100px", margin: "0 auto" }} // Center the image
+                              style={{
+                                maxWidth: "100px",
+                                height: "100px",
+                                margin: "0 auto",
+                              }} // Center the image
                             />
                             <div className="card-body">
-                              <span style={{ fontSize: "10px", wordBreak: "break-all" }}>
-                                Congratulations!! You've successfully filled your timesheet.
+                              <span
+                                style={{
+                                  fontSize: "10px",
+                                  wordBreak: "break-all",
+                                }}
+                              >
+                                Congratulations!! You've successfully filled
+                                your timesheet.
                               </span>
                             </div>
                           </div>
@@ -991,16 +1073,28 @@ const MyTimeline = ({
 
                       {timesheetData?.isDAParatially === true && (
                         <Carousel.Item>
-                          <div className="card text-center" style={{ border: "none" }}>
+                          <div
+                            className="card text-center"
+                            style={{ border: "none" }}
+                          >
                             <img
                               src={image3}
                               alt="Description for image 3"
-                              style={{ maxWidth: "100px", height: "100px", margin: "0 auto" }} // Center the image
+                              style={{
+                                maxWidth: "100px",
+                                height: "100px",
+                                margin: "0 auto",
+                              }} // Center the image
                             />
                             <div className="card-body">
-                              <span style={{ fontSize: "9px", wordBreak: "break-all" }}>
-                                You have partially filled the timesheet. Please update it
-                                accordingly
+                              <span
+                                style={{
+                                  fontSize: "9px",
+                                  wordBreak: "break-all",
+                                }}
+                              >
+                                You have partially filled the timesheet. Please
+                                update it accordingly
                               </span>
                             </div>
                           </div>
@@ -1009,15 +1103,28 @@ const MyTimeline = ({
 
                       {timesheetData?.isDANotFilled === true && (
                         <Carousel.Item>
-                          <div className="card text-center" style={{ border: "none" }}>
+                          <div
+                            className="card text-center"
+                            style={{ border: "none" }}
+                          >
                             <img
                               src={image2}
                               alt="Description for image 3"
-                              style={{ maxWidth: "100px", height: "100px", margin: "0 auto" }} // Center the image
+                              style={{
+                                maxWidth: "100px",
+                                height: "100px",
+                                margin: "0 auto",
+                              }} // Center the image
                             />
                             <div className="card-body">
-                              <span style={{ fontSize: "10px", wordBreak: "break-all" }}>
-                                Your entered timesheet effort is zero. Please update your effort.
+                              <span
+                                style={{
+                                  fontSize: "10px",
+                                  wordBreak: "break-all",
+                                }}
+                              >
+                                Your entered timesheet effort is zero. Please
+                                update your effort.
                               </span>
                             </div>
                           </div>

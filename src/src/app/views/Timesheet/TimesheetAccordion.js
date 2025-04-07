@@ -17,27 +17,39 @@ const TimesheetAccordion = ({
   date1,
   setNewdate,
   newdate,
-  refreshGrid
+  refreshGrid,
 }) => {
   const [selectedProject, setSelectedProject] = useState("");
   // Set default selected hour and minute from timesheet data
   const [timesheetData, setTimesheetData] = useState(null);
 
   const [projects, setProjects] = useState([]);
-  console.log("Timesheet Status", date1);
-  const [selectedHour, setSelectedHour] = useState(timesheetData?.startHrh || "00");
-  const [selectedMinute, setSelectedMinute] = useState(timesheetData?.startMin || "00");
-  const [selectedHourT, setSelectedHourT] = useState(timesheetData?.toHrh || "00");
+
+  const [selectedHour, setSelectedHour] = useState(
+    timesheetData?.startHrh || "00"
+  );
+  const [selectedMinute, setSelectedMinute] = useState(
+    timesheetData?.startMin || "00"
+  );
+  const [selectedHourT, setSelectedHourT] = useState(
+    timesheetData?.toHrh || "00"
+  );
   const [selecteddaTypes, setSelecteddaTypes] = useState("N");
-  const [selectedMinuteT, setSelectedMinuteT] = useState(timesheetData?.toMin || "00");
+  const [selectedMinuteT, setSelectedMinuteT] = useState(
+    timesheetData?.toMin || "00"
+  );
   const [tasks, setTasks] = useState([]);
   const [subTasks, setSubTasks] = useState([]);
   const [selectedsubTasks, setSelectedSubTasks] = useState([]);
   const [daTypes, setDATypes] = useState([]);
   const [isHovered, setIsHovered] = useState(false);
   const [taskDetails, setTaskDetails] = useState(null);
-  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
-  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
+  const hours = Array.from({ length: 24 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
+  const minutes = Array.from({ length: 60 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
   const [searchTerm, setSearchTerm] = useState(""); // State to manage the search input
   const [selectedMonth, setSelectedMonth] = useState(date.getMonth()); // State to manage selected month
   const [selectedYear, setSelectedYear] = useState(date.getFullYear()); // State to manage selected year
@@ -170,7 +182,6 @@ const TimesheetAccordion = ({
     fetchDATypes();
   }, []);
   const fetchTasks = async (pId) => {
-    debugger;
     try {
       const response = await fetch(
         `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyTimesheetEntry/GetTimesheetDADetailsDropDown?UserID=${userid}&ProjectID=${pId}&FieldName=Task`,
@@ -256,7 +267,9 @@ const TimesheetAccordion = ({
   // Generate month options
   const monthOptions = Array.from({ length: 12 }, (_, i) => (
     <option key={i} value={i}>
-      {new Intl.DateTimeFormat("en-US", { month: "long" }).format(new Date(0, i))}
+      {new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+        new Date(0, i)
+      )}
     </option>
   ));
 
@@ -268,6 +281,8 @@ const TimesheetAccordion = ({
   ));
 
   const handleSave = async () => {
+    debugger;
+
     const hhmmRegex = /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/; // Regex for hh:mm format (24-hour)
 
     if (!hhmmRegex.test(efforts)) {
@@ -276,20 +291,9 @@ const TimesheetAccordion = ({
     }
     console.log("ValidateDAEntry", date);
     const entryData = {
-      entryDate: new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString(),
-      userID: userid,
-      projectID: Number(selectedProject),
-      taskID: Number(selectedTask),
-      // subTaskID: selectedsubTasks,
-      fromTime: `${selectedHour}:${selectedMinute}`,
-      toTime: `${selectedHourT}:${selectedMinuteT}`,
-      daType: selecteddaTypes,
-      duration: efforts,
-      description: description
-    };
-
-    const entryData1 = {
-      entryDate: new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString(),
+      entryDate: new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      ).toISOString(),
       userID: userid,
       projectID: Number(selectedProject),
       taskID: Number(selectedTask),
@@ -299,7 +303,22 @@ const TimesheetAccordion = ({
       daType: selecteddaTypes,
       duration: efforts,
       description: description,
-      TotalDuration: `00:00`
+    };
+
+    const entryData1 = {
+      entryDate: new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      ).toISOString(),
+      userID: userid,
+      projectID: Number(selectedProject),
+      taskID: Number(selectedTask),
+      // subTaskID: selectedsubTasks,
+      fromTime: `${selectedHour}:${selectedMinute}`,
+      toTime: `${selectedHourT}:${selectedMinuteT}`,
+      daType: selecteddaTypes,
+      duration: efforts,
+      description: description,
+      TotalDuration: `00:00`,
     };
     try {
       // Validate the entry first using POST with JSON body
@@ -310,9 +329,9 @@ const TimesheetAccordion = ({
           headers: {
             Accept: "*/*",
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(entryData1) // Send the entryData in JSON body
+          body: JSON.stringify(entryData1), // Send the entryData in JSON body
         }
       );
 
@@ -338,9 +357,9 @@ const TimesheetAccordion = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
               },
-              body: JSON.stringify(entryData) // Send the entryData to post
+              body: JSON.stringify(entryData), // Send the entryData to post
             }
           );
 
@@ -349,15 +368,24 @@ const TimesheetAccordion = ({
           // Check for the response validation message after posting the entry
           if (postResult?.data?.[0]?.validationMessage === "Success") {
             toast.success("Timesheet Entry saved successfully");
-            alert("w12");
+            // alert("w12");
+            clearvalues();
             refreshGrid();
           } else {
             const postValidationErrors = postResult?.data
-              ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage
+              ?.filter(
+                (item) =>
+                  !item.validationMessage ||
+                  item.validationMessage.trim() === ""
+              ) // Check for null or empty validationMessage
               .map((item) => "Please fill Daily Activity")
               .concat(
                 postResult?.data
-                  ?.filter((item) => item.validationMessage && item.validationMessage.trim() !== "") // Include non-empty validation messages
+                  ?.filter(
+                    (item) =>
+                      item.validationMessage &&
+                      item.validationMessage.trim() !== ""
+                  ) // Include non-empty validation messages
                   .map((item) => item.validationMessage)
               )
               .join(", ");
@@ -387,7 +415,7 @@ const TimesheetAccordion = ({
                 backgroundColor: "#4CAF50",
                 color: "white",
                 borderRadius: "4px",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               Yes
@@ -402,7 +430,7 @@ const TimesheetAccordion = ({
                 backgroundColor: "#f44336",
                 color: "white",
                 borderRadius: "4px",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               No
@@ -418,9 +446,9 @@ const TimesheetAccordion = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
               },
-              body: JSON.stringify(entryData) // Send the entryData to post
+              body: JSON.stringify(entryData), // Send the entryData to post
             }
           );
 
@@ -428,15 +456,24 @@ const TimesheetAccordion = ({
 
           if (postResult?.data?.[0]?.validationMessage === "Success") {
             toast.success("Timesheet Entry saved successfully");
-            alert("w2");
+            // alert("w2");
+            clearvalues();
             refreshGrid();
           } else {
             const postValidationErrors = postResult?.data
-              ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage
+              ?.filter(
+                (item) =>
+                  !item.validationMessage ||
+                  item.validationMessage.trim() === ""
+              ) // Check for null or empty validationMessage
               .map((item) => "Please fill Daily Activity")
               .concat(
                 postResult?.data
-                  ?.filter((item) => item.validationMessage && item.validationMessage.trim() !== "") // Include non-empty validation messages
+                  ?.filter(
+                    (item) =>
+                      item.validationMessage &&
+                      item.validationMessage.trim() !== ""
+                  ) // Include non-empty validation messages
                   .map((item) => item.validationMessage)
               )
               .join(", ");
@@ -453,6 +490,15 @@ const TimesheetAccordion = ({
       console.error("Error during save:", error);
       toast("An error occurred. Please try again.", { type: "error" });
     }
+  };
+
+  const clearvalues = () => {
+    //Added by Parth.G to clear Values
+    setSelectedProject("");
+    setSelectedTask("");
+    setSelecteddaTypes("N");
+    setEfforts("00:00");
+    setDescription("");
   };
 
   return (
@@ -480,8 +526,8 @@ const TimesheetAccordion = ({
                       Timesheet Entry
                     </h5>
                     <div className="ps-3 text-nowrap">
-                      <span className="fw-500">Week Period -</span> {topdata.weekStartDate} to{" "}
-                      {topdata.weekEndDate}
+                      <span className="fw-500">Week Period -</span>{" "}
+                      {topdata.weekStartDate} to {topdata.weekEndDate}
                     </div>
                   </div>
 
@@ -491,8 +537,8 @@ const TimesheetAccordion = ({
                       Week Total | Expected Hours -
                       <span className="fw-500">
                         {" "}
-                        <i className="fa-regular fa-clock" /> {topdata.weekActualHours} |{" "}
-                        {topdata.weekExpectedHours}
+                        <i className="fa-regular fa-clock" />{" "}
+                        {topdata.weekActualHours} | {topdata.weekExpectedHours}
                       </span>
                     </div>
                   </div>
@@ -519,7 +565,9 @@ const TimesheetAccordion = ({
         {/* Accordion content */}
         <div
           id="CalendarDtlsTab"
-          className={`accordion-collapse collapse ${showAccordion ? "show" : ""}`}
+          className={`accordion-collapse collapse ${
+            showAccordion ? "show" : ""
+          }`}
         >
           <div className="accordion-body">
             <div className="calendarContent">
@@ -569,7 +617,11 @@ const TimesheetAccordion = ({
                       view="month"
                       tileClassName="no-tooltip"
                       className="mt-3 w-100" // Keep full width
-                      style={{ maxWidth: "100%", height: "90vh", overflow: "hidden" }} // Increase height to 80% of the viewport height
+                      style={{
+                        maxWidth: "100%",
+                        height: "90vh",
+                        overflow: "hidden",
+                      }} // Increase height to 80% of the viewport height
                     />
                   </div>
                   {/* Monthly Calendar End */}
@@ -592,10 +644,12 @@ const TimesheetAccordion = ({
                     <div className="col-sm-12">
                       {/* Project */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-end required mt-2">Project</label>
+                        <label className="col-sm-4 text-end required mt-2">
+                          Project
+                        </label>
                         <div className="col-sm-7">
                           <select
-                            value={selectedProject}
+                            value={selectedProject} // need to add
                             onChange={handleChange}
                             style={{
                               width: "100%", // Ensures the select takes full width of its container
@@ -603,14 +657,15 @@ const TimesheetAccordion = ({
                               fontSize: "12px", // Adjusts font size for readability
                               borderRadius: "4px", // Adds rounded corners for a modern look
                               border: "1px solid #ccc", // A soft border color
-                              boxSizing: "border-box" // Makes sure padding doesn't affect the overall width
+                              boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
                             }}
                           >
                             <option>Select Project</option>
                             {Array.isArray(projects) && projects.length > 0 ? (
                               projects.map((project) => (
                                 <option key={project.id} value={project.id}>
-                                  {project.name} {/* Displaying the project name */}
+                                  {project.name}{" "}
+                                  {/* Displaying the project name */}
                                 </option>
                               ))
                             ) : (
@@ -622,8 +677,13 @@ const TimesheetAccordion = ({
 
                       {/* Task */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-end required mt-2">Task</label>
-                        <div className="col-sm-7" style={{ position: "relative" }}>
+                        <label className="col-sm-4 text-end required mt-2">
+                          Task
+                        </label>
+                        <div
+                          className="col-sm-7"
+                          style={{ position: "relative" }}
+                        >
                           <select
                             onChange={handleTaskChange}
                             value={selectedTask}
@@ -633,7 +693,7 @@ const TimesheetAccordion = ({
                               fontSize: "12px", // Adjusts font size for readability
                               borderRadius: "4px", // Adds rounded corners for a modern look
                               border: "1px solid #ccc", // A soft border color
-                              boxSizing: "border-box" // Makes sure padding doesn't affect the overall width
+                              boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
                             }}
                           >
                             <option value="">Select Task</option>
@@ -649,13 +709,15 @@ const TimesheetAccordion = ({
                               top: "50%",
                               right: "20px", // Move icon to the left by increasing the right value
                               transform: "translateY(-50%)", // Aligns the icon vertically in the middle
-                              cursor: "pointer"
+                              cursor: "pointer",
                             }}
                             onMouseEnter={() => handleTaskHover(selectedTask)}
                             onMouseLeave={() => setIsHovered(false)}
                           >
                             {selectedTask && (
-                              <FaInfoCircle style={{ fontSize: "15px", color: "#007bff" }} />
+                              <FaInfoCircle
+                                style={{ fontSize: "15px", color: "#007bff" }}
+                              />
                             )}
                           </div>
 
@@ -672,27 +734,45 @@ const TimesheetAccordion = ({
                                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
                                 zIndex: "10",
                                 width: "250px", // Adjust width as necessary
-                                marginTop: "10px" // Adds space between the icon and the tooltip
+                                marginTop: "10px", // Adds space between the icon and the tooltip
                               }}
                             >
                               <div className="row">
-                                <div className="col-sm-6 text-end txt_Blue">Start Date:</div>
-                                <div className="col-sm-6">{taskDetails?.startDate || "N/A"}</div>
+                                <div className="col-sm-6 text-end txt_Blue">
+                                  Start Date:
+                                </div>
+                                <div className="col-sm-6">
+                                  {taskDetails?.startDate || "N/A"}
+                                </div>
                               </div>
                               <div className="row">
-                                <div className="col-sm-6 text-end txt_Blue">End Date:</div>
-                                <div className="col-sm-6">{taskDetails?.endDate || "N/A"}</div>
+                                <div className="col-sm-6 text-end txt_Blue">
+                                  End Date:
+                                </div>
+                                <div className="col-sm-6">
+                                  {taskDetails?.endDate || "N/A"}
+                                </div>
                               </div>
                               <div className="row">
-                                <div className="col-sm-6 text-end txt_Blue">Task Name :</div>
-                                <div className="col-sm-6">{taskDetails?.taskName || "N/A"}</div>
+                                <div className="col-sm-6 text-end txt_Blue">
+                                  Task Name :
+                                </div>
+                                <div className="col-sm-6">
+                                  {taskDetails?.taskName || "N/A"}
+                                </div>
                               </div>
                               <div className="row">
-                                <div className="col-sm-6 text-end txt_Blue">Actual Effort:</div>
-                                <div className="col-sm-6">{taskDetails?.actualWork || "N/A"}</div>
+                                <div className="col-sm-6 text-end txt_Blue">
+                                  Actual Effort:
+                                </div>
+                                <div className="col-sm-6">
+                                  {taskDetails?.actualWork || "N/A"}
+                                </div>
                               </div>
                               <div className="row">
-                                <div className="col-sm-6 text-end txt_Blue">Planned Efforts:</div>
+                                <div className="col-sm-6 text-end txt_Blue">
+                                  Planned Efforts:
+                                </div>
                                 <div className="col-sm-6">
                                   {taskDetails?.plannedEfforts || "N/A"}
                                 </div>
@@ -729,7 +809,9 @@ const TimesheetAccordion = ({
 
                       {/* From Time */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-end mt-2">From Time</label>
+                        <label className="col-sm-4 text-end mt-2">
+                          From Time
+                        </label>
                         <div className="col-sm-7 d-flex">
                           <select
                             disabled
@@ -742,7 +824,7 @@ const TimesheetAccordion = ({
                               fontSize: "15px",
                               borderRadius: "4px",
                               border: "1px solid #ccc",
-                              boxSizing: "border-box"
+                              boxSizing: "border-box",
                             }}
                           >
                             <option>Hour</option>
@@ -764,7 +846,7 @@ const TimesheetAccordion = ({
                               fontSize: "15px",
                               borderRadius: "4px",
                               border: "1px solid #ccc",
-                              boxSizing: "border-box"
+                              boxSizing: "border-box",
                             }}
                           >
                             <option>Minute</option>
@@ -779,7 +861,9 @@ const TimesheetAccordion = ({
                       </div>
 
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-end mt-2">To Time</label>
+                        <label className="col-sm-4 text-end mt-2">
+                          To Time
+                        </label>
                         <div className="col-sm-7 d-flex">
                           <select
                             disabled
@@ -792,7 +876,7 @@ const TimesheetAccordion = ({
                               fontSize: "16px",
                               borderRadius: "4px",
                               border: "1px solid #ccc",
-                              boxSizing: "border-box"
+                              boxSizing: "border-box",
                             }}
                           >
                             <option>Hour</option>
@@ -814,7 +898,7 @@ const TimesheetAccordion = ({
                               fontSize: "15px",
                               borderRadius: "4px",
                               border: "1px solid #ccc",
-                              boxSizing: "border-box"
+                              boxSizing: "border-box",
                             }}
                           >
                             <option>Minute</option>
@@ -830,7 +914,9 @@ const TimesheetAccordion = ({
 
                       {/* DA Type */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-end  mt-2">DA Type</label>
+                        <label className="col-sm-4 text-end  mt-2">
+                          DA Type
+                        </label>
                         <div className="col-sm-7">
                           <select
                             style={{
@@ -839,8 +925,9 @@ const TimesheetAccordion = ({
                               fontSize: "12px", // Adjusts font size for readability
                               borderRadius: "4px", // Adds rounded corners for a modern look
                               border: "1px solid #ccc", // A soft border color
-                              boxSizing: "border-box" // Makes sure padding doesn't affect the overall width
+                              boxSizing: "border-box", // Makes sure padding doesn't affect the overall width
                             }}
+                            value={selecteddaTypes}
                             onChange={(e) => setSelecteddaTypes(e.target.value)}
                           >
                             {/* <option value="">Select DA Type</option> */}
@@ -855,7 +942,9 @@ const TimesheetAccordion = ({
 
                       {/* Efforts */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-end required mt-2">Efforts</label>
+                        <label className="col-sm-4 text-end required mt-2">
+                          Efforts
+                        </label>
                         <div className="col-sm-3">
                           <input
                             type="text"
@@ -869,7 +958,9 @@ const TimesheetAccordion = ({
 
                       {/* Description */}
                       <div className="row mb-3">
-                        <label className="col-sm-4 text-end  mt-2">Description</label>
+                        <label className="col-sm-4 text-end  mt-2">
+                          Description
+                        </label>
                         <div className="col-sm-7">
                           <textarea
                             className="form-control"

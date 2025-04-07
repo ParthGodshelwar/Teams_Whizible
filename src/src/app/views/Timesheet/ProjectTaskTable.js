@@ -388,46 +388,50 @@ const ProjectTaskTable = ({
 
             <div className="row gx-1 mb-2">
               <div className="col-sm-12">
-                <div className="form-floating my-2 position-relative">
-                  <span className="txt_Blue">Quick Entry</span>
-                  <input
-                    type="text"
-                    label="Quick Entry"
-                    className="form-control ml-2 pe-5"
-                    defaultValue="00:00"
-                    maxLength="5"
-                    value={quickEntryValues}
-                    onChange={(e) => {
-                      let value = e.target.value.replace(/\D/g, "");
-                      if (value.length > 2) {
-                        value =
-                          value.substring(0, 2) + ":" + value.substring(2, 4);
-                      }
-                      if (value.length > 5) {
-                        value = value.substring(0, 5);
-                      }
-                      if (value.length >= 3) {
-                        const hours = parseInt(value.substring(0, 2), 10);
-                        if (hours > 23) {
-                          value = "23" + value.substring(2);
+                <div className="form-floating my-2 d-flex justify-content-between">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span className="txt_Blue" style={{ lineHeight: "1.2" }}>
+                      Quick <br /> Entry
+                    </span>
+                    <input
+                      type="text"
+                      label="Quick Entry"
+                      className="form-control ml-2 py-2"
+                      defaultValue="00:00"
+                      maxLength="5"
+                      value={quickEntryValues}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/\D/g, "");
+                        if (value.length > 2) {
+                          value =
+                            value.substring(0, 2) + ":" + value.substring(2, 4);
                         }
-                      }
-                      if (value.length === 5) {
-                        const minutes = parseInt(value.substring(3), 10);
-                        if (minutes > 59) {
-                          value = value.substring(0, 3) + "59";
+                        if (value.length > 5) {
+                          value = value.substring(0, 5);
                         }
-                      }
-                      setQuickEntryValues(value);
-                    }}
-                    style={{ width: "69%" }}
-                    placeholder="HH:MM"
-                  />
+                        if (value.length >= 3) {
+                          const hours = parseInt(value.substring(0, 2), 10);
+                          if (hours > 23) {
+                            value = "23" + value.substring(2);
+                          }
+                        }
+                        if (value.length === 5) {
+                          const minutes = parseInt(value.substring(3), 10);
+                          if (minutes > 59) {
+                            value = value.substring(0, 3) + "59";
+                          }
+                        }
+                        setQuickEntryValues(value);
+                      }}
+                      style={{ width: "90px", height: "35px" }}
+                      placeholder="HH:MM"
+                    />
+                  </div>
                   <button
-                    className="btn d-flex mt-2 align-items-center justify-content-center rounded-circle p-0 position-absolute top-50 end-0 translate-middle-y"
+                    className="btn d-flex align-items-center justify-content-center rounded-circle p-0 position-absolute top-50 end-0 translate-middle-y"
                     style={{
-                      width: "30px",
-                      height: "30px",
+                      width: "25px",
+                      height: "25px",
                       fontSize: "20px",
                       backgroundColor: "transparent",
                       border: "none",
