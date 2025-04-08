@@ -48,9 +48,9 @@ const WeekPicker = ({ selectedDate, setSelectedDate }) => {
     <div className="week-picker-container">
       <div>
         Date:
-        <span style={{ fontWeight: 500 }}> {selectedDate.toDateString()} </span>
+        <span className="font-weight-600"> {selectedDate.toDateString()} </span>
         | Week Number:{" "}
-        <span style={{ fontWeight: 500 }}>{getWeekNumber(selectedDate)}</span>
+        <span className="font-weight-600">{getWeekNumber(selectedDate)}</span>
       </div>
       <div className="row">
         <div className="">
@@ -62,7 +62,6 @@ const WeekPicker = ({ selectedDate, setSelectedDate }) => {
             isMonthPickerVisible={false}
             allowTextInput={false}
           />
-          
         </div>
         {/* <div></div> */}
       </div>

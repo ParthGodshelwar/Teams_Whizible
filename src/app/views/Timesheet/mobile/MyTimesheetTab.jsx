@@ -64,9 +64,6 @@ const MyTimesheetTab = ({}) => {
   const dropdownRef = useRef(null);
 
   const [activeCard, setActiveCard] = useState(null); // Tracks clicked card
-  const [isFullHeight, setIsFullHeight] = useState(false);
-  const scrollRef = useRef(null);
-  const lastScrollTop = useRef(0);
 
   const toggleActions = (timesheetID) => {
     // setActiveCard(activeCard === timesheetID ? null : timesheetID);
@@ -223,30 +220,6 @@ const MyTimesheetTab = ({}) => {
       minute: "numeric",
     });
   };
-
-  useEffect(() => {
-    const drawer = scrollRef.current;
-    if (!drawer) return;
-
-    const handleScroll = () => {
-      const currentScroll = drawer.scrollTop;
-
-      // If scrolling down
-      if (currentScroll > lastScrollTop.current + 10) {
-        closeDrawer(); // close on scroll down
-      }
-
-      // If scrolling up
-      if (currentScroll < lastScrollTop.current - 10) {
-        setIsFullHeight(true); // make it full screen
-      }
-
-      lastScrollTop.current = currentScroll;
-    };
-
-    drawer.addEventListener("scroll", handleScroll);
-    return () => drawer.removeEventListener("scroll", handleScroll);
-  }, [closeDrawer]);
 
   // useEffect(() => {
   //   fetchTimesheetData(statusMap.Approved, currentPage); // Load initial data
@@ -463,20 +436,9 @@ const MyTimesheetTab = ({}) => {
             className="drawer-backdrop"
             onClick={closeDrawer} // or remove this if you want it to be non-clickable
           ></div>
-          {/* <div
+          <div
             className="offcanvas offcanvas-bottom offcanvasHeight-75 show box_shodow"
             style={{ display: "block", overflowY: "auto" }}
-          > */}
-          <div
-            ref={scrollRef}
-            className={`offcanvas offcanvas-bottom box_shodow show ${
-              isFullHeight ? "full-height" : "offcanvasHeight-75"
-            }`}
-            style={{
-              display: "block",
-              overflowY: "auto",
-              transition: "height 0.3s ease",
-            }}
           >
             <div className="offcanvas-body">
               <div className="TimesheetEntryDetlsSec">

@@ -1,4 +1,10 @@
-import React, { createContext, useEffect, useReducer, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useEffect,
+  useReducer,
+  useState,
+  useCallback,
+} from "react";
 import { useMsal } from "@azure/msal-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,7 +21,7 @@ const initialState = {
   isInitialized: false,
   isAuthenticated: false,
   isLoading: true,
-  isFirstLoad: true // Track first load
+  isFirstLoad: true, // Track first load
 };
 
 const reducer = (state, action) => {
@@ -28,7 +34,7 @@ const reducer = (state, action) => {
         isAuthenticated: true,
         user: action.payload.user,
         isLoading: false,
-        isFirstLoad: false
+        isFirstLoad: false,
       };
     case "LOGOUT":
       return {
@@ -36,17 +42,17 @@ const reducer = (state, action) => {
         isAuthenticated: false,
         user: null,
         isLoading: false,
-        isFirstLoad: true
+        isFirstLoad: true,
       };
     case "LOADING":
       return {
         ...state,
-        isLoading: action.payload
+        isLoading: action.payload,
       };
     case "SET_FIRST_LOAD":
       return {
         ...state,
-        isFirstLoad: action.payload
+        isFirstLoad: action.payload,
       };
     default:
       return state;
@@ -56,7 +62,7 @@ const reducer = (state, action) => {
 const AuthContext = createContext({
   ...initialState,
   logout: () => {},
-  handleMicrosoftSignIn: () => {}
+  handleMicrosoftSignIn: () => {},
 });
 
 export const AuthProvider = ({ children }) => {
@@ -76,8 +82,8 @@ export const AuthProvider = ({ children }) => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -85,7 +91,10 @@ export const AuthProvider = ({ children }) => {
 
       const userProfileData = await userProfileResponse.json();
       sessionStorage.setItem("user", JSON.stringify(userProfileData));
-      sessionStorage.setItem("UserProfilePic", userProfileData?.data?.profilePicURL);
+      sessionStorage.setItem(
+        "UserProfilePic",
+        userProfileData?.data?.profilePicURL
+      );
 
       const empID = userProfileData.data.employeeId;
       if (!empID) throw new Error("No employee ID found");
@@ -95,12 +104,13 @@ export const AuthProvider = ({ children }) => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
-      if (!moduleAccessResponse.ok) throw new Error("Failed to fetch module access");
+      if (!moduleAccessResponse.ok)
+        throw new Error("Failed to fetch module access");
 
       const moduleAccessData = await moduleAccessResponse.json();
       sessionStorage.setItem("tAccess", JSON.stringify(moduleAccessData));
@@ -131,14 +141,16 @@ export const AuthProvider = ({ children }) => {
         const authToken = await new Promise((resolve, reject) => {
           microsoftTeams.authentication.getAuthToken({
             successCallback: resolve,
-            failureCallback: reject
+            failureCallback: reject,
           });
         });
 
         setToken(authToken);
         sessionStorage.setItem("token", authToken);
 
-        const { userProfileData, moduleAccessData } = await fetchUserData(authToken);
+        const { userProfileData, moduleAccessData } = await fetchUserData(
+          authToken
+        );
 
         dispatch({ type: "LOGIN", payload: { user: userProfileData } });
 
@@ -226,11 +238,16 @@ export const AuthProvider = ({ children }) => {
         method: "JWT",
         logout,
         handleMicrosoftSignIn,
-        error
+        error,
       }}
     >
-      <ToastContainer position="top-right" autoClose={5000} pauseOnHover closeOnClick />
-      {state.isLoading ? (
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        pauseOnHover
+        closeOnClick
+      />
+      {false ? (
         <div
           className="full-page-loader d-flex justify-content-center align-items-center"
           style={{ height: "100vh" }}

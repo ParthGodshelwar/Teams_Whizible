@@ -203,11 +203,26 @@ const TimesheetEntryTab = ({ timesheetdate = "" }) => {
             setProjects={setProjects}
           />
 
-          <NewTaskEntry
-            selectedDate={selectedDate}
-            date1={date1}
-            setRefresh={setRefresh}
-          />
+          {/* {topdata.timesheetStatus === "Rejected" && (
+            <>
+              <NewTaskEntry
+                selectedDate={selectedDate}
+                date1={date1}
+                setRefresh={setRefresh}
+              />
+            </>
+          )} */}
+
+          {(topdata.timesheetStatus === "Rejected" ||
+            topdata.timesheetStatus === "Not Submitted") && (
+            <>
+              <NewTaskEntry
+                selectedDate={selectedDate}
+                date1={date1}
+                setRefresh={setRefresh}
+              />
+            </>
+          )}
         </div>
 
         <div>

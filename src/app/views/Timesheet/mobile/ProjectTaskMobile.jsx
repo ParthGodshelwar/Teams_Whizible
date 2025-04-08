@@ -2,15 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { Tooltip, TextField } from "@mui/material";
 import { Callout, DirectionalHint } from "@fluentui/react";
 import { FaInfoCircle } from "react-icons/fa";
+import { faTrashCan } from "@fortawesome/free-regular-svg-icons";
 // import { Tooltip } from "react-bootstrap";
 // import {  FaInfoCircle } from "react-icons/fa";
 import { Modal, Tab, Nav, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCheck,
-  faInfoCircle,
-  faCogs,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faInfoCircle, faCogs } from "@fortawesome/free-solid-svg-icons";
 import { FaSearch, FaCalendar } from "react-icons/fa";
 import moment from "moment";
 import { toast } from "react-toastify";
@@ -34,7 +31,7 @@ const ProjectTaskMobile = ({
   setRefresh,
   projects,
   setProjects,
-  setDate1,
+  setDate1
 }) => {
   const token = sessionStorage.getItem("token");
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -69,14 +66,14 @@ const ProjectTaskMobile = ({
         {
           name: "Fixed BID Project Testing",
           allocatedWork: "08:75",
-          actualWork: "00:00",
+          actualWork: "00:00"
         },
         {
           name: "Resource Allocation page development",
           allocatedWork: "09:15",
-          actualWork: "00:00",
-        },
-      ],
+          actualWork: "00:00"
+        }
+      ]
     },
     {
       project: "API Customization",
@@ -89,15 +86,15 @@ const ProjectTaskMobile = ({
         {
           name: "Other Timesheet Task",
           allocatedWork: "08:75",
-          actualWork: "08:75",
+          actualWork: "08:75"
         },
         {
           name: "Timesheet Customization",
           allocatedWork: "09:15",
-          actualWork: "00:00",
-        },
-      ],
-    },
+          actualWork: "00:00"
+        }
+      ]
+    }
   ]);
   const iconRef = useRef(null); // Reference for Callout positioning
   const [isCalloutVisible, setIsCalloutVisible] = useState(false);
@@ -110,8 +107,7 @@ const ProjectTaskMobile = ({
   useEffect(() => {
     if (showDaTypeModal && currentProject && currentDay) {
       const selectedDaTypeKey = currentDay[`daTypet${currentProject}`];
-      const selectedDaType =
-        daTypeMapping[selectedDaTypeKey] || selectedDaTypeKey; // Default to key if no mapping
+      const selectedDaType = daTypeMapping[selectedDaTypeKey] || selectedDaTypeKey; // Default to key if no mapping
       const selectedDescription = currentDay[`descriptiont${currentProject}`];
 
       setDaType(selectedDaType);
@@ -153,6 +149,30 @@ const ProjectTaskMobile = ({
     setActiveIndex((prevIndex) => (prevIndex === index ? null : index));
   };
 
+  // const deleteTimesheetEffort = () =>{
+
+  // }
+  const deleteTimesheetEffort = async (DAID, UserID) => {
+    debugger;
+    const url = `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyTimesheetEntry/DeleteTimesheetEntryDetail?DAID=${DAID}&UserID=${UserID}`;
+    // const url = `https://springfield-applicant-ultimate-likewise.trycloudflare.com/WhizTeams/MyTimesheetEntry/DeleteTimesheetEntryDetail?DAID=${DAID}&UserID=${UserID}`;
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json" // optional but good to have
+        }
+      });
+
+      if (response.data.data === "1") {
+        toast.success("Timesheet entry deleted successfully");
+        setRefresh((prev) => !prev); // Refresh the data after deletion
+      }
+    } catch (error) {
+      console.error("API Error:", error.response?.data || error.message);
+    }
+  };
+
   const handleShowDaTypeModal = (projectId, day, task) => {
     setCurrentProject(projectId?.projectId);
     setCurrentDay(projectId?.dayIndex);
@@ -177,8 +197,8 @@ const ProjectTaskMobile = ({
     axios
       .get(apiUrl, {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}`
+        }
       })
       .then((response) => {
         setFetchedTaskDetails(response.data.data.listTimestTaskDetail[0]);
@@ -196,11 +216,8 @@ const ProjectTaskMobile = ({
 
   const handleSave = async () => {
     // Extract day-specific date string and time range
-    const dayDateString =
-      timesheetData.listTimesheetEntryHeader[0][`dayDate${currentDay}`];
-    const [dateString, timeRangeString] = dayDateString
-      .split("|")
-      .map((part) => part.trim()); // Split date and time range
+    const dayDateString = timesheetData.listTimesheetEntryHeader[0][`dayDate${currentDay}`];
+    const [dateString, timeRangeString] = dayDateString.split("|").map((part) => part.trim()); // Split date and time range
     // console.log("dayDateString", dayDateString);
 
     // Parse the date string (e.g., "14 Jan 2025") into a Date object
@@ -221,9 +238,7 @@ const ProjectTaskMobile = ({
       if (modifier === "PM" && hours < 12) hours += 12; // Convert PM to 24-hour format
       if (modifier === "AM" && hours === 12) hours = 0; // Handle midnight (12 AM)
 
-      return `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}`; // Format as "HH:mm"
+      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`; // Format as "HH:mm"
     };
 
     // Extract and convert `fromTime` and `toTime`
@@ -233,9 +248,7 @@ const ProjectTaskMobile = ({
       return `${hours % 12 || 12}:${minutes.toString().padStart(2, "0")}`; // Ensure two-digit minutes
     };
 
-    const [fromTimeString, toTimeString] = timeRangeString
-      .split("-")
-      .map((time) => time.trim());
+    const [fromTimeString, toTimeString] = timeRangeString.split("-").map((time) => time.trim());
     const fromTime = convertTo12HourTime(fromTimeString);
     const toTime = convertTo12HourTime(toTimeString);
 
@@ -254,7 +267,7 @@ const ProjectTaskMobile = ({
       taskID: Number(taskid?.taskID), // Task ID
       description: description, // Description for the day
       daType: daType, // DA type for the day
-      duration: taskid[`dayEfforst${currentDay}`], // Effort duration
+      duration: taskid[`dayEfforst${currentDay}`] // Effort duration
     };
 
     // console.log("Mapped Entry Data:", entryData);
@@ -268,9 +281,9 @@ const ProjectTaskMobile = ({
           headers: {
             Accept: "*/*",
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify(entryData), // Send the entryData in JSON body
+          body: JSON.stringify(entryData) // Send the entryData in JSON body
         }
       );
 
@@ -294,9 +307,9 @@ const ProjectTaskMobile = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`
               },
-              body: JSON.stringify(entryData), // Send the entryData to post
+              body: JSON.stringify(entryData) // Send the entryData to post
             }
           );
 
@@ -309,19 +322,11 @@ const ProjectTaskMobile = ({
             handleCloseDaTypeModal();
           } else {
             const postValidationErrors = postResult?.data
-              ?.filter(
-                (item) =>
-                  !item.validationMessage ||
-                  item.validationMessage.trim() === ""
-              ) // Check for null or empty validationMessage
+              ?.filter((item) => !item.validationMessage || item.validationMessage.trim() === "") // Check for null or empty validationMessage
               .map((item) => "Please fill Daily Activity")
               .concat(
                 postResult?.data
-                  ?.filter(
-                    (item) =>
-                      item.validationMessage &&
-                      item.validationMessage.trim() !== ""
-                  ) // Include non-empty validation messages
+                  ?.filter((item) => item.validationMessage && item.validationMessage.trim() !== "") // Include non-empty validation messages
                   .map((item) => item.validationMessage)
               )
               .join(", ");
@@ -355,7 +360,7 @@ const ProjectTaskMobile = ({
                   backgroundColor: "#4CAF50",
                   color: "white",
                   borderRadius: "4px",
-                  cursor: "pointer",
+                  cursor: "pointer"
                 }}
               >
                 Yes
@@ -371,7 +376,7 @@ const ProjectTaskMobile = ({
                   backgroundColor: "#f44336",
                   color: "white",
                   borderRadius: "4px",
-                  cursor: "pointer",
+                  cursor: "pointer"
                 }}
               >
                 No
@@ -400,43 +405,41 @@ const ProjectTaskMobile = ({
       const updatedData = JSON.parse(JSON.stringify(prevData)); // Deep copy to avoid mutating state
 
       // Map through projects in listProjectDetailsEntity
-      const updatedProjects = updatedData?.listProjectDetailsEntity.map(
-        (project) => {
-          // console.log("currentProject:", currentProject, project.projectID); // 3
+      const updatedProjects = updatedData?.listProjectDetailsEntity.map((project) => {
+        // console.log("currentProject:", currentProject, project.projectID); // 3
 
-          // Update the tasks for the selected project
-          const updatedTasks = project.listTaskDetailsEntity.map((task) => {
-            // console.log(`Updating taskID: ${task.taskID}`); // Log task ID being updated
+        // Update the tasks for the selected project
+        const updatedTasks = project.listTaskDetailsEntity.map((task) => {
+          // console.log(`Updating taskID: ${task.taskID}`); // Log task ID being updated
 
-            // Get the dynamic field names based on the `day` value
-            const daTypetField = `daTypet${currentDay}`; // Example: daTypet3
-            const descriptiontField = `descriptiont${currentDay}`; // Example: descriptiont3
+          // Get the dynamic field names based on the `day` value
+          const daTypetField = `daTypet${currentDay}`; // Example: daTypet3
+          const descriptiontField = `descriptiont${currentDay}`; // Example: descriptiont3
 
-            // Update the day-specific DA Type field (e.g., daTypet3)
-            if (task.hasOwnProperty(daTypetField)) {
-              // console.log(
-              //   `Updating ${daTypetField} for taskID: ${task.taskID} with value: ${daType}`
-              // );
-              task[daTypetField] = daType; // Set the DA Type field for the current day
-            }
+          // Update the day-specific DA Type field (e.g., daTypet3)
+          if (task.hasOwnProperty(daTypetField)) {
+            // console.log(
+            //   `Updating ${daTypetField} for taskID: ${task.taskID} with value: ${daType}`
+            // );
+            task[daTypetField] = daType; // Set the DA Type field for the current day
+          }
 
-            // Update the day-specific Description field (e.g., descriptiont3)
-            if (task.hasOwnProperty(descriptiontField)) {
-              // console.log(
-              //   `Updating ${descriptiontField} for taskID: ${task.taskID} with value: ${description}`
-              // );
-              task[descriptiontField] = description; // Set the Description field for the current day
-            }
+          // Update the day-specific Description field (e.g., descriptiont3)
+          if (task.hasOwnProperty(descriptiontField)) {
+            // console.log(
+            //   `Updating ${descriptiontField} for taskID: ${task.taskID} with value: ${description}`
+            // );
+            task[descriptiontField] = description; // Set the Description field for the current day
+          }
 
-            return task; // Return the updated task
-          });
+          return task; // Return the updated task
+        });
 
-          // Return the updated project with modified tasks
-          return { ...project, listTaskDetailsEntity: updatedTasks };
+        // Return the updated project with modified tasks
+        return { ...project, listTaskDetailsEntity: updatedTasks };
 
-          return project; // Return unchanged project if not the selected one
-        }
-      );
+        return project; // Return unchanged project if not the selected one
+      });
 
       // Log the updated state before setting
       // console.log("Updated Timesheet Data:", updatedData);
@@ -444,7 +447,7 @@ const ProjectTaskMobile = ({
       // Return the updated timesheet data to set it in state
       return {
         ...updatedData,
-        listProjectDetailsEntity: updatedProjects,
+        listProjectDetailsEntity: updatedProjects
       };
     });
 
@@ -493,8 +496,8 @@ const ProjectTaskMobile = ({
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${sessionStorage.getItem("token")}`, // Add token if required
-          },
+            Authorization: `Bearer ${sessionStorage.getItem("token")}` // Add token if required
+          }
         }
       );
 
@@ -519,8 +522,8 @@ const ProjectTaskMobile = ({
           `${process.env.REACT_APP_BASEURL_ACCESS_CONTROL1}/MyTimesheetEntry/GetUserDAEntryFilter?UserID=${userid}`,
           {
             headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            },
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`
+            }
           }
         );
 
@@ -545,7 +548,7 @@ const ProjectTaskMobile = ({
             whereClause: filterData,
             // whereClause:
             //   '{"strFilterProjectList":"","strFilterTaskTypeList":"","strFilterTaskCategories":"","strFilterSubProjectList":"","strFilterMilestoneList":"","strFilterModuleList":"","strFilterDeliverableList":"","strFilterPhaseList":"","strFilterTaskStatus":"","strFilterPriorityList":"","strFilterBillable":""}',
-            strTaskName: searchTerm,
+            strTaskName: searchTerm
           };
 
           // Remove fields with undefined, null, empty string, or empty array
@@ -571,16 +574,13 @@ const ProjectTaskMobile = ({
             headers: {
               Accept: "*/*",
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, // Add token to Authorization header
-            },
+              Authorization: `Bearer ${token}` // Add token to Authorization header
+            }
           }
         );
 
         const data = response.data.data;
-        if (
-          data?.listProjectDetailsEntity &&
-          data?.listProjectDetailsEntity.length === 0
-        ) {
+        if (data?.listProjectDetailsEntity && data?.listProjectDetailsEntity.length === 0) {
           const currentTime = Date.now(); // Get current time in milliseconds
 
           //Added by Parth.G
@@ -616,14 +616,13 @@ const ProjectTaskMobile = ({
           tasks: project.listTaskDetailsEntity.map((task) => {
             const dayWiseEfforts = daysCount.map((no, index) => ({
               date:
-                data.listTimesheetEntryHeader[0][`dayDate${index + 1}`]?.split(
-                  "|"
-                )[0] || `Day ${index + 1}`,
+                data.listTimesheetEntryHeader[0][`dayDate${index + 1}`]?.split("|")[0] ||
+                `Day ${index + 1}`,
               effort: task[`dayEfforst${no}`] || "00:00",
               descriptiont: task[`descriptiont${no}`] || "",
               daTypet: task[`daTypet${no}`] || "",
               resourceTimesheetID: task[`resourceTimesheetID${no}`] || 0,
-              timesheetStatusFlag: task[`timesheetStatusFlag${no}`] || "",
+              timesheetStatusFlag: task[`timesheetStatusFlag${no}`] || ""
             }));
 
             return {
@@ -633,9 +632,9 @@ const ProjectTaskMobile = ({
               name: task.taskName,
               taskID: task.taskID,
               taskTypeID: task.taskTypeID,
-              whichTask: task.whichTask,
+              whichTask: task.whichTask
             };
-          }),
+          })
         }));
 
         console.log("Formatted Tasks", formattedTasks);
@@ -668,21 +667,15 @@ const ProjectTaskMobile = ({
     const payload = {
       userID: userid, // Replace with actual userID value
       weekStartDate: new Date(
-        new Date(
-          timesheetData.listTimesheetEntryHeader[0].weekStartDate
-        ).setDate(
-          new Date(
-            timesheetData.listTimesheetEntryHeader[0].weekStartDate
-          ).getDate() + 1
+        new Date(timesheetData.listTimesheetEntryHeader[0].weekStartDate).setDate(
+          new Date(timesheetData.listTimesheetEntryHeader[0].weekStartDate).getDate() + 1
         )
       ).toISOString(),
       weekEndDate: new Date(
         new Date(timesheetData.listTimesheetEntryHeader[0].weekEndDate).setDate(
-          new Date(
-            timesheetData.listTimesheetEntryHeader[0].weekEndDate
-          ).getDate() + 1
+          new Date(timesheetData.listTimesheetEntryHeader[0].weekEndDate).getDate() + 1
         )
-      ).toISOString(),
+      ).toISOString()
     };
 
     try {
@@ -693,8 +686,8 @@ const ProjectTaskMobile = ({
           headers: {
             Accept: "*/*",
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+            "Content-Type": "application/json"
+          }
         }
       );
 
@@ -711,8 +704,7 @@ const ProjectTaskMobile = ({
       }
       if (mailEntities && mailEntities.length > 0) {
         for (const mail of mailEntities) {
-          const { result, fromEmailID, toEmailID, ccEmailID, subject, body } =
-            mail;
+          const { result, fromEmailID, toEmailID, ccEmailID, subject, body } = mail;
 
           if (result.toLowerCase() === "success" && fromEmailID) {
             toast.success("Timesheet submitted successfully");
@@ -722,7 +714,7 @@ const ProjectTaskMobile = ({
               ccAddress: ccEmailID || "", // Include CC if available
               subject: subject,
               body: body,
-              isHtml: 1,
+              isHtml: 1
             };
 
             await axios.post(
@@ -731,8 +723,8 @@ const ProjectTaskMobile = ({
               {
                 headers: {
                   Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-                  "Content-Type": "application/json",
-                },
+                  "Content-Type": "application/json"
+                }
               }
             );
           }
@@ -757,108 +749,93 @@ const ProjectTaskMobile = ({
 
   const handleSubmitTimesheet = async (data) => {
     // Retrieve selected tasks from sessionStorage
-    const selectedTasksFromSession =
-      JSON.parse(sessionStorage.getItem("selectedTasks")) || [];
+    const selectedTasksFromSession = JSON.parse(sessionStorage.getItem("selectedTasks")) || [];
 
     const payload = {
       userID: userid, // Replace with actual userID value
       weekStartDate: new Date(
-        new Date(
-          timesheetData.listTimesheetEntryHeader[0].weekStartDate
-        ).getTime() -
+        new Date(timesheetData.listTimesheetEntryHeader[0].weekStartDate).getTime() -
           new Date().getTimezoneOffset() * 60000
       )
         .toISOString()
         .split("T")[0], // Format as 'YYYY-MM-DD'
 
       weekEndDate: new Date(
-        new Date(
-          timesheetData.listTimesheetEntryHeader[0].weekEndDate
-        ).getTime() -
+        new Date(timesheetData.listTimesheetEntryHeader[0].weekEndDate).getTime() -
           new Date().getTimezoneOffset() * 60000
       )
         .toISOString()
         .split("T")[0],
 
       // Check if selectedTasks are available, otherwise include all tasks
-      listDADetailsEntity: timesheetData.listProjectDetailsEntity.flatMap(
-        (project) =>
-          project.listTaskDetailsEntity.flatMap(
-            (task) =>
-              [1, 2, 3, 4, 5, 6, 7]
-                .map((day) => {
-                  const dayDateKey = `dayDate${day}`;
-                  const dayEffortsKey = `dayEfforst${day}`;
-                  const daySumTotalKey = `daySumTotal${day}`;
-                  const descriptionKey = `descriptiont${day}`;
-                  const daTypeKey = `daTypet${day}`;
-                  const daiD = `daiD${day}`;
-                  const resourceTimesheetID = `resourceTimesheetID${day}`;
+      listDADetailsEntity: timesheetData.listProjectDetailsEntity.flatMap((project) =>
+        project.listTaskDetailsEntity.flatMap(
+          (task) =>
+            [1, 2, 3, 4, 5, 6, 7]
+              .map((day) => {
+                const dayDateKey = `dayDate${day}`;
+                const dayEffortsKey = `dayEfforst${day}`;
+                const daySumTotalKey = `daySumTotal${day}`;
+                const descriptionKey = `descriptiont${day}`;
+                const daTypeKey = `daTypet${day}`;
+                const daiD = `daiD${day}`;
+                const resourceTimesheetID = `resourceTimesheetID${day}`;
 
-                  // Exclude task if duration is "00:00"
-                  // if (task[dayEffortsKey] === "00:00") return null; // Skip this task
-                  //Added by Parth.G for DA
+                // Exclude task if duration is "00:00"
+                // if (task[dayEffortsKey] === "00:00") return null; // Skip this task
+                //Added by Parth.G for DA
 
-                  const currentEffort = task[dayEffortsKey] || "00:00";
+                const currentEffort = task[dayEffortsKey] || "00:00";
 
-                  const prevEffort =
-                    previousEfforts.current[`${task.taskID}-${day}`] || "00:00";
-                  var FromWhereFlag = "";
+                const prevEffort = previousEfforts.current[`${task.taskID}-${day}`] || "00:00";
+                var FromWhereFlag = "";
 
-                  if (currentEffort === "00:00" && prevEffort === "00:00") {
-                    return null;
-                  } else if (
-                    currentEffort === "00:00" &&
-                    prevEffort !== "00:00"
-                  ) {
-                    FromWhereFlag = "MT";
-                    previousEfforts.current[`${task.taskID}-${day}`] = "00:00";
-                  }
+                if (currentEffort === "00:00" && prevEffort === "00:00") {
+                  return null;
+                } else if (currentEffort === "00:00" && prevEffort !== "00:00") {
+                  FromWhereFlag = "MT";
+                  previousEfforts.current[`${task.taskID}-${day}`] = "00:00";
+                }
 
-                  // Check if task is in selectedTasks, only include it if selected
-                  // if (
-                  //   selectedTasksFromSession.length > 0 &&
-                  //   !selectedTasksFromSession.includes(task.taskID)
-                  // ) {
-                  //   return null; // Exclude tasks not in selectedTasks
-                  // }
+                // Check if task is in selectedTasks, only include it if selected
+                // if (
+                //   selectedTasksFromSession.length > 0 &&
+                //   !selectedTasksFromSession.includes(task.taskID)
+                // ) {
+                //   return null; // Exclude tasks not in selectedTasks
+                // }
 
-                  return {
-                    dailyActivityEntryID: task[daiD],
-                    taskID: task.taskID,
-                    projectID: project.projectID,
-                    entryDate: new Date(
-                      new Date(
-                        timesheetData.listTimesheetEntryHeader[0][
-                          dayDateKey
-                        ]?.split("|")[0]
-                      ).getTime() -
-                        new Date().getTimezoneOffset() * 60000
-                    )
-                      .toISOString()
-                      .split("T")[0],
-                    duration: task[dayEffortsKey] || "0",
-                    totalDuration:
-                      timesheetData.listTimesheetEntryHeader[0][
-                        daySumTotalKey
-                      ] || "0",
-                    description: task[descriptionKey] || "", //Added by Parth.G
-                    taskTypeID: task.taskTypeID,
-                    subTaskTypeID: 0,
-                    isDurationChange: true,
-                    isTaskComplete: false,
-                    actualPercentComplete: 0,
-                    isResourceTaskComplete: false,
-                    overtime: "0",
-                    daType: task[daTypeKey] || "N",
-                    storyPoint: 0,
-                    resourceTimesheetID: task[resourceTimesheetID] || 0, //need to handle now
-                    FromWhere: FromWhereFlag,
-                  };
-                })
-                .filter(Boolean) // Remove null values (tasks with "00:00" duration or not selected)
-          )
-      ),
+                return {
+                  dailyActivityEntryID: task[daiD],
+                  taskID: task.taskID,
+                  projectID: project.projectID,
+                  entryDate: new Date(
+                    new Date(
+                      timesheetData.listTimesheetEntryHeader[0][dayDateKey]?.split("|")[0]
+                    ).getTime() -
+                      new Date().getTimezoneOffset() * 60000
+                  )
+                    .toISOString()
+                    .split("T")[0],
+                  duration: task[dayEffortsKey] || "0",
+                  totalDuration: timesheetData.listTimesheetEntryHeader[0][daySumTotalKey] || "0",
+                  description: task[descriptionKey] || "", //Added by Parth.G
+                  taskTypeID: task.taskTypeID,
+                  subTaskTypeID: 0,
+                  isDurationChange: true,
+                  isTaskComplete: false,
+                  actualPercentComplete: 0,
+                  isResourceTaskComplete: false,
+                  overtime: "0",
+                  daType: task[daTypeKey] || "N",
+                  storyPoint: 0,
+                  resourceTimesheetID: task[resourceTimesheetID] || 0, //need to handle now
+                  FromWhere: FromWhereFlag
+                };
+              })
+              .filter(Boolean) // Remove null values (tasks with "00:00" duration or not selected)
+        )
+      )
     };
 
     isFetchedPrevvalue.current = false;
@@ -871,9 +848,9 @@ const ProjectTaskMobile = ({
           headers: {
             Accept: "*/*",
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(payload)
         }
       );
 
@@ -887,11 +864,7 @@ const ProjectTaskMobile = ({
       const validationData = result?.data;
       // setRefresh1(!refresh1);
       if (validationData.validationMessage != null) {
-        if (
-          validationData.validationMessage.includes(
-            "the Daily Activity will still be saved."
-          )
-        ) {
+        if (validationData.validationMessage.includes("the Daily Activity will still be saved.")) {
           // Handle the case where the message contains the specific string
           toast.info(validationData.validationMessage);
         }
@@ -899,10 +872,7 @@ const ProjectTaskMobile = ({
 
       if (!validationData || validationData.validationMessage === null) {
         toast.error("Please Fill Daily Activity");
-        console.error(
-          "Missing validation message in API response:",
-          validationData
-        );
+        console.error("Missing validation message in API response:", validationData);
       } else {
         let { validationMessage } = validationData;
 
@@ -916,24 +886,17 @@ const ProjectTaskMobile = ({
           toast.success("Daily Activity Saved Successfully!");
         } else {
           // Replace '\r\n' with a new line `<br/>` for proper formatting
-          const formattedMessage = validationMessage
-            .split("\r\n")
-            .join("<br/>");
+          const formattedMessage = validationMessage.split("\r\n").join("<br/>");
 
           // Show red toast for validation errors
           if (
-            !validationData.validationMessage.includes(
-              "the Daily Activity will still be saved."
-            )
+            !validationData.validationMessage.includes("the Daily Activity will still be saved.")
           ) {
             // Handle the case where the message contains the specific string
             // toast.info(validationData.validationMessage);
-            toast.error(
-              <div dangerouslySetInnerHTML={{ __html: formattedMessage }} />,
-              {
-                style: { backgroundColor: "red", color: "white" },
-              }
-            );
+            toast.error(<div dangerouslySetInnerHTML={{ __html: formattedMessage }} />, {
+              style: { backgroundColor: "red", color: "white" }
+            });
           }
         }
       }
@@ -966,14 +929,10 @@ const ProjectTaskMobile = ({
                 tIndex === taskIndex
                   ? {
                       ...task,
-                      dayWiseEfforts: updateEffort(
-                        task.dayWiseEfforts,
-                        date,
-                        newEffort
-                      ),
+                      dayWiseEfforts: updateEffort(task.dayWiseEfforts, date, newEffort)
                     }
                   : task
-              ),
+              )
             }
           : proj
       )
@@ -999,27 +958,25 @@ const ProjectTaskMobile = ({
     if (!newValue) return;
 
     // Find the task to update
-    const updatedTimesheetData = timesheetData.listProjectDetailsEntity.map(
-      (project) => {
-        return {
-          ...project,
-          listTaskDetailsEntity: project.listTaskDetailsEntity.map((task) => {
-            if (task.taskID === taskID) {
-              return {
-                ...task,
-                [`dayEfforst${day}`]: newValue, // Update the specific dayEfforst field
-              };
-            }
-            return task;
-          }),
-        };
-      }
-    );
+    const updatedTimesheetData = timesheetData.listProjectDetailsEntity.map((project) => {
+      return {
+        ...project,
+        listTaskDetailsEntity: project.listTaskDetailsEntity.map((task) => {
+          if (task.taskID === taskID) {
+            return {
+              ...task,
+              [`dayEfforst${day}`]: newValue // Update the specific dayEfforst field
+            };
+          }
+          return task;
+        })
+      };
+    });
 
     // Update the state to reflect the changes
     setTimesheetData((prevState) => ({
       ...prevState,
-      listProjectDetailsEntity: updatedTimesheetData,
+      listProjectDetailsEntity: updatedTimesheetData
     }));
 
     // Update the previousEfforts state
@@ -1029,7 +986,7 @@ const ProjectTaskMobile = ({
 
     if (foundTask) {
       setPreviousEfforts({
-        [`${taskID}-${day}`]: foundTask[`dayEfforst${day}`] || "00:00",
+        [`${taskID}-${day}`]: foundTask[`dayEfforst${day}`] || "00:00"
       });
     }
 
@@ -1053,7 +1010,7 @@ const ProjectTaskMobile = ({
         timesheetData.listTimesheetEntryHeader[0].day4,
         timesheetData.listTimesheetEntryHeader[0].day5,
         timesheetData.listTimesheetEntryHeader[0].day6,
-        timesheetData.listTimesheetEntryHeader[0].day7,
+        timesheetData.listTimesheetEntryHeader[0].day7
       ]
     : [];
 
@@ -1065,7 +1022,7 @@ const ProjectTaskMobile = ({
         timesheetData.listTimesheetEntryHeader[0].dayDate4,
         timesheetData.listTimesheetEntryHeader[0].dayDate5,
         timesheetData.listTimesheetEntryHeader[0].dayDate6,
-        timesheetData.listTimesheetEntryHeader[0].dayDate7,
+        timesheetData.listTimesheetEntryHeader[0].dayDate7
       ]
     : [];
 
@@ -1077,7 +1034,7 @@ const ProjectTaskMobile = ({
         timesheetData.listTimesheetEntryHeader[0].daySumTotal4,
         timesheetData.listTimesheetEntryHeader[0].daySumTotal5,
         timesheetData.listTimesheetEntryHeader[0].daySumTotal6,
-        timesheetData.listTimesheetEntryHeader[0].daySumTotal7,
+        timesheetData.listTimesheetEntryHeader[0].daySumTotal7
       ]
     : [];
 
@@ -1088,7 +1045,7 @@ const ProjectTaskMobile = ({
     N: "Normal",
     0: "Overtime",
     C: "OnCall",
-    C1: "CallBack",
+    C1: "CallBack"
   };
 
   return (
@@ -1130,11 +1087,7 @@ const ProjectTaskMobile = ({
                     </button>
                   )}
 
-                  <button
-                    className="btn btnyellow"
-                    title="Save"
-                    onClick={handleSubmitTimesheet}
-                  >
+                  <button className="btn btnyellow" title="Save" onClick={handleSubmitTimesheet}>
                     Save
                   </button>
                 </div>
@@ -1153,11 +1106,7 @@ const ProjectTaskMobile = ({
                     </button>
                   )}
 
-                  <button
-                    className="btn btnyellow"
-                    title="Save"
-                    onClick={handleSubmitTimesheet}
-                  >
+                  <button className="btn btnyellow" title="Save" onClick={handleSubmitTimesheet}>
                     Save
                   </button>
                 </div>
@@ -1175,11 +1124,7 @@ const ProjectTaskMobile = ({
                       Resubmit Timesheet
                     </button>
                   )}
-                  <button
-                    className="btn btnyellow"
-                    title="Save"
-                    onClick={handleSubmitTimesheet}
-                  >
+                  <button className="btn btnyellow" title="Save" onClick={handleSubmitTimesheet}>
                     Save
                   </button>
                 </div>
@@ -1191,10 +1136,7 @@ const ProjectTaskMobile = ({
         {/* {loading && <div className="spinner-border text-primary" role="status"><span className="sr-only">Loading...</span></div>} */}
 
         {loading ? (
-          <div
-            className="d-flex justify-content-center "
-            style={{ height: "100vh" }}
-          >
+          <div className="d-flex justify-content-center " style={{ height: "100vh" }}>
             <div className="spinner-border text-primary" role="status">
               <span className="sr-only">Loading...</span>
             </div>
@@ -1210,9 +1152,27 @@ const ProjectTaskMobile = ({
                 {/* <FaCalendar /> <span>Tuesday, 14 Jan 2025</span> */}
               </h6>
 
-              <h6 className="txt_Blue text-center">
+              {/* <h6 className="txt_Blue text-center">
                 T-Status - {topdata.timesheetStatus}
-                {/* <FaCalendar /> <span>Tuesday, 14 Jan 2025</span> */}
+              </h6> */}
+              <h6 className="text-center">
+                <span className="txt_Blue">T-Status - </span>
+
+                <span
+                  className={
+                    topdata.timesheetStatus === "Rejected"
+                      ? "text_red"
+                      : topdata.timesheetStatus === "Approved"
+                      ? "text_green"
+                      : topdata.timesheetStatus === "Submitted"
+                      ? "txt_Blue"
+                      : topdata.timesheetStatus === "Not Submitted"
+                      ? ""
+                      : ""
+                  }
+                >
+                  {topdata.timesheetStatus}
+                </span>
               </h6>
             </div>
 
@@ -1225,9 +1185,7 @@ const ProjectTaskMobile = ({
             >
               {timesheetData?.listProjectDetailsEntity?.map((proj, index) => {
                 var colourData =
-                  projects.find(
-                    (project) => project?.days === `Day${dayNumber}`
-                  )?.dayType || "";
+                  projects.find((project) => project?.days === `Day${dayNumber}`)?.dayType || "";
 
                 let className = "orange";
                 if (colourData === "WeekEnd") {
@@ -1247,59 +1205,40 @@ const ProjectTaskMobile = ({
                     >
                       <h2 className="accordion-header">
                         <button
-                          className={`accordion-button ${
-                            activeIndex === index ? "" : "collapsed"
-                          }`}
+                          className={`accordion-button ${activeIndex === index ? "" : "collapsed"}`}
                           type="button"
                           onClick={() => handleToggle(index)}
-                          aria-expanded={
-                            activeIndex === index ? "true" : "false"
-                          }
+                          aria-expanded={activeIndex === index ? "true" : "false"}
                           aria-controls={`collapseProject${index}_Mob`}
                         >
                           <div className="flex-1 pe-2">
                             {/* <div className="d-flex justify-content-between align-items-end"> */}
                             <div className="row mb-3">
-                              <div
-                                className="col-7"
-                                style={{ lineHeight: "1.2" }}
-                              >
+                              <div className="col-7" style={{ lineHeight: "1.2" }}>
                                 <span>{proj.projectName}</span>
                               </div>
                               <div className="col-5">
-                                <label className="text_pink fw-500">
-                                  Actual Hours -&nbsp;
-                                </label>
-                                <label className=" fw-500">
-                                  {proj.projectWeekEfforts}
-                                </label>
+                                <label className="text_pink fw-500">Actual Hours -&nbsp;</label>
+                                <label className=" fw-500">{proj.projectWeekEfforts}</label>
                               </div>
                             </div>
                             <div className="row gx-1">
                               <div className="col-4">
                                 <div className="projDetlsMob text-center">
                                   <div className="text_pink">Start Date: </div>
-                                  <div className="fw-500">
-                                    {proj.assignmentStartDate}
-                                  </div>
+                                  <div className="fw-500">{proj.assignmentStartDate}</div>
                                 </div>
                               </div>
                               <div className="col-4">
                                 <div className="projDetlsMob text-center">
                                   <div className="text_pink">End Date: </div>
-                                  <div className="fw-500">
-                                    {proj.assignmentEndDate}
-                                  </div>
+                                  <div className="fw-500">{proj.assignmentEndDate}</div>
                                 </div>
                               </div>
                               <div className="col-4">
                                 <div className="projDetlsMob text-center">
-                                  <div className="text_pink ">
-                                    % Allocation:{" "}
-                                  </div>
-                                  <div className="fw-500">
-                                    {proj.resourcePercentage}
-                                  </div>
+                                  <div className="text_pink ">% Allocation: </div>
+                                  <div className="fw-500">{proj.resourcePercentage}</div>
                                 </div>
                               </div>
                             </div>
@@ -1324,31 +1263,28 @@ const ProjectTaskMobile = ({
                               const effortKey = `dayEfforst${dayIndex}`;
                               const daTypetKey = `daTypet${dayIndex}`;
                               const descriptionKey = `descriptiont${dayIndex}`;
+                              const daiDKey = `daiD${dayIndex}`;
                               const timesheetStatusKey = `timesheetStatusFlag${dayIndex}`;
                               const resourceTimesheetIDKey = `resourceTimesheetID${dayIndex}`;
 
                               const effortValue = task[effortKey] || "00:00";
                               const daTypet = task[daTypetKey] || "";
                               const description = task[descriptionKey] || "";
-                              const timesheetStatusFlag =
-                                task[timesheetStatusKey] || "";
-                              const resourceTimesheetID =
-                                task[resourceTimesheetIDKey] || 0;
+                              const daid = task[daiDKey] || 0;
+                              const timesheetStatusFlag = task[timesheetStatusKey] || "";
+                              const resourceTimesheetID = task[resourceTimesheetIDKey] || 0;
 
                               return (
                                 <li className="mb-2" key={tIndex}>
                                   <div className="row align-items-center">
                                     <div className="col-6 d-flex justify-content-between">
-                                      <span className="taskTxt_mob">
-                                        {task.taskName}
-                                      </span>
+                                      <span className="taskTxt_mob">{task.taskName}</span>
 
                                       {/* kam */}
                                       <div>
                                         <Tooltip
                                           title={
-                                            fetchedTaskDetails &&
-                                            currentTaskID === task.taskID ? (
+                                            fetchedTaskDetails && currentTaskID === task.taskID ? (
                                               <div style={{ width: "210px" }}>
                                                 <div className="row">
                                                   <div className="col-6 col-sm-12 text-end">
@@ -1375,8 +1311,7 @@ const ProjectTaskMobile = ({
                                                     Allocated Hours :
                                                   </div>
                                                   <div className="col-6 col-sm-8">
-                                                    {fetchedTaskDetails?.allocatedHrs ||
-                                                      "N/A"}
+                                                    {fetchedTaskDetails?.allocatedHrs || "N/A"}
                                                   </div>
                                                 </div>
                                                 <div className="row">
@@ -1384,8 +1319,7 @@ const ProjectTaskMobile = ({
                                                     Actual Effort :
                                                   </div>
                                                   <div className="col-6 col-sm-8">
-                                                    {fetchedTaskDetails?.actualHrs ||
-                                                      "N/A"}
+                                                    {fetchedTaskDetails?.actualHrs || "N/A"}
                                                   </div>
                                                 </div>
                                               </div>
@@ -1536,25 +1470,19 @@ const ProjectTaskMobile = ({
                                         //   "N/A"
                                         // }
                                         value={
-                                          intermediateValues[
-                                            `${task.taskID}-${dayIndex}`
-                                          ] ??
+                                          intermediateValues[`${task.taskID}-${dayIndex}`] ??
                                           effortValue ??
                                           "00:00"
                                         }
                                         // pending for efforts value change
                                         onChange={(e) => {
-                                          let value = e.target.value.replace(
-                                            /\D/g,
-                                            ""
-                                          ); // Remove non-numeric characters
+                                          let value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
 
                                           if (value === "") {
                                             // Allow empty value
                                             setIntermediateValues((prev) => ({
                                               ...prev,
-                                              [`${task.taskID}-${dayIndex}`]:
-                                                "",
+                                              [`${task.taskID}-${dayIndex}`]: ""
                                             }));
                                             return;
                                           }
@@ -1562,9 +1490,7 @@ const ProjectTaskMobile = ({
                                           // Automatically add colon after 2 digits
                                           if (value.length > 2) {
                                             value =
-                                              value.substring(0, 2) +
-                                              ":" +
-                                              value.substring(2, 4);
+                                              value.substring(0, 2) + ":" + value.substring(2, 4);
                                           }
 
                                           // Limit the value to 5 characters (hh:mm)
@@ -1574,10 +1500,7 @@ const ProjectTaskMobile = ({
 
                                           // Ensure hours are in the valid 24-hour range (00-23)
                                           if (value.length >= 3) {
-                                            const hours = parseInt(
-                                              value.substring(0, 2),
-                                              10
-                                            );
+                                            const hours = parseInt(value.substring(0, 2), 10);
                                             if (hours > 23) {
                                               value = "23" + value.substring(2);
                                             }
@@ -1585,20 +1508,15 @@ const ProjectTaskMobile = ({
 
                                           // Ensure minutes are in the valid range (00-59)
                                           if (value.length === 5) {
-                                            const minutes = parseInt(
-                                              value.substring(3),
-                                              10
-                                            );
+                                            const minutes = parseInt(value.substring(3), 10);
                                             if (minutes > 59) {
-                                              value =
-                                                value.substring(0, 3) + "59";
+                                              value = value.substring(0, 3) + "59";
                                             }
                                           }
 
                                           setIntermediateValues((prev) => ({
                                             ...prev,
-                                            [`${task.taskID}-${dayIndex}`]:
-                                              value,
+                                            [`${task.taskID}-${dayIndex}`]: value
                                           }));
                                         }}
                                         onBlur={(e) => {
@@ -1625,41 +1543,24 @@ const ProjectTaskMobile = ({
                                           //   )}:${value.substring(2)}`; // Convert "1234" → "12:34"
                                           // }
 
-                                          if (
-                                            value.length === 4 &&
-                                            value.includes(":")
-                                          ) {
+                                          if (value.length === 4 && value.includes(":")) {
                                             value =
-                                              value.substring(0, 3) +
-                                              value.substring(3) +
-                                              "0";
+                                              value.substring(0, 3) + value.substring(3) + "0";
                                           }
 
                                           // Ensure hours are in the valid 24-hour range (00-23)
-                                          let hours = parseInt(
-                                            value.substring(0, 2),
-                                            10
-                                          );
+                                          let hours = parseInt(value.substring(0, 2), 10);
                                           if (hours > 23) {
                                             value = "23" + value.substring(2);
                                           }
 
                                           // Ensure minutes are in the valid range (00-59)
-                                          let minutes = parseInt(
-                                            value.substring(3),
-                                            10
-                                          );
+                                          let minutes = parseInt(value.substring(3), 10);
                                           if (minutes > 59) {
-                                            value =
-                                              value.substring(0, 3) + "59";
+                                            value = value.substring(0, 3) + "59";
                                           }
 
-                                          handleSaveEdit(
-                                            e,
-                                            task.taskID,
-                                            dayIndex,
-                                            value
-                                          );
+                                          handleSaveEdit(e, task.taskID, dayIndex, value);
                                         }}
                                         className="form-control edtTimeInputMob"
                                         // onChange={(e) =>
@@ -1674,27 +1575,54 @@ const ProjectTaskMobile = ({
                                     </div>
                                     <div className="col-2 d-flex justify-content-center">
                                       {/* Replace this div with FontAwesomeIcon */}
-                                      <div className="col-sm-3 ps-0">
-                                        {task[`dayEfforst${dayIndex}`] !==
-                                          "00:00" && (
-                                          // {true && (
-                                          <FontAwesomeIcon
-                                            icon={faInfoCircle}
-                                            style={{
-                                              cursor: "pointer",
-                                              color: "#007bff",
-                                            }}
-                                            onClick={() =>
-                                              handleShowDaTypeModal({
-                                                dayIndex,
-                                                task,
-                                                projectId: task.taskID,
-                                              })
-                                            }
-                                          />
+                                      {task[`dayEfforst${dayIndex}`] !== "00:00" && (
+                                        // {true && (
+                                        <FontAwesomeIcon
+                                          className="mt-1"
+                                          icon={faInfoCircle}
+                                          style={{
+                                            cursor: "pointer",
+                                            color: "#007bff"
+                                          }}
+                                          onClick={() =>
+                                            handleShowDaTypeModal({
+                                              dayIndex,
+                                              task,
+                                              projectId: task.taskID
+                                            })
+                                          }
+                                        />
+                                      )}
+
+                                      {task[`dayEfforst${dayIndex}`] !== "00:00" &&
+                                        (timesheetStatusFlag === "N" ||
+                                          timesheetStatusFlag === "J") && (
+                                          // topdata.timesheetStatus ===
+                                          <span className="ps-2">
+                                            <FontAwesomeIcon
+                                              icon={faTrashCan}
+                                              style={{
+                                                cursor: "pointer",
+                                                color: "red"
+                                              }}
+                                              onClick={() => deleteTimesheetEffort(daid, userid)}
+                                            />
+                                          </span>
+
+                                          // <FontAwesomeIcon
+                                          //   icon={faInfoCircle}
+                                          //   style={{
+                                          //     cursor: "pointer",
+                                          //     color: "#007bff",
+                                          //   }}
+                                          //   onClick={() =>
+                                          //     deleteTimesheetEffort({
+                                          //       daid,
+                                          //       userid
+                                          //     })
+                                          //   }
+                                          // />
                                         )}
-                                      </div>
-                                      {/* <div className="">Icon</div> */}
                                     </div>
                                   </div>
                                 </li>
@@ -1740,10 +1668,7 @@ const ProjectTaskMobile = ({
             ))}
           </div>
           <div className="form-group mt-4">
-            <label
-              htmlFor="description"
-              className="form-label fw-semibold mb-2"
-            >
+            <label htmlFor="description" className="form-label fw-semibold mb-2">
               Description
             </label>
             <textarea
@@ -1757,18 +1682,10 @@ const ProjectTaskMobile = ({
           </div>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-end">
-          <Button
-            variant="primary"
-            className="me-2 px-4"
-            onClick={handleSubmitDaType}
-          >
+          <Button variant="primary" className="me-2 px-4" onClick={handleSubmitDaType}>
             Save
           </Button>
-          <Button
-            variant="secondary"
-            className="px-4"
-            onClick={handleCloseDaTypeModal}
-          >
+          <Button variant="secondary" className="px-4" onClick={handleCloseDaTypeModal}>
             Cancel
           </Button>
         </Modal.Footer>
