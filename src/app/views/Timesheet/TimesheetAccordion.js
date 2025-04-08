@@ -452,12 +452,22 @@ const TimesheetAccordion = ({
       } else {
         // if (validationErrors !== "Success") toast.error(validationErrors);
         //Restriction Alert
-        toast.info(
-          <div>
-            <div style={{ marginBottom: "10px" }}>{validationErrors}</div>
-          </div>,
+        toast.error(
+          <div dangerouslySetInnerHTML={{ __html: validationErrors }} />,
+          {
+            style: { backgroundColor: "red", color: "white" }
+          },
           { autoClose: false }
         );
+
+        // toast.error(
+        //   // <div>
+        //   //   <div style={{ marginBottom: "10px" }}></div>
+        //   // </div>
+
+        //   validationErrors,
+        //   { autoClose: false }
+        // );
       }
 
       console.log("validationErrors99999999999", validationErrors);
